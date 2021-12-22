@@ -1,0 +1,12 @@
+name: schoolexam
+description: Dart package used for the communication with the school exam backend. Can be understood as a package implementing the API requests.
+publish_to: none
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.15.0 <3.0.0"
+
+dependencies:
+  equatable: ^2.0.3
+  meta: ^1.7.0
