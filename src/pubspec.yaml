@@ -64,6 +64,8 @@ dependencies:
   # PDF viewer
   native_pdf_view: ^5.0.0
 
+  syncfusion_flutter_pdfviewer: ^19.4.41-beta
+
 
 dev_dependencies:
   flutter_test:

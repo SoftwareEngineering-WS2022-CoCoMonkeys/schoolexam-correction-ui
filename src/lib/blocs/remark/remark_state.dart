@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:schoolexam/schoolexam.dart';
@@ -77,4 +79,28 @@ class RemarkState extends Equatable {
         textOptions: textOptions ?? this.textOptions,
         eraserOptions: eraserOptions ?? this.eraserOptions);
   }
+}
+
+class UpdatedRemarks extends RemarkState {
+  /// Contains the pdf of the ongoing remark
+  /// Importantly, we store the submission pdf as lowest layer
+  final Uint8List correction;
+
+  UpdatedRemarks.update({required RemarkState state, required this.correction})
+      : super._(
+            exam: state.exam,
+            submissions: state.submissions,
+            corrections: List.from(state.corrections)
+              ..insert(
+                  state.selectedCorrection,
+                  state.corrections[state.selectedCorrection]
+                      .copyWith(correction: correction)),
+            inputTool: state.inputTool,
+            pencilOptions: state.pencilOptions,
+            markerOptions: state.markerOptions,
+            textOptions: state.textOptions,
+            eraserOptions: state.eraserOptions);
+
+  @override
+  List<Object> get props => super.props..add(correction);
 }

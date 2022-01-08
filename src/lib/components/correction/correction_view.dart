@@ -4,12 +4,11 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:native_pdf_view/native_pdf_view.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_box.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import 'correction_input_header.dart';
-import 'drawing_page.dart';
 
 /// Given, that at least one correction is currently active, this view is used for correcting.
 class CorrectionView extends StatelessWidget {
@@ -32,9 +31,9 @@ class CorrectionView extends StatelessWidget {
               child: AspectRatio(
                   aspectRatio: 1 / sqrt(2),
                   child: Stack(
-                    children: const [
+                    children: [
                       _PDFView(),
-                      InputBox(),
+                      const InputBox(),
                     ],
                   )),
             )
@@ -44,35 +43,28 @@ class CorrectionView extends StatelessWidget {
 }
 
 class _PDFView extends StatelessWidget {
-  const _PDFView();
-
   @override
   Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
-        buildWhen: (previous, current) {
-          var condition =
-              previous.selectedCorrection != current.selectedCorrection;
-
-          if (condition) {
-            dev.log(
-                "Rebuilding PDF view, as correction changed from ${previous.selectedCorrection} to ${current.selectedCorrection}");
-          }
-
-          return condition;
-        },
+        buildWhen: (previous, current) => current is UpdatedRemarks,
         builder: (context, state) {
-          final _controller = PdfController(
-            document: PdfDocument.openFile(
-                state.corrections[state.selectedCorrection].correctionPath),
-            initialPage: 1,
+          dev.log("Rebuilding PDF for state of type ${state.runtimeType}");
+          return SfPdfViewer.memory(
+            state.corrections[state.selectedCorrection].correction,
+            onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+              AlertDialog(
+                title: Text(details.error),
+                content: Text(details.description),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
           );
-
-          return PdfView(
-              documentLoader: const Center(
-                child: CircularProgressIndicator(),
-              ),
-              controller: _controller,
-              onDocumentLoaded: (document) {},
-              onPageChanged: (page) {});
         },
       );
 }

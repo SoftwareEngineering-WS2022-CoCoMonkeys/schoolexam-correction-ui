@@ -25,6 +25,13 @@ class _InputBoxState extends State<InputBox> {
         currentLineController = StreamController<Stroke>.broadcast(),
         linesController = StreamController<List<Stroke>>.broadcast();
 
+  void _drawingFinished(Stroke line) {
+    lines = List.from(lines)..add(line);
+    linesController.add(lines);
+
+    BlocProvider.of<RemarkCubit>(context).addDrawing([line]);
+  }
+
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<RemarkCubit, RemarkState>(builder: (context, state) {
@@ -32,14 +39,11 @@ class _InputBoxState extends State<InputBox> {
           case RemarkInputTool.pencil:
             return Stack(
               children: [
-                PathsWidget(
-                    options: state.pencilOptions, controller: linesController),
+                /*  PathsWidget(
+                    options: state.pencilOptions, controller: linesController),*/
                 DrawingInputOverlay(
                   controller: currentLineController,
-                  callback: (line) {
-                    lines = List.from(lines)..add(line);
-                    linesController.add(lines);
-                  },
+                  callback: _drawingFinished,
                   child: PathWidget(
                     options: state.pencilOptions,
                     controller: currentLineController,
@@ -48,7 +52,7 @@ class _InputBoxState extends State<InputBox> {
               ],
             );
           default:
-            return Text("Not yet supported!");
+            return const Text("Not yet supported!");
         }
       });
 

@@ -1,12 +1,18 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
+import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
@@ -24,7 +30,6 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   void _onNavigationState(AppNavigationState state) async {
-    print(state);
     log("Observed navigation switch : $state");
     if (state.context != AppNavigationContext.exams) {
       return;
@@ -41,7 +46,9 @@ class RemarkCubit extends Cubit<RemarkState> {
 
     log("Determined submissions : $submissions");
 
-    emit(RemarkState.start(exam: exam, submissions: submissions));
+    var state = RemarkState.start(exam: exam, submissions: submissions);
+
+    emit(state);
   }
 
   Future<void> open(Submission submission) async {
@@ -52,7 +59,73 @@ class RemarkCubit extends Cubit<RemarkState> {
     final corrections = <Correction>{...state.corrections};
     corrections.add(await Correction.start(submission: submission));
 
-    emit(state.copyWith(corrections: corrections.toList(growable: false)));
+    // Switch active pdf
+    var newState =
+        state.copyWith(corrections: corrections.toList(growable: false));
+
+    emit(newState);
+  }
+
+  Future<void> _addDrawing(
+      {required List<Stroke> lines,
+      required DrawingInputOptions options}) async {
+    // Cant be persisted. I literally want to cry. Why are all the PDF libraries bs...
+    final document = PdfDocument(
+        inputBytes: state.corrections[state.selectedCorrection].correction);
+    // TODO : Obtain from valid current page
+    final page = document.pages[0];
+
+    for (int i = 0; i < lines.length; ++i) {
+      final outlinePoints = getStroke(
+        lines[i].points,
+        size: options.size * 1.0,
+        thinning: options.thinning,
+        smoothing: options.smoothing,
+        streamline: options.streamline,
+        taperStart: options.taperStart,
+        capStart: options.capStart,
+        taperEnd: options.taperEnd,
+        capEnd: options.capEnd,
+        simulatePressure: options.simulatePressure,
+        isComplete: options.isComplete,
+      );
+
+      // Empty
+      if (outlinePoints.isEmpty) {
+        continue;
+      }
+      // Dot
+      else if (outlinePoints.length < 2) {
+        page.graphics.drawEllipse(Rect.fromCircle(
+            center: Offset(outlinePoints[0].x, outlinePoints[0].y), radius: 1));
+      }
+      // Path
+      else {
+        final path = PdfPath();
+
+        page.graphics.drawPolygon(
+            outlinePoints.map((e) => Offset(e.x, e.y)).toList(),
+            brush: PdfBrushes.black);
+      }
+    }
+
+    final res = document.save();
+    document.dispose();
+
+    var updatedState = UpdatedRemarks.update(
+        state: state, correction: Uint8List.fromList(res));
+
+    emit(updatedState);
+  }
+
+  void addDrawing(List<Stroke> lines) async {
+    switch (state.inputTool) {
+      case RemarkInputTool.pencil:
+        await _addDrawing(lines: lines, options: state.pencilOptions);
+        break;
+      default:
+        return;
+    }
   }
 
   void changePencilOptions(DrawingInputOptions options) =>
@@ -92,7 +165,7 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _navigationSubscription.cancel();
     return super.close();
   }
