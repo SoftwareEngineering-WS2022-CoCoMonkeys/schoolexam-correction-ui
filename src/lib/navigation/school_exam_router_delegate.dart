@@ -9,6 +9,7 @@ import 'package:schoolexam_correction_ui/navigation/paths/exams_route_path.dart'
 import 'package:schoolexam_correction_ui/navigation/paths/login_route_path.dart';
 import 'package:schoolexam_correction_ui/navigation/paths/route_path.dart';
 import 'package:schoolexam_correction_ui/navigation/paths/unknown_route_path.dart';
+import 'package:schoolexam_correction_ui/pages/correction_page.dart';
 import 'package:schoolexam_correction_ui/pages/exams_page.dart';
 import 'package:schoolexam_correction_ui/pages/login_page.dart';
 
@@ -43,11 +44,25 @@ class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
           const MaterialPage(key: ValueKey("LoginPage"), child: LoginPage())
         else ...[
           if (state.context == AppNavigationContext.exams) ...[
-            const MaterialPage(key: ValueKey("ExamsPage"), child: ExamsPage())
+            const MaterialPage(key: ValueKey("ExamsPage"), child: ExamsPage()),
+            if (state.examId.isNotEmpty)
+              const MaterialPage(
+                  key: ValueKey("CorrectionPage"), child: CorrectionPage())
           ] else
             ...[]
         ]
       ],
+      onPopPage: (route, result) {
+        if (!route.didPop(result)) {
+          return false;
+        }
+
+        if (_navigationCubit.state.examId.isNotEmpty) {
+          _navigationCubit.back();
+        }
+
+        return true;
+      },
     );
   }
 
@@ -84,7 +99,7 @@ class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
     } else if (configuration is LoginRoutePath) {
       _navigationCubit.toLogin();
     }
-    // TODO : All route pathes
+    // TODO : All route paths
   }
 
   @override

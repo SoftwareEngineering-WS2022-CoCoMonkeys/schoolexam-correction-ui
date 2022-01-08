@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 import 'package:schoolexam/user/user.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
-@internal
 class _UserDTO extends Equatable {
   final String id;
 
@@ -24,7 +22,7 @@ class _UserDTO extends Equatable {
   @override
   List<Object?> get props => [id];
 
-  User toModel(){
-    return User(id : this.id);
+  User toModel() {
+    return User(id: this.id);
   }
 }

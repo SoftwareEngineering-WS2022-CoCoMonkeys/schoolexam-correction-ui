@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam/exams/dummy_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_route_information_parser.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.dart';
+
+import 'blocs/remark/remark.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,22 +17,40 @@ void main() {
   runApp(MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => AuthenticationRepository()),
-        RepositoryProvider(create: (context) => const UserRepository())
+        RepositoryProvider(create: (context) => const UserRepository()),
+        RepositoryProvider<ExamsRepository>(
+            create: (context) => const DummyExamsRepository())
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
               create: (context) => AuthenticationBloc(
                   authenticationRepository:
-                      context.read<AuthenticationRepository>(),
-                  userRepository: context.read<UserRepository>())),
+                      RepositoryProvider.of<AuthenticationRepository>(context),
+                  userRepository:
+                      RepositoryProvider.of<UserRepository>(context))),
           BlocProvider(
               create: (context) => LoginBloc(
                   authenticationRepository:
-                      context.read<AuthenticationRepository>())),
+                      RepositoryProvider.of<AuthenticationRepository>(
+                          context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => ExamsCubit(
+                  examsRepository:
+                      RepositoryProvider.of<ExamsRepository>(context),
+                  authenticationBloc:
+                      BlocProvider.of<AuthenticationBloc>(context))),
           BlocProvider(
               create: (context) => NavigationCubit(
-                  authenticationBloc: context.read<AuthenticationBloc>()))
+                  authenticationBloc:
+                      BlocProvider.of<AuthenticationBloc>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => RemarkCubit(
+                  navigationCubit: BlocProvider.of<NavigationCubit>(context),
+                  examsRepository:
+                      RepositoryProvider.of<ExamsRepository>(context)))
         ],
         child: const SchoolExamCorrectionUI(),
       )));
@@ -42,6 +64,9 @@ class SchoolExamCorrectionUI extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
         title: "SchoolExam",
+        debugShowCheckedModeBanner: false,
+        theme:
+            ThemeData(brightness: Brightness.light, primaryColor: Colors.blue),
         routeInformationParser: SchoolExamRouteInformationParser(
             navigationCubit: context.read<NavigationCubit>()),
         routerDelegate: SchoolExamRouterDelegate(

@@ -55,4 +55,21 @@ class SchoolExamRouteInformationParser
 
     return UnknownRoutePath();
   }
+
+  @override
+  RouteInformation restoreRouteInformation(RoutePath configuration) {
+    late final String location;
+
+    if (configuration is ExamsRoutePath) {
+      location = "/exams";
+    } else if (configuration is CorrectionRoutePath) {
+      location = "/correct/${configuration.id}";
+    } else if (configuration is AnalysisRoutePath) {
+      location = "/analysis";
+    } else if (configuration is LoginRoutePath) {
+      location = "/login";
+    }
+
+    return RouteInformation(location: location);
+  }
 }

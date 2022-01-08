@@ -22,15 +22,19 @@ class NavigationCubit extends Cubit<AppNavigationState> {
   }
 
   // The following functions are used for navigation
-  void toExams() => emit(state.copyWith(context: AppNavigationContext.exams));
+  void toExams() =>
+      emit(state.copyWith(context: AppNavigationContext.exams, examId: ""));
 
   void toAnalysis() =>
       emit(state.copyWith(context: AppNavigationContext.analysis));
 
-  void toCorrection(String examId) =>
+  void toCorrection(String examId) async =>
       emit(state.copyWith(context: AppNavigationContext.exams, examId: examId));
 
-  void toLogin() => emit(state.copyWith(requiresAuthentication: true));
+  void toLogin() =>
+      emit(state.copyWith(requiresAuthentication: true, examId: ""));
+
+  void back() => emit(state.copyWith(examId: ""));
 
   @override
   Future<void> close() {

@@ -25,6 +25,32 @@ class LoginForm extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              "SchoolExam",
+              textScaleFactor: 2,
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Willkommen!",
+                textScaleFactor: 2,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                  "Bitte melden Sie sich an, um mit der Korrektur von Prüfungen zu beginnen.",
+                  style: TextStyle(fontStyle: FontStyle.italic)),
+            ),
+            const SizedBox(
+              height: 50,
+            ),
             _UsernameInput(),
             const Padding(padding: EdgeInsets.all(12)),
             _PasswordInput(),
@@ -43,13 +69,25 @@ class _UsernameInput extends StatelessWidget {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.username != current.username,
       builder: (context, state) {
-        return TextField(
-          key: const Key('loginForm_usernameInput_textField'),
-          onChanged: (username) =>
-              context.read<LoginBloc>().add(LoginUsernameChanged(username)),
-          decoration: InputDecoration(
-            labelText: 'username',
-            errorText: state.username.invalid ? 'invalid username' : null,
+        return Container(
+          padding: EdgeInsets.all(10),
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: TextField(
+            key: const Key('loginForm_usernameInput_textField'),
+            onChanged: (username) =>
+                context.read<LoginBloc>().add(LoginUsernameChanged(username)),
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                Icons.person_outline,
+                size: 40,
+                color: Theme.of(context).primaryColor,
+              ),
+              border:
+                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              isDense: true,
+              labelText: 'Benutzername',
+              errorText: state.username.invalid ? 'invalid username' : null,
+            ),
           ),
         );
       },
@@ -63,14 +101,26 @@ class _PasswordInput extends StatelessWidget {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.password != current.password,
       builder: (context, state) {
-        return TextField(
-          key: const Key('loginForm_passwordInput_textField'),
-          onChanged: (password) =>
-              context.read<LoginBloc>().add(LoginPasswordChanged(password)),
-          obscureText: true,
-          decoration: InputDecoration(
-            labelText: 'password',
-            errorText: state.password.invalid ? 'invalid password' : null,
+        return Container(
+          padding: EdgeInsets.all(10),
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: TextField(
+            key: const Key('loginForm_passwordInput_textField'),
+            onChanged: (password) =>
+                context.read<LoginBloc>().add(LoginPasswordChanged(password)),
+            obscureText: true,
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                Icons.lock_outline,
+                size: 40,
+                color: Theme.of(context).primaryColor,
+              ),
+              border:
+                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              isDense: true,
+              labelText: 'Passwort',
+              errorText: state.password.invalid ? 'invalid password' : null,
+            ),
           ),
         );
       },
@@ -86,14 +136,23 @@ class _LoginButton extends StatelessWidget {
       builder: (context, state) {
         return state.status.isSubmissionInProgress
             ? const CircularProgressIndicator()
-            : ElevatedButton(
-                key: const Key('loginForm_continue_raisedButton'),
-                child: const Text('Login'),
-                onPressed: state.status.isValidated
-                    ? () {
-                        context.read<LoginBloc>().add(const LoginSubmitted());
-                      }
-                    : null,
+            : Container(
+                padding: EdgeInsets.all(10),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: Size(400, 50)),
+                  key: const Key('loginForm_continue_raisedButton'),
+                  child: const Text(
+                    'Login',
+                    textScaleFactor: 1.5,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: state.status.isValidated
+                      ? () {
+                          context.read<LoginBloc>().add(const LoginSubmitted());
+                        }
+                      : null,
+                ),
               );
       },
     );
