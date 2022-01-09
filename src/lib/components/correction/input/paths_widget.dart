@@ -1,15 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:perfect_freehand/perfect_freehand.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/overlay_input.dart';
 
 class PathsWidget extends StatelessWidget {
-  final DrawingInputOptions options;
-  final StreamController<List<Stroke>> controller;
+  final Widget child;
+  final StreamController<List<OverlayInput>> controller;
 
-  const PathsWidget({Key? key, required this.options, required this.controller})
+  const PathsWidget({Key? key, required this.child, required this.controller})
       : super(key: key);
 
   @override
@@ -18,82 +16,46 @@ class PathsWidget extends StatelessWidget {
           color: Colors.transparent,
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: StreamBuilder<List<Stroke>>(
+          child: StreamBuilder<List<OverlayInput>>(
               stream: controller.stream,
               builder: (context, snapshot) {
-                return CustomPaint(
-                  painter: _PathsPainter(
-                    lines: snapshot.data != null ? snapshot.data! : [],
-                    options: options,
-                  ),
-                );
-              })));
-}
-
-class PathWidget extends StatelessWidget {
-  final DrawingInputOptions options;
-  final StreamController<Stroke> controller;
-
-  const PathWidget({Key? key, required this.options, required this.controller})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => RepaintBoundary(
-      child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: StreamBuilder<Stroke>(
-              stream: controller.stream,
-              builder: (context, snapshot) {
-                return CustomPaint(
-                  painter: _PathsPainter(
-                    lines: snapshot.data != null ? [snapshot.data!] : [],
-                    options: options,
+                return ClipRect(
+                  child: CustomPaint(
+                    // TODO : Help
+                    //child: child,
+                    painter: _PathsPainter(
+                        inputs: snapshot.data != null ? snapshot.data! : []),
                   ),
                 );
               })));
 }
 
 class _PathsPainter extends CustomPainter {
-  final List<Stroke> lines;
-  final DrawingInputOptions options;
+  final List<OverlayInput> inputs;
 
-  _PathsPainter({required this.lines, required this.options});
+  _PathsPainter({required this.inputs});
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()..color = Colors.black;
-
-    for (int i = 0; i < lines.length; ++i) {
-      final outlinePoints = getStroke(
-        lines[i].points,
-        size: options.size * 1.0,
-        thinning: options.thinning,
-        smoothing: options.smoothing,
-        streamline: options.streamline,
-        taperStart: options.taperStart,
-        capStart: options.capStart,
-        taperEnd: options.taperEnd,
-        capEnd: options.capEnd,
-        simulatePressure: options.simulatePressure,
-        isComplete: options.isComplete,
-      );
+    for (int i = 0; i < inputs.length; ++i) {
+      final input = inputs[i];
+      Paint paint = Paint()..color = input.color;
 
       final path = Path();
 
-      if (outlinePoints.isEmpty) {
+      if (input.points.isEmpty) {
         return;
-      } else if (outlinePoints.length < 2) {
+      } else if (input.points.length < 2) {
         // If the path only has one line, draw a dot.
         path.addOval(Rect.fromCircle(
-            center: Offset(outlinePoints[0].x, outlinePoints[0].y), radius: 1));
+            center: Offset(input.points[0].x, input.points[0].y), radius: 1));
       } else {
         // Otherwise, draw a line that connects each point with a curve.
-        path.moveTo(outlinePoints[0].x, outlinePoints[0].y);
+        path.moveTo(input.points[0].x, input.points[0].y);
 
-        for (int i = 1; i < outlinePoints.length - 1; ++i) {
-          final p0 = outlinePoints[i];
-          final p1 = outlinePoints[i + 1];
+        for (int i = 1; i < input.points.length - 1; ++i) {
+          final p0 = input.points[i];
+          final p1 = input.points[i + 1];
 
           path.quadraticBezierTo(
               p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2);

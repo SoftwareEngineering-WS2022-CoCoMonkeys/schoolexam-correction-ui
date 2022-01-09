@@ -12,9 +12,14 @@ import 'correction.dart';
 enum RemarkInputTool { pencil, marker, text, eraser }
 
 class RemarkState extends Equatable {
+  /// We may only provide remarks for one exam at the time. This contains information about the subject, participants etc.
   final Exam exam;
+
+  /// All submissions currently known to the system. The user may start corrections from any of these.
   final List<Submission> submissions;
 
+  /// Defines which correction is currently being worked on
+  /// If corrections is empty, no correction is active
   final int selectedCorrection;
   final List<Correction> corrections;
 
@@ -25,19 +30,6 @@ class RemarkState extends Equatable {
   final InputOptions eraserOptions;
 
   final RemarkInputTool inputTool;
-
-  @override
-  List<Object> get props => [
-        exam,
-        submissions,
-        selectedCorrection,
-        corrections,
-        pencilOptions,
-        markerOptions,
-        textOptions,
-        eraserOptions,
-        inputTool
-      ];
 
   RemarkState._(
       {this.exam = Exam.empty,
@@ -59,48 +51,78 @@ class RemarkState extends Equatable {
 
   RemarkState.none() : this._(submissions: [], corrections: []);
 
-  RemarkState.start({required Exam exam, required List<Submission> submissions})
-      : this._(exam: exam, submissions: submissions, corrections: []);
+  @override
+  List<Object> get props => [
+        exam,
+        submissions,
+        selectedCorrection,
+        corrections,
+        pencilOptions,
+        markerOptions,
+        textOptions,
+        eraserOptions,
+        inputTool
+      ];
+}
 
-  RemarkState copyWith(
-      {List<Correction>? corrections,
+/// Starting the overall correction for an exam. No submission can yet be actively corrected.
+class StartedCorrectionState extends RemarkState {
+  StartedCorrectionState.start(
+      {required Exam exam, required List<Submission> submissions})
+      : super._(exam: exam, submissions: submissions, corrections: []);
+}
+
+/// Added a new correction for active working.
+class AddedCorrectionState extends RemarkState {
+  final Correction added;
+
+  AddedCorrectionState.add({required RemarkState initial, required this.added})
+      : super._(
+            exam: initial.exam,
+            selectedCorrection: initial.corrections.length,
+            submissions: initial.submissions,
+            corrections: <Correction>[...initial.corrections]..add(added),
+            inputTool: initial.inputTool,
+            pencilOptions: initial.pencilOptions,
+            markerOptions: initial.markerOptions,
+            textOptions: initial.textOptions,
+            eraserOptions: initial.eraserOptions);
+}
+
+class SwitchedCorrectionState extends RemarkState {
+  SwitchedCorrectionState.change(
+      {required RemarkState initial, required int selectedCorrection})
+      : super._(
+            exam: initial.exam,
+            selectedCorrection: (selectedCorrection >= 0 &&
+                    selectedCorrection < initial.corrections.length)
+                ? selectedCorrection
+                : initial.selectedCorrection,
+            submissions: initial.submissions,
+            corrections: initial.corrections,
+            inputTool: initial.inputTool,
+            pencilOptions: initial.pencilOptions,
+            markerOptions: initial.markerOptions,
+            textOptions: initial.textOptions,
+            eraserOptions: initial.eraserOptions);
+}
+
+class UpdatedInputOptionsState extends RemarkState {
+  UpdatedInputOptionsState.update(
+      {required RemarkState initial,
       RemarkInputTool? inputTool,
       DrawingInputOptions? pencilOptions,
       DrawingInputOptions? markerOptions,
       ColoredInputOptions? textOptions,
-      InputOptions? eraserOptions}) {
-    return RemarkState._(
-        exam: exam,
-        submissions: submissions,
-        corrections: corrections ?? this.corrections,
-        inputTool: inputTool ?? this.inputTool,
-        pencilOptions: pencilOptions ?? this.pencilOptions,
-        markerOptions: markerOptions ?? this.markerOptions,
-        textOptions: textOptions ?? this.textOptions,
-        eraserOptions: eraserOptions ?? this.eraserOptions);
-  }
-}
-
-class UpdatedRemarks extends RemarkState {
-  /// Contains the pdf of the ongoing remark
-  /// Importantly, we store the submission pdf as lowest layer
-  final Uint8List correction;
-
-  UpdatedRemarks.update({required RemarkState state, required this.correction})
+      InputOptions? eraserOptions})
       : super._(
-            exam: state.exam,
-            submissions: state.submissions,
-            corrections: List.from(state.corrections)
-              ..insert(
-                  state.selectedCorrection,
-                  state.corrections[state.selectedCorrection]
-                      .copyWith(correction: correction)),
-            inputTool: state.inputTool,
-            pencilOptions: state.pencilOptions,
-            markerOptions: state.markerOptions,
-            textOptions: state.textOptions,
-            eraserOptions: state.eraserOptions);
-
-  @override
-  List<Object> get props => super.props..add(correction);
+            exam: initial.exam,
+            selectedCorrection: initial.selectedCorrection,
+            submissions: initial.submissions,
+            corrections: initial.corrections,
+            inputTool: inputTool ?? initial.inputTool,
+            pencilOptions: pencilOptions ?? initial.pencilOptions,
+            markerOptions: markerOptions ?? initial.markerOptions,
+            textOptions: textOptions ?? initial.textOptions,
+            eraserOptions: eraserOptions ?? initial.eraserOptions);
 }

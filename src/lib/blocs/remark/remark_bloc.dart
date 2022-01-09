@@ -1,22 +1,18 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
 
+/// This cubit is responsible for managing the currently active corrections.
+/// It therefore has to provide knowledge about the underlying submissions and corresponding students.
 class RemarkCubit extends Cubit<RemarkState> {
   late final StreamSubscription _navigationSubscription;
   final ExamsRepository _examsRepository;
@@ -46,7 +42,8 @@ class RemarkCubit extends Cubit<RemarkState> {
 
     log("Determined submissions : $submissions");
 
-    var state = RemarkState.start(exam: exam, submissions: submissions);
+    var state =
+        StartedCorrectionState.start(exam: exam, submissions: submissions);
 
     emit(state);
   }
@@ -54,95 +51,29 @@ class RemarkCubit extends Cubit<RemarkState> {
   Future<void> open(Submission submission) async {
     log("Requested to correct submission $submission");
 
-    // TODO : Ensures state change, however inefficient copy
-    // TODO : Equality check
-    final corrections = <Correction>{...state.corrections};
-    corrections.add(await Correction.start(submission: submission));
-
     // Switch active pdf
-    var newState =
-        state.copyWith(corrections: corrections.toList(growable: false));
+    var newState = AddedCorrectionState.add(
+        initial: state, added: await Correction.start(submission: submission));
 
     emit(newState);
   }
 
-  Future<void> _addDrawing(
-      {required List<Stroke> lines,
-      required DrawingInputOptions options}) async {
-    // Cant be persisted. I literally want to cry. Why are all the PDF libraries bs...
-    final document = PdfDocument(
-        inputBytes: state.corrections[state.selectedCorrection].correction);
-    // TODO : Obtain from valid current page
-    final page = document.pages[0];
+  void changePencilOptions(DrawingInputOptions options) => emit(
+      UpdatedInputOptionsState.update(initial: state, pencilOptions: options));
 
-    for (int i = 0; i < lines.length; ++i) {
-      final outlinePoints = getStroke(
-        lines[i].points,
-        size: options.size * 1.0,
-        thinning: options.thinning,
-        smoothing: options.smoothing,
-        streamline: options.streamline,
-        taperStart: options.taperStart,
-        capStart: options.capStart,
-        taperEnd: options.taperEnd,
-        capEnd: options.capEnd,
-        simulatePressure: options.simulatePressure,
-        isComplete: options.isComplete,
-      );
+  void changeMarkerOptions(DrawingInputOptions options) => emit(
+      UpdatedInputOptionsState.update(initial: state, markerOptions: options));
 
-      // Empty
-      if (outlinePoints.isEmpty) {
-        continue;
-      }
-      // Dot
-      else if (outlinePoints.length < 2) {
-        page.graphics.drawEllipse(Rect.fromCircle(
-            center: Offset(outlinePoints[0].x, outlinePoints[0].y), radius: 1));
-      }
-      // Path
-      else {
-        final path = PdfPath();
+  void changeTextOptions(ColoredInputOptions options) => emit(
+      UpdatedInputOptionsState.update(initial: state, textOptions: options));
 
-        page.graphics.drawPolygon(
-            outlinePoints.map((e) => Offset(e.x, e.y)).toList(),
-            brush: PdfBrushes.black);
-      }
-    }
+  void changeEraserOptions(InputOptions options) => emit(
+      UpdatedInputOptionsState.update(initial: state, eraserOptions: options));
 
-    final res = document.save();
-    document.dispose();
+  void changeTool(RemarkInputTool inputTool) => emit(
+      UpdatedInputOptionsState.update(initial: state, inputTool: inputTool));
 
-    var updatedState = UpdatedRemarks.update(
-        state: state, correction: Uint8List.fromList(res));
-
-    emit(updatedState);
-  }
-
-  void addDrawing(List<Stroke> lines) async {
-    switch (state.inputTool) {
-      case RemarkInputTool.pencil:
-        await _addDrawing(lines: lines, options: state.pencilOptions);
-        break;
-      default:
-        return;
-    }
-  }
-
-  void changePencilOptions(DrawingInputOptions options) =>
-      emit(state.copyWith(pencilOptions: options));
-
-  void changeMarkerOptions(DrawingInputOptions options) =>
-      emit(state.copyWith(markerOptions: options));
-
-  void changeTextOptions(ColoredInputOptions options) =>
-      emit(state.copyWith(textOptions: options));
-
-  void changeEraserOptions(InputOptions options) =>
-      emit(state.copyWith(eraserOptions: options));
-
-  void changeTool(RemarkInputTool inputTool) =>
-      emit(state.copyWith(inputTool: inputTool));
-
+  // TODO : THIS IS NOT WORKING
   void moveTo(Task task) {
     log("Requested to move to $task");
 
@@ -160,8 +91,6 @@ class RemarkCubit extends Cubit<RemarkState> {
                 .answers
                 .firstWhere((element) => element.task.id == task.id,
                     orElse: () => Answer.empty));
-
-    emit(state.copyWith(corrections: corrections));
   }
 
   @override

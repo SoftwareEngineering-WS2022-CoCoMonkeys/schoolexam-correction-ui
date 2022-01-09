@@ -6,6 +6,7 @@ import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dar
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/overlay.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_route_information_parser.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.dart';
 
@@ -50,7 +51,11 @@ void main() {
               create: (context) => RemarkCubit(
                   navigationCubit: BlocProvider.of<NavigationCubit>(context),
                   examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context)))
+                      RepositoryProvider.of<ExamsRepository>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => OverlayCubit(
+                  remarkCubit: BlocProvider.of<RemarkCubit>(context)))
         ],
         child: const SchoolExamCorrectionUI(),
       )));

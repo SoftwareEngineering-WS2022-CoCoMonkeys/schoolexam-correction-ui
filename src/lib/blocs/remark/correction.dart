@@ -10,32 +10,42 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 class Correction {
   /// Contains the pdf of the ongoing remark
   /// Importantly, we store the submission pdf as lowest layer
-  final Uint8List correction;
   final String correctionPath;
+  final Uint8List correction;
+  final int pageNumber;
 
+  /// Contains possible meta data about the submission, like the corresponding student.
   final Submission submission;
 
+  /// Contains meta data about the answers within the submission. This allows for task specific UI navigation.
   final Answer currentAnswer;
 
   Correction._(
       {required this.correction,
       required this.correctionPath,
       required this.submission,
-      required this.currentAnswer});
+      required this.currentAnswer,
+      this.pageNumber = 0});
 
   static Future<Correction> start({required Submission submission}) async {
     final directory = (await getApplicationDocumentsDirectory()).path;
-    final PdfDocument document = PdfDocument.fromBase64String(submission.data);
-
     final path =
         p.join(directory, "corrections", submission.exam.id, submission.id);
-    log("Trying to start submission with file located at $path");
+    final file = File(path);
 
-    // TODO : ensure that local changes are not just simply lost
-    // TODO : this is going to be achieved by including a utc timestamp into the correction retrieved from the server
-    final res = document.save();
-    final file = await File(path).create(recursive: true);
-    await file.writeAsBytes(res);
+    late final Uint8List res;
+    if (await file.exists()) {
+      log("Trying to start submission with file located at $path");
+      final document = PdfDocument(inputBytes: await file.readAsBytes());
+      res = Uint8List.fromList(document.save());
+    } else {
+      log("Writing file to $path");
+      final document = PdfDocument.fromBase64String(submission.data);
+      res = Uint8List.fromList(document.save());
+
+      await file.create(recursive: true);
+      await file.writeAsBytes(res);
+    }
 
     return Correction._(
         correction: Uint8List.fromList(res),

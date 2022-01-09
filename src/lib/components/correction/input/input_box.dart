@@ -2,63 +2,55 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/overlay.dart' as pdf;
+import 'package:schoolexam_correction_ui/blocs/overlay/overlay_input.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/paths_widget.dart';
 
 import 'drawing_input_overlay.dart';
-import 'stroke.dart';
 
 class InputBox extends StatefulWidget {
-  const InputBox({Key? key}) : super(key: key);
+  final Widget child;
+
+  const InputBox({Key? key, required this.child}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _InputBoxState();
 }
 
 class _InputBoxState extends State<InputBox> {
-  List<Stroke> lines;
-  final StreamController<Stroke> currentLineController;
-  final StreamController<List<Stroke>> linesController;
+  final StreamController<List<OverlayInput>> linesController;
 
   _InputBoxState()
-      : lines = <Stroke>[],
-        currentLineController = StreamController<Stroke>.broadcast(),
-        linesController = StreamController<List<Stroke>>.broadcast();
-
-  void _drawingFinished(Stroke line) {
-    lines = List.from(lines)..add(line);
-    linesController.add(lines);
-
-    BlocProvider.of<RemarkCubit>(context).addDrawing([line]);
-  }
+      : linesController = StreamController<List<OverlayInput>>.broadcast();
 
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<RemarkCubit, RemarkState>(builder: (context, state) {
-        switch (state.inputTool) {
-          case RemarkInputTool.pencil:
-            return Stack(
-              children: [
-                /*  PathsWidget(
-                    options: state.pencilOptions, controller: linesController),*/
-                DrawingInputOverlay(
-                  controller: currentLineController,
-                  callback: _drawingFinished,
-                  child: PathWidget(
-                    options: state.pencilOptions,
-                    controller: currentLineController,
-                  ),
-                )
-              ],
-            );
-          default:
-            return const Text("Not yet supported!");
-        }
-      });
+      BlocListener<pdf.OverlayCubit, pdf.OverlayState>(
+        listener: (context, state) {
+          linesController.add(state.current.inputs);
+        },
+        child: BlocBuilder<RemarkCubit, RemarkState>(builder: (context, state) {
+          switch (state.inputTool) {
+            case RemarkInputTool.pencil:
+              return Stack(
+                children: [
+                  DrawingInputOverlay(
+                    overlayCubit: BlocProvider.of<pdf.OverlayCubit>(context),
+                    linesController: linesController,
+                    child: PathsWidget(
+                        controller: linesController, child: widget.child),
+                  )
+                ],
+              );
+            default:
+              return const Text("Not yet supported!");
+          }
+        }),
+      );
 
   @override
   void dispose() {
-    currentLineController.close();
     linesController.close();
     super.dispose();
   }
