@@ -6,9 +6,15 @@ import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_input.
 
 class PathsWidget extends StatelessWidget {
   final Size size;
+
+  final List<CorrectionOverlayInput> initialData;
   final StreamController<List<CorrectionOverlayInput>> controller;
 
-  const PathsWidget({Key? key, required this.size, required this.controller})
+  const PathsWidget(
+      {Key? key,
+      required this.initialData,
+      required this.size,
+      required this.controller})
       : super(key: key);
 
   @override
@@ -18,6 +24,7 @@ class PathsWidget extends StatelessWidget {
           width: size.width,
           height: size.height,
           child: StreamBuilder<List<CorrectionOverlayInput>>(
+              initialData: initialData,
               stream: controller.stream,
               builder: (context, snapshot) {
                 return ClipRect(

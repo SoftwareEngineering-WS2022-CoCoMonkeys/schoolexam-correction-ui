@@ -22,6 +22,17 @@ class CorrectionOverlayState extends Equatable {
 
   final CorrectionInputTool inputTool;
 
+  @override
+  List<Object?> get props => [
+        current,
+        overlays,
+        pencilOptions,
+        markerOptions,
+        textOptions,
+        eraserOptions,
+        inputTool
+      ];
+
   CorrectionOverlayState(
       {required this.current,
       required this.overlays,
@@ -41,16 +52,27 @@ class CorrectionOverlayState extends Equatable {
   CorrectionOverlayState.none()
       : this(current: CorrectionOverlayPage.empty, overlays: []);
 
+  CorrectionOverlayState changeDocument(
+      {required int documentNumber,
+      required CorrectionOverlayDocument document}) {
+    final updated = List<CorrectionOverlayDocument>.from(overlays);
+    updated[documentNumber] = document;
+
+    return CorrectionOverlayState(current: current, overlays: updated);
+  }
+
   CorrectionOverlayState addInputs(
       {required int documentNumber,
       required int pageNumber,
       required List<CorrectionOverlayInput> inputs}) {
-    final updated = List<CorrectionOverlayDocument>.from(overlays);
-    updated[documentNumber] = overlays[documentNumber]
-        .addInputs(pageNumber: pageNumber, inputs: inputs);
+    final updated = changeDocument(
+        documentNumber: documentNumber,
+        document: overlays[documentNumber]
+            .addInputs(pageNumber: pageNumber, inputs: inputs));
 
     return CorrectionOverlayState(
-        current: updated[documentNumber].pages[pageNumber], overlays: updated);
+        current: updated.overlays[documentNumber].pages[pageNumber],
+        overlays: updated.overlays);
   }
 
   CorrectionOverlayState updateInput(
@@ -58,16 +80,15 @@ class CorrectionOverlayState extends Equatable {
       required int pageNumber,
       required int index,
       required CorrectionOverlayInput input}) {
-    final updated = List<CorrectionOverlayDocument>.from(overlays);
-    updated[documentNumber] = overlays[documentNumber]
-        .updateInput(pageNumber: pageNumber, index: index, input: input);
+    final updated = changeDocument(
+        documentNumber: documentNumber,
+        document: overlays[documentNumber]
+            .updateInput(pageNumber: pageNumber, index: index, input: input));
 
     return CorrectionOverlayState(
-        current: updated[documentNumber].pages[pageNumber], overlays: updated);
+        current: updated.overlays[documentNumber].pages[pageNumber],
+        overlays: updated.overlays);
   }
-
-  @override
-  List<Object?> get props => [current, overlays];
 }
 
 class UpdatedInputOptionsState extends CorrectionOverlayState {

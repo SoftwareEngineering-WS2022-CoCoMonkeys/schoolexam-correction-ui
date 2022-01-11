@@ -5,13 +5,13 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:tuple/tuple.dart';
 
 /// This class contains all necessary data for an ongoing correction of a single submission instance
 class Correction {
   /// The initial submission without any correction remarks
   final String submissionPath;
   final Uint8List submissionData;
-  final int pageNumber;
 
   /// Contains the pdf of the ongoing remark
   /// Importantly, we store the submission pdf as lowest layer
@@ -30,28 +30,30 @@ class Correction {
       required this.correctionPath,
       required this.correctionData,
       required this.submission,
-      required this.currentAnswer,
-      this.pageNumber = 0});
+      required this.currentAnswer});
 
-  static Future<Uint8List> _ensurePersistence(
+  static Future<Tuple2<Uint8List, int>> _ensurePersistence(
       {required String path, required String data}) async {
     final file = File(path);
 
+    late final int pageCount;
     late final Uint8List res;
     if (await file.exists()) {
       log("Loading file located at $path");
       final document = PdfDocument(inputBytes: await file.readAsBytes());
+      pageCount = document.pages.count;
       res = Uint8List.fromList(document.save());
     } else {
       log("Writing file to $path");
       final document = PdfDocument.fromBase64String(data);
+      pageCount = document.pages.count;
       res = Uint8List.fromList(document.save());
 
       await file.create(recursive: true);
       await file.writeAsBytes(res);
     }
 
-    return res;
+    return Tuple2(res, pageCount);
   }
 
   static Future<Correction> start({required Submission submission}) async {
@@ -67,9 +69,9 @@ class Correction {
         await _ensurePersistence(path: correctionPath, data: submission.data);
 
     return Correction._(
-        correctionData: cRes,
+        correctionData: cRes.item1,
         correctionPath: correctionPath,
-        submissionData: sRes,
+        submissionData: sRes.item1,
         submissionPath: submissionPath,
         submission: submission,
         currentAnswer: Answer.empty);
@@ -91,7 +93,6 @@ class Correction {
   static final empty = Correction._(
       submissionPath: "",
       submissionData: Uint8List.fromList([]),
-      pageNumber: 0,
       correctionPath: "",
       correctionData: Uint8List.fromList([]),
       submission: Submission.empty,

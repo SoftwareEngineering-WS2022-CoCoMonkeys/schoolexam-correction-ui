@@ -62,8 +62,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       final document = await _load(path: state.added.submissionPath);
       overlays.add(document);
 
-      final current = document
-          .pages[state.corrections[state.selectedCorrection].pageNumber];
+      // TODO : Maybe use current answer
+      final current = document.pages[0];
 
       emit(CorrectionOverlayState(current: current, overlays: overlays));
     }
@@ -116,56 +116,57 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     return res;
   }
 
-  /// Adds the [lines] into the correction overlay.
+  /// Adds the [lines] into the correction overlay [document].
   /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
-  void addDrawing({required List<Stroke> lines, required Size size}) async {
+  void addDrawing(
+      {required CorrectionOverlayDocument document,
+      required List<Stroke> lines,
+      required Size size}) async {
     log("Adding new drawings");
 
-    final remarkState = _remarkCubit.state;
     final overlayState = state;
 
-    final currentCorrection =
-        remarkState.corrections[remarkState.selectedCorrection];
-
-    final documentNumber = overlayState.overlays.indexWhere(
-        (element) => element.path == currentCorrection.submissionPath, -1);
+    final documentNumber = overlayState.overlays
+        .indexWhere((element) => element.path == document.path, -1);
 
     if (documentNumber < 0) {
-      log("Found no existing overlay document for ${currentCorrection.submissionPath}");
+      log("Found no existing overlay document for ${document.path}");
       return;
     }
 
     final updatedState = state.addInputs(
         documentNumber: documentNumber,
-        pageNumber: currentCorrection.pageNumber,
+        pageNumber: overlayState.overlays[documentNumber].pageNumber,
         inputs: toOverlayInputs(lines: lines, size: size));
 
     emit(updatedState);
   }
 
-  /// Updates the lastly added line to match [line]
+  /// Updates the lastly added line to match [line] within the correction overlay [document].
   /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
-  void updateLine({required Stroke line, required Size size}) async {
-    final remarkState = _remarkCubit.state;
+  void updateLine(
+      {required CorrectionOverlayDocument document,
+      required Stroke line,
+      required Size size}) async {
     final overlayState = state;
 
-    final currentCorrection =
-        remarkState.corrections[remarkState.selectedCorrection];
-
-    final documentNumber = overlayState.overlays.indexWhere(
-        (element) => element.path == currentCorrection.submissionPath, -1);
+    final documentNumber = overlayState.overlays
+        .indexWhere((element) => element.path == document.path, -1);
 
     if (documentNumber < 0) {
-      log("Found no existing overlay document for ${currentCorrection.submissionPath}");
+      log("Found no existing overlay document for ${document.path}");
       return;
     }
 
     final updatedState = state.updateInput(
-        index: overlayState.overlays[documentNumber]
-                .pages[currentCorrection.pageNumber].inputs.length -
+        index: overlayState
+                .overlays[documentNumber]
+                .pages[overlayState.overlays[documentNumber].pageNumber]
+                .inputs
+                .length -
             1,
         documentNumber: documentNumber,
-        pageNumber: currentCorrection.pageNumber,
+        pageNumber: overlayState.overlays[documentNumber].pageNumber,
         input: toOverlayInputs(lines: [line], size: size)[0]);
 
     emit(updatedState);
@@ -185,6 +186,33 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
   void changeTool(CorrectionInputTool inputTool) => emit(
       UpdatedInputOptionsState.update(initial: state, inputTool: inputTool));
+
+  void jumpToPage(
+      {required CorrectionOverlayDocument document, required int pageNumber}) {
+    final overlayState = state;
+
+    final documentNumber = overlayState.overlays
+        .indexWhere((element) => element.path == document.path, -1);
+
+    if (documentNumber < 0) {
+      log("Found no existing overlay document for ${document.path}");
+      return;
+    }
+
+    if (pageNumber < 0 ||
+        pageNumber >= overlayState.overlays[documentNumber].pages.length) {
+      log("Not jumping to invalid page $pageNumber");
+      return;
+    }
+
+    log("Jumping from ${document.pageNumber} to $pageNumber within ${document.path}");
+    final updated = overlayState.changeDocument(
+        documentNumber: documentNumber,
+        document: overlayState.overlays[documentNumber]
+            .copyWith(pageNumber: pageNumber));
+
+    emit(updated);
+  }
 
   @override
   Future<void> close() async {

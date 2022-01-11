@@ -68,6 +68,9 @@ dependencies:
   # Used for identifying page instances within overlay
   uuid: ^3.0.5
 
+  # Useful for returning multiple value types within internal functions
+  tuple: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

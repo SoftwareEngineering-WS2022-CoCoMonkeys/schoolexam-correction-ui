@@ -1,37 +1,29 @@
 import 'package:equatable/equatable.dart';
-import 'package:uuid/uuid.dart';
 
 import 'correction_overlay_input.dart';
 import 'correction_overlay_page.dart';
 
 /// TODO : Save in database or similiar
 class CorrectionOverlayDocument extends Equatable {
-  late final String instanceId;
-  final int version;
   final String path;
-  final List<CorrectionOverlayPage> pages;
 
-  CorrectionOverlayDocument(
-      {required this.path,
-      required this.pages,
-      this.version = 0,
-      String? instanceId}) {
-    this.instanceId = instanceId ?? const Uuid().v4.toString();
-  }
+  /// The amount of overlay pages is equivalent to the submission pages.
+  /// This has to be ensured by the corresponding blocs.
+  final List<CorrectionOverlayPage> pages;
+  final int pageNumber;
+
+  const CorrectionOverlayDocument(
+      {required this.path, required this.pages, this.pageNumber = 0});
 
   @override
-  List<Object?> get props => [instanceId, version];
+  List<Object?> get props => [path, pages, pageNumber];
 
   CorrectionOverlayDocument addInputs(
       {required int pageNumber, required List<CorrectionOverlayInput> inputs}) {
     final updated = List<CorrectionOverlayPage>.from(pages);
     updated[pageNumber] = pages[pageNumber].addInputs(inputs: inputs);
 
-    return CorrectionOverlayDocument(
-        instanceId: instanceId,
-        version: version + 1,
-        path: path,
-        pages: updated);
+    return copyWith(pages: updated);
   }
 
   CorrectionOverlayDocument updateInput(
@@ -42,16 +34,18 @@ class CorrectionOverlayDocument extends Equatable {
     updated[pageNumber] =
         pages[pageNumber].updateInput(index: index, input: input);
 
-    return CorrectionOverlayDocument(
-        instanceId: instanceId,
-        version: version + 1,
-        path: path,
-        pages: updated);
+    return copyWith(pages: updated);
   }
 
-  static final empty = CorrectionOverlayDocument(
-      instanceId: "", version: 0, path: "", pages: const []);
+  static const empty = CorrectionOverlayDocument(path: "", pages: []);
 
   bool get isEmpty => this == CorrectionOverlayDocument.empty;
   bool get isNotEmpty => this != CorrectionOverlayDocument.empty;
+
+  CorrectionOverlayDocument copyWith(
+          {int? pageNumber, List<CorrectionOverlayPage>? pages}) =>
+      CorrectionOverlayDocument(
+          pageNumber: pageNumber ?? this.pageNumber,
+          path: path,
+          pages: pages ?? this.pages);
 }

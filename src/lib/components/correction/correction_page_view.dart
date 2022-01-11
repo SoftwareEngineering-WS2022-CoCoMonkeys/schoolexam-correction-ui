@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_document.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_input.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_page.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
@@ -12,53 +14,105 @@ import 'package:schoolexam_correction_ui/components/correction/input/paths_widge
 import 'input/drawing_input_overlay.dart';
 import 'submission_view.dart';
 
-class CorrectionPageView extends StatelessWidget {
+class CorrectionPageView extends StatefulWidget {
   final StreamController<List<CorrectionOverlayInput>> linesController;
 
-  final CorrectionOverlayPage overlay;
+  final CorrectionOverlayDocument initialDocument;
+  final StreamController<CorrectionOverlayDocument> documentController;
+
   final Correction correction;
 
   CorrectionPageView(
-      {Key? key, required this.correction, required this.overlay})
+      {Key? key,
+      required this.correction,
+      required this.initialDocument,
+      required this.documentController})
       : linesController =
-            StreamController<List<CorrectionOverlayInput>>.broadcast()
-              ..add(overlay.inputs),
+            StreamController<List<CorrectionOverlayInput>>.broadcast(),
         super(key: key);
 
-  Size _getSize(BoxConstraints constraints) {
-    final size = Size(
-        constraints.maxWidth,
-        constraints.maxWidth *
-            (overlay.pageSize.height / overlay.pageSize.width));
+  @override
+  State<StatefulWidget> createState() => _CorrectionPageViewState();
+}
 
-    log("Determined size ${size.width} ${size.height} from ${overlay.pageSize.height} ${overlay.pageSize.width}");
+class _CorrectionPageViewState extends State<CorrectionPageView> {
+  StreamSubscription? _documentSubscription;
+
+  @override
+  void initState() {
+    _documentSubscription =
+        widget.documentController.stream.listen(_onDocumentChange);
+    super.initState();
+  }
+
+  void _onDocumentChange(CorrectionOverlayDocument document) =>
+      widget.linesController.add(document.pages[document.pageNumber].inputs);
+
+  Size _getSize(BoxConstraints constraints, CorrectionOverlayPage page) {
+    final size = Size(constraints.maxWidth,
+        constraints.maxWidth * (page.pageSize.height / page.pageSize.width));
+
+    log("Determined size ${size.width} ${size.height} from ${page.pageSize.height} ${page.pageSize.width}");
 
     return size;
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) =>
-          InteractiveViewer(
-            child: Stack(
-              children: [
-                SubmissionView(
-                    size: _getSize(constraints), correction: correction),
-                _CorrectionPageDrawingView(
-                  size: _getSize(constraints),
-                  linesController: linesController,
-                )
-              ],
-            ),
-          ));
+  Widget build(BuildContext context) => StreamBuilder<
+          CorrectionOverlayDocument>(
+      stream: widget.documentController.stream,
+      initialData: widget.initialDocument,
+      builder: (context, snapshot) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) =>
+              InteractiveViewer(
+                child: (snapshot.requireData.pages.isEmpty)
+                    ? const CircularProgressIndicator()
+                    : Stack(
+                        children: [
+                          SubmissionView(
+                              documentController: widget.documentController,
+                              initialDocument: widget.initialDocument,
+                              size: _getSize(
+                                  constraints,
+                                  snapshot.requireData
+                                      .pages[snapshot.requireData.pageNumber]),
+                              correction: widget.correction),
+                          _CorrectionPageDrawingView(
+                            document: snapshot.requireData,
+                            size: _getSize(
+                                constraints,
+                                snapshot.requireData
+                                    .pages[snapshot.requireData.pageNumber]),
+                            linesController: widget.linesController,
+                            documentController: widget.documentController,
+                          )
+                        ],
+                      ),
+              )));
+
+  @override
+  void dispose() async {
+    if (_documentSubscription != null) {
+      await _documentSubscription!.cancel();
+    }
+    super.dispose();
+  }
 }
 
 class _CorrectionPageDrawingView extends StatelessWidget {
+  final CorrectionOverlayDocument document;
   final Size size;
+
+  // Streams allow to efficiently update downstream children without e.g. duplicating retrieval logic
   final StreamController<List<CorrectionOverlayInput>> linesController;
+  final StreamController<CorrectionOverlayDocument> documentController;
 
   const _CorrectionPageDrawingView(
-      {Key? key, required this.size, required this.linesController})
+      {Key? key,
+      required this.document,
+      required this.size,
+      required this.linesController,
+      required this.documentController})
       : super(key: key);
 
   @override
@@ -69,12 +123,15 @@ class _CorrectionPageDrawingView extends StatelessWidget {
           case CorrectionInputTool.pencil:
             return Stack(
               children: [
-                PathsWidget(size: size, controller: linesController),
+                PathsWidget(
+                    initialData: document.pages[document.pageNumber].inputs,
+                    size: size,
+                    controller: linesController),
                 DrawingInputOverlay(
                   size: size,
-                  overlayCubit:
-                      BlocProvider.of<CorrectionOverlayCubit>(context),
                   linesController: linesController,
+                  documentController: documentController,
+                  initialDocument: document,
                 )
               ],
             );
