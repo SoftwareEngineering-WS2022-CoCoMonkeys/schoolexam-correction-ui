@@ -1,15 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:schoolexam/schoolexam.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
 
 import 'correction.dart';
-
-enum RemarkInputTool { pencil, marker, text, eraser }
 
 class RemarkState extends Equatable {
   /// We may only provide remarks for one exam at the time. This contains information about the subject, participants etc.
@@ -23,31 +15,11 @@ class RemarkState extends Equatable {
   final int selectedCorrection;
   final List<Correction> corrections;
 
-  /// The following options define the behavior of the inputs
-  final DrawingInputOptions pencilOptions;
-  final DrawingInputOptions markerOptions;
-  final ColoredInputOptions textOptions;
-  final InputOptions eraserOptions;
-
-  final RemarkInputTool inputTool;
-
-  RemarkState._(
+  const RemarkState._(
       {this.exam = Exam.empty,
       this.selectedCorrection = 0,
-      this.inputTool = RemarkInputTool.pencil,
       required this.submissions,
-      required this.corrections,
-      DrawingInputOptions? pencilOptions,
-      DrawingInputOptions? markerOptions,
-      ColoredInputOptions? textOptions,
-      InputOptions? eraserOptions})
-      : pencilOptions = pencilOptions ??
-            DrawingInputOptions.pencil(size: 8, color: Colors.black),
-        markerOptions = markerOptions ??
-            DrawingInputOptions.marker(size: 8, color: Colors.yellow),
-        textOptions =
-            markerOptions ?? ColoredInputOptions(size: 8, color: Colors.black),
-        eraserOptions = eraserOptions ?? InputOptions(size: 8);
+      required this.corrections});
 
   RemarkState.none() : this._(submissions: [], corrections: []);
 
@@ -57,11 +29,6 @@ class RemarkState extends Equatable {
         submissions,
         selectedCorrection,
         corrections,
-        pencilOptions,
-        markerOptions,
-        textOptions,
-        eraserOptions,
-        inputTool
       ];
 }
 
@@ -81,12 +48,7 @@ class AddedCorrectionState extends RemarkState {
             exam: initial.exam,
             selectedCorrection: initial.corrections.length,
             submissions: initial.submissions,
-            corrections: <Correction>[...initial.corrections]..add(added),
-            inputTool: initial.inputTool,
-            pencilOptions: initial.pencilOptions,
-            markerOptions: initial.markerOptions,
-            textOptions: initial.textOptions,
-            eraserOptions: initial.eraserOptions);
+            corrections: <Correction>[...initial.corrections, added]);
 }
 
 class SwitchedCorrectionState extends RemarkState {
@@ -99,30 +61,20 @@ class SwitchedCorrectionState extends RemarkState {
                 ? selectedCorrection
                 : initial.selectedCorrection,
             submissions: initial.submissions,
-            corrections: initial.corrections,
-            inputTool: initial.inputTool,
-            pencilOptions: initial.pencilOptions,
-            markerOptions: initial.markerOptions,
-            textOptions: initial.textOptions,
-            eraserOptions: initial.eraserOptions);
+            corrections: initial.corrections);
 }
 
-class UpdatedInputOptionsState extends RemarkState {
-  UpdatedInputOptionsState.update(
-      {required RemarkState initial,
-      RemarkInputTool? inputTool,
-      DrawingInputOptions? pencilOptions,
-      DrawingInputOptions? markerOptions,
-      ColoredInputOptions? textOptions,
-      InputOptions? eraserOptions})
+class MergedCorrectionState extends RemarkState {
+  final Correction merged;
+
+  MergedCorrectionState.merged(
+      {required RemarkState initial, required this.merged})
       : super._(
             exam: initial.exam,
             selectedCorrection: initial.selectedCorrection,
             submissions: initial.submissions,
-            corrections: initial.corrections,
-            inputTool: inputTool ?? initial.inputTool,
-            pencilOptions: pencilOptions ?? initial.pencilOptions,
-            markerOptions: markerOptions ?? initial.markerOptions,
-            textOptions: textOptions ?? initial.textOptions,
-            eraserOptions: eraserOptions ?? initial.eraserOptions);
+            corrections: <Correction>[
+              ...initial.corrections.map((e) =>
+                  (e.correctionPath == merged.correctionPath) ? merged : e)
+            ]);
 }

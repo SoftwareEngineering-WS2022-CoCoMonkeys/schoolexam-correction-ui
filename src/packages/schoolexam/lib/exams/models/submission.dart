@@ -29,4 +29,16 @@ class Submission extends Correctable {
   String toString() {
     return "(${exam.title}) ${student.displayName}";
   }
+
+  static final empty = Submission(
+      id: "",
+      exam: Exam.empty,
+      data: "",
+      student: Student.empty,
+      answers: [],
+      achievedPoints: 0,
+      status: CorrectableStatus.unknown);
+
+  bool get isEmpty => this == Submission.empty;
+  bool get isNotEmpty => this != Submission.empty;
 }

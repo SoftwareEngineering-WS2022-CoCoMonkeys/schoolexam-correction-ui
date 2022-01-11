@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_document.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
@@ -58,20 +60,65 @@ class RemarkCubit extends Cubit<RemarkState> {
     emit(newState);
   }
 
-  void changePencilOptions(DrawingInputOptions options) => emit(
-      UpdatedInputOptionsState.update(initial: state, pencilOptions: options));
+  /// Combines overlay documents with submission documents
+  Future<void> merge({required CorrectionOverlayDocument document}) async {
+    final remarkState = state;
 
-  void changeMarkerOptions(DrawingInputOptions options) => emit(
-      UpdatedInputOptionsState.update(initial: state, markerOptions: options));
+    final correction = remarkState.corrections.firstWhere(
+        (element) => element.submissionPath == document.path,
+        orElse: () => Correction.empty);
 
-  void changeTextOptions(ColoredInputOptions options) => emit(
-      UpdatedInputOptionsState.update(initial: state, textOptions: options));
+    if (correction.isEmpty) {
+      log("There is no ongoing correction present for ${document.path}");
+      return;
+    }
 
-  void changeEraserOptions(InputOptions options) => emit(
-      UpdatedInputOptionsState.update(initial: state, eraserOptions: options));
+    log("Merging correction for ${document.path}");
+    final file = File(correction.correctionPath);
+    final pdfDocument = PdfDocument(inputBytes: await file.readAsBytes());
+    assert(document.pages.length == pdfDocument.pages.count);
 
-  void changeTool(RemarkInputTool inputTool) => emit(
-      UpdatedInputOptionsState.update(initial: state, inputTool: inputTool));
+    for (int pageNr = 0; pageNr < pdfDocument.pages.count; pageNr++) {
+      // 1. Cleanup old overlay - This is saved in a separate layer
+      pdfDocument.pages[pageNr].layers.remove(name: "correction");
+
+      // 2. Create new layer for correction inputs
+      final layer = pdfDocument.pages[pageNr].layers
+          .add(name: "correction", visible: true);
+
+      // 3. Convert correction inputs
+      for (int i = 0; i < document.pages[pageNr].inputs.length; ++i) {
+        final points = document.pages[pageNr].inputs[i].points
+            .map((e) => e.toAbsolutePoint(size: pdfDocument.pages[pageNr].size))
+            .toList();
+        // Empty
+        if (points.isEmpty) {
+          continue;
+        }
+        // Dot
+        else if (points.length < 2) {
+          layer.graphics.drawEllipse(Rect.fromCircle(
+              center: Offset(points[0].x, points[0].y), radius: 1));
+        }
+        // Path
+        else {
+          // TODO : Respect color
+          layer.graphics.drawPolygon(
+              points.map((e) => Offset(e.x, e.y)).toList(),
+              brush: PdfBrushes.black);
+        }
+      }
+    }
+
+    final res = Uint8List.fromList(pdfDocument.save());
+    pdfDocument.dispose();
+
+    log("Writing out correction to ${file.path}");
+    await file.writeAsBytes(res);
+    emit(MergedCorrectionState.merged(
+        initial: state,
+        merged: correction.copyWith(correctionData: Uint8List.fromList(res))));
+  }
 
   // TODO : THIS IS NOT WORKING
   void moveTo(Task task) {

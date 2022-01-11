@@ -1,23 +1,24 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/overlay_input.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_input.dart';
+import 'package:schoolexam_correction_ui/components/correction/input/drawing_gesture_recognizer.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 
 class DrawingInputOverlay extends StatefulWidget {
-  final OverlayCubit overlayCubit;
-  final StreamController<List<OverlayInput>> linesController;
-
-  final Widget child;
+  final Size size;
+  final CorrectionOverlayCubit overlayCubit;
+  final StreamController<List<CorrectionOverlayInput>> linesController;
 
   const DrawingInputOverlay(
       {Key? key,
+      required this.size,
       required this.overlayCubit,
-      required this.linesController,
-      required this.child})
+      required this.linesController})
       : super(key: key);
 
   @override
@@ -28,9 +29,10 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
   Stroke? line;
 
   void _addUpdate() {
-    widget.linesController.add(
-        List<OverlayInput>.from(widget.overlayCubit.state.current.inputs)
-          ..addAll(widget.overlayCubit.toOverlayInputs(lines: [line!])));
+    widget.linesController.add(List<CorrectionOverlayInput>.from(
+        widget.overlayCubit.state.current.inputs)
+      ..addAll(widget.overlayCubit
+          .toOverlayInputs(lines: [line!], size: widget.size)));
   }
 
   void onPanStart(BuildContext context, DragStartDetails details) {
@@ -57,16 +59,27 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
 
   void onPanEnd(DragEndDetails details) {
     // Registering the line with the business logic
-    widget.overlayCubit.addDrawing(lines: [line!]);
+    widget.overlayCubit.addDrawing(lines: [line!], size: widget.size);
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-        color: Colors.green.withOpacity(0.25),
-        child: GestureDetector(
-            onPanStart: (details) => onPanStart(context, details),
-            onPanUpdate: (details) => onPanUpdate(context, details),
-            onPanEnd: onPanEnd,
-            child: widget.child),
+  Widget build(BuildContext context) => RawGestureDetector(
+        gestures: {
+          DrawingGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<DrawingGestureRecognizer>(
+                  () => DrawingGestureRecognizer(),
+                  (DrawingGestureRecognizer instance) {
+            instance.onStart =
+                (DragStartDetails details) => onPanStart(context, details);
+            instance.onUpdate =
+                (DragUpdateDetails details) => onPanUpdate(context, details);
+            instance.onEnd = onPanEnd;
+          })
+        },
+        child: Container(
+          width: widget.size.width,
+          height: widget.size.height,
+          color: Colors.transparent,
+        ),
       );
 }

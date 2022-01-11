@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/presentation/custom_icons.dart';
 
@@ -17,26 +18,26 @@ class InputHeader extends StatelessWidget {
               IconButton(onPressed: () {}, icon: const Icon(Icons.redo)),
               IconButton(
                   onPressed: () {
-                    BlocProvider.of<RemarkCubit>(context)
-                        .changeTool(RemarkInputTool.text);
+                    BlocProvider.of<CorrectionOverlayCubit>(context)
+                        .changeTool(CorrectionInputTool.text);
                   },
                   icon: const Icon(CustomIcons.font)),
               IconButton(
                   onPressed: () {
-                    BlocProvider.of<RemarkCubit>(context)
-                        .changeTool(RemarkInputTool.pencil);
+                    BlocProvider.of<CorrectionOverlayCubit>(context)
+                        .changeTool(CorrectionInputTool.pencil);
                   },
                   icon: const Icon(CustomIcons.pencil_alt)),
               IconButton(
                   onPressed: () {
-                    BlocProvider.of<RemarkCubit>(context)
-                        .changeTool(RemarkInputTool.marker);
+                    BlocProvider.of<CorrectionOverlayCubit>(context)
+                        .changeTool(CorrectionInputTool.marker);
                   },
                   icon: const Icon(CustomIcons.marker)),
               IconButton(
                   onPressed: () {
-                    BlocProvider.of<RemarkCubit>(context)
-                        .changeTool(RemarkInputTool.eraser);
+                    BlocProvider.of<CorrectionOverlayCubit>(context)
+                        .changeTool(CorrectionInputTool.eraser);
                   },
                   icon: const Icon(CustomIcons.eraser)),
               const Padding(
