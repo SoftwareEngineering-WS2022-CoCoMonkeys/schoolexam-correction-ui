@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
+import 'package:schoolexam/exams/models/submission.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
@@ -28,7 +29,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);
   }
 
-  Future<CorrectionOverlayDocument> _load({required String path}) async {
+  Future<CorrectionOverlayDocument> _load(
+      {required String path, required Submission submission}) async {
     const bool exists = false;
 
     late final CorrectionOverlayDocument res;
@@ -41,6 +43,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       log("Submission document has ${document.pages.count} page(s).");
 
       res = CorrectionOverlayDocument(
+          submissionId: submission.id,
           path: path,
           pages: List.generate(document.pages.count, (index) {
             final size = document.pages[index].size;
@@ -59,7 +62,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     if (state is AddedCorrectionState) {
       final overlays =
           List<CorrectionOverlayDocument>.from(this.state.overlays);
-      final document = await _load(path: state.added.submissionPath);
+      final document = await _load(
+          path: state.added.submissionPath, submission: state.added.submission);
       overlays.add(document);
 
       // TODO : Maybe use current answer

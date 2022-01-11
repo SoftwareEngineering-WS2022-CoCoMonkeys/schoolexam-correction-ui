@@ -84,10 +84,10 @@ class SubmissionViewState extends State<SubmissionView> {
       );
 
   @override
-  void dispose() async {
+  Future<void> dispose() async {
+    super.dispose();
     if (_documentSubscription != null) {
       await _documentSubscription!.cancel();
     }
-    super.dispose();
   }
 }

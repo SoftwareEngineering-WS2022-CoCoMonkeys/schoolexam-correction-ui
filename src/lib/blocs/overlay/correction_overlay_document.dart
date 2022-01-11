@@ -3,8 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'correction_overlay_input.dart';
 import 'correction_overlay_page.dart';
 
-/// TODO : Save in database or similiar
 class CorrectionOverlayDocument extends Equatable {
+  /// The identification of the correction.
+  /// This is a 1:1 mapping to the submission.
+  final String submissionId;
   final String path;
 
   /// The amount of overlay pages is equivalent to the submission pages.
@@ -13,10 +15,13 @@ class CorrectionOverlayDocument extends Equatable {
   final int pageNumber;
 
   const CorrectionOverlayDocument(
-      {required this.path, required this.pages, this.pageNumber = 0});
+      {required this.submissionId,
+      required this.path,
+      required this.pages,
+      this.pageNumber = 0});
 
   @override
-  List<Object?> get props => [path, pages, pageNumber];
+  List<Object?> get props => [submissionId, path, pages, pageNumber];
 
   CorrectionOverlayDocument addInputs(
       {required int pageNumber, required List<CorrectionOverlayInput> inputs}) {
@@ -37,7 +42,8 @@ class CorrectionOverlayDocument extends Equatable {
     return copyWith(pages: updated);
   }
 
-  static const empty = CorrectionOverlayDocument(path: "", pages: []);
+  static const empty =
+      CorrectionOverlayDocument(submissionId: "", path: "", pages: []);
 
   bool get isEmpty => this == CorrectionOverlayDocument.empty;
   bool get isNotEmpty => this != CorrectionOverlayDocument.empty;
@@ -45,6 +51,7 @@ class CorrectionOverlayDocument extends Equatable {
   CorrectionOverlayDocument copyWith(
           {int? pageNumber, List<CorrectionOverlayPage>? pages}) =>
       CorrectionOverlayDocument(
+          submissionId: submissionId,
           pageNumber: pageNumber ?? this.pageNumber,
           path: path,
           pages: pages ?? this.pages);
