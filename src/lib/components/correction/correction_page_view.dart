@@ -5,9 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
+import 'package:schoolexam_correction_ui/components/correction/input/eraser_input_overlay.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/paths_widget.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 import 'input/drawing_input_overlay.dart';
 import 'submission_view.dart';
@@ -116,25 +117,26 @@ class _CorrectionPageDrawingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
-          builder: (context, state) {
-        switch (state.inputTool) {
-          case CorrectionInputTool.pencil:
-            return Stack(
-              children: [
-                PathsWidget(
-                    initialData: document.pages[document.pageNumber].inputs,
-                    size: size,
-                    controller: linesController),
-                DrawingInputOverlay(
-                  size: size,
-                  linesController: linesController,
-                  documentController: documentController,
-                  initialDocument: document,
-                )
-              ],
-            );
-          default:
-            return const Text("Not yet supported!");
-        }
-      });
+          builder: (context, state) => Stack(
+                children: [
+                  PathsWidget(
+                      initialData: document.pages[document.pageNumber].inputs,
+                      size: size,
+                      controller: linesController),
+                  if (state.inputTool == CorrectionInputTool.pencil ||
+                      state.inputTool == CorrectionInputTool.marker)
+                    DrawingInputOverlay(
+                      size: size,
+                      linesController: linesController,
+                      documentController: documentController,
+                      initialDocument: document,
+                    ),
+                  if (state.inputTool == CorrectionInputTool.eraser)
+                    EraserInputOverlay(
+                        size: size,
+                        linesController: linesController,
+                        initialDocument: document,
+                        documentController: documentController)
+                ],
+              ));
 }

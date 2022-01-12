@@ -12,8 +12,8 @@ import 'package:schoolexam_correction_ui/components/correction/input/colored_inp
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'correction_overlay_state.dart';
 
@@ -163,6 +163,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       case CorrectionInputTool.pencil:
         return _convert(
             lines: lines, size: size, options: correctionState.pencilOptions);
+      case CorrectionInputTool.marker:
+        return _convert(
+            lines: lines, size: size, options: correctionState.markerOptions);
       default:
         return [];
     }
@@ -189,18 +192,15 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
         pageNumber: correctionState.overlays[documentNumber].pageNumber,
         inputs: toOverlayInputs(lines: lines, size: size));
 
-    await _correctionOverlayRepository.saveDocument(
-        document: updatedState.overlays[documentNumber]);
-
     emit(updatedState);
   }
 
-  /// Updates the lastly added line to match [line] within the correction overlay [document].
-  /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
-  void updateLine(
+  /// Replaces all drawings in the current page within [document] with [inputs].
+  /// Use this function with caution, as you are practically destroying previous work of a user.
+  void replaceDrawings(
       {required CorrectionOverlayDocument document,
-      required Stroke line,
-      required Size size}) async {
+      required List<CorrectionOverlayInput> inputs}) async {
+    log("Updating drawings from external source");
     final correctionState = state;
     final documentNumber =
         _getDocumentNumber(state: correctionState, document: document);
@@ -210,18 +210,15 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       return;
     }
 
-    final updatedState = state.updateInput(
-        index: correctionState
-                .overlays[documentNumber]
-                .pages[correctionState.overlays[documentNumber].pageNumber]
-                .inputs
-                .length -
-            1,
-        documentNumber: documentNumber,
-        pageNumber: correctionState.overlays[documentNumber].pageNumber,
-        input: toOverlayInputs(lines: [line], size: size)[0]);
+    final pageNumber = correctionState.overlays[documentNumber].pageNumber;
+    final currentPage =
+        correctionState.overlays[documentNumber].pages[pageNumber];
 
-    emit(updatedState);
+    emit(correctionState.changePage(
+        documentNumber: documentNumber,
+        pageNumber: pageNumber,
+        page: currentPage.copyWith(
+            version: currentPage.version + 1, inputs: inputs)));
   }
 
   void changePencilOptions(DrawingInputOptions options) => emit(

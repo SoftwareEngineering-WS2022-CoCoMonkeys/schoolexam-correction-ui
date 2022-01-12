@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
+
 import 'correction_overlay_input.dart';
 
 class CorrectionOverlayPage extends Equatable {
@@ -23,6 +24,8 @@ class CorrectionOverlayPage extends Equatable {
     this.instanceId = instanceId ?? const Uuid().v4().toString();
   }
 
+  /// Adds [inputs] to the known list of inputs.
+  /// The version is increased accordingly.
   CorrectionOverlayPage addInputs(
       {required List<CorrectionOverlayInput> inputs}) {
     final updated = List<CorrectionOverlayInput>.from(this.inputs);
@@ -30,25 +33,31 @@ class CorrectionOverlayPage extends Equatable {
     return copyWith(version: version + 1, inputs: updated..addAll(inputs));
   }
 
-  CorrectionOverlayPage updateInput(
-      {required int index, required CorrectionOverlayInput input}) {
+  /// Replaces currently known inputs with [inputs].
+  /// The version is increased accordingly.
+  CorrectionOverlayPage replaceInputs(
+      {required List<CorrectionOverlayInput> inputs}) {
     final updated = List<CorrectionOverlayInput>.from(inputs);
-    updated[index] = input;
 
     return copyWith(version: version + 1, inputs: updated);
   }
-
-  CorrectionOverlayPage copyWith(
-          {int? version, List<CorrectionOverlayInput>? inputs}) =>
-      CorrectionOverlayPage(
-          inputs: inputs ?? this.inputs,
-          instanceId: instanceId,
-          version: version ?? this.version,
-          pageSize: pageSize);
 
   static final empty = CorrectionOverlayPage(
       pageSize: Size.zero, inputs: const [], version: 0, instanceId: "");
 
   bool get isEmpty => this == CorrectionOverlayPage.empty;
   bool get isNotEmpty => this != CorrectionOverlayPage.empty;
+
+  CorrectionOverlayPage copyWith({
+    int? version,
+    List<CorrectionOverlayInput>? inputs,
+    Size? pageSize,
+  }) {
+    return CorrectionOverlayPage(
+      instanceId: instanceId,
+      version: version ?? this.version,
+      inputs: inputs ?? this.inputs,
+      pageSize: pageSize ?? this.pageSize,
+    );
+  }
 }

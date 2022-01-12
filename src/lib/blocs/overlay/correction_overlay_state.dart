@@ -57,6 +57,8 @@ class CorrectionOverlayState extends Equatable {
     return copyWith(overlays: updated);
   }
 
+  /// Using this method the page [pageNumber] for the document [documentNumber] is replaced.
+  /// Importantly, this returns a general [CorrectionOverlayState] type and should there not be used for state changes occurring through drawings.
   CorrectionOverlayState changePage(
       {required int documentNumber,
       required int pageNumber,
@@ -70,7 +72,7 @@ class CorrectionOverlayState extends Equatable {
         document: overlays[documentNumber].copyWith(pages: updatedPages));
   }
 
-  CorrectionOverlayState addInputs(
+  UpdatedDrawingsState addInputs(
       {required int documentNumber,
       required int pageNumber,
       required List<CorrectionOverlayInput> inputs}) {
@@ -82,15 +84,14 @@ class CorrectionOverlayState extends Equatable {
     return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
   }
 
-  CorrectionOverlayState updateInput(
+  UpdatedDrawingsState updateInputs(
       {required int documentNumber,
       required int pageNumber,
-      required int index,
-      required CorrectionOverlayInput input}) {
+      required List<CorrectionOverlayInput> inputs}) {
     final updated = changeDocument(
         documentNumber: documentNumber,
         document: overlays[documentNumber]
-            .updateInput(pageNumber: pageNumber, index: index, input: input));
+            .addInputs(pageNumber: pageNumber, inputs: inputs));
 
     return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
   }

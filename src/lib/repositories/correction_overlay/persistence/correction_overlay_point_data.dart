@@ -1,7 +1,5 @@
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/repositories/correction_overlay/models/correction_overlay_document.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/persistence/correction_overlay_input_data.dart';
-import 'package:schoolexam_correction_ui/repositories/correction_overlay/persistence/correction_overlay_page_data.dart';
 
 /// Data class for storing a single point within a set of inputs.
 /// This data class needs no primary key, because we are never interested in deleting a specific single point (based on its identity) from the persistence layer.

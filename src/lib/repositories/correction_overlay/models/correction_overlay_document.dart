@@ -22,6 +22,7 @@ class CorrectionOverlayDocument extends Equatable {
   @override
   List<Object?> get props => [submissionId, pages, pageNumber];
 
+  /// Adds [inputs] to the page [pageNumber].
   CorrectionOverlayDocument addInputs(
       {required int pageNumber, required List<CorrectionOverlayInput> inputs}) {
     final updated = List<CorrectionOverlayPage>.from(pages);
@@ -30,13 +31,11 @@ class CorrectionOverlayDocument extends Equatable {
     return copyWith(pages: updated);
   }
 
-  CorrectionOverlayDocument updateInput(
-      {required int pageNumber,
-      required int index,
-      required CorrectionOverlayInput input}) {
+  /// Replaces current inputs with [inputs] provided in the page [pageNumber].
+  CorrectionOverlayDocument replaceInputs(
+      {required int pageNumber, required List<CorrectionOverlayInput> inputs}) {
     final updated = List<CorrectionOverlayPage>.from(pages);
-    updated[pageNumber] =
-        pages[pageNumber].updateInput(index: index, input: input);
+    updated[pageNumber] = pages[pageNumber].replaceInputs(inputs: inputs);
 
     return copyWith(pages: updated);
   }
@@ -46,10 +45,14 @@ class CorrectionOverlayDocument extends Equatable {
   bool get isEmpty => this == CorrectionOverlayDocument.empty;
   bool get isNotEmpty => this != CorrectionOverlayDocument.empty;
 
-  CorrectionOverlayDocument copyWith(
-          {int? pageNumber, List<CorrectionOverlayPage>? pages}) =>
-      CorrectionOverlayDocument(
-          submissionId: submissionId,
-          pageNumber: pageNumber ?? this.pageNumber,
-          pages: pages ?? this.pages);
+  CorrectionOverlayDocument copyWith({
+    List<CorrectionOverlayPage>? pages,
+    int? pageNumber,
+  }) {
+    return CorrectionOverlayDocument(
+      submissionId: submissionId,
+      pages: pages ?? this.pages,
+      pageNumber: pageNumber ?? this.pageNumber,
+    );
+  }
 }
