@@ -12,46 +12,52 @@ import 'package:schoolexam_correction_ui/components/correction/input/drawing_inp
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
-import 'correction_overlay_document.dart';
-import 'correction_overlay_input.dart';
-import 'correction_overlay_page.dart';
-import 'correction_overlay_point.dart';
 import 'correction_overlay_state.dart';
 
 class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
+  final CorrectionOverlayRepository _correctionOverlayRepository;
   final RemarkCubit _remarkCubit;
   late final StreamSubscription _remarkSubscription;
 
-  CorrectionOverlayCubit({required RemarkCubit remarkCubit})
-      : _remarkCubit = remarkCubit,
+  CorrectionOverlayCubit(
+      {required CorrectionOverlayRepository correctionOverlayRepository,
+      required RemarkCubit remarkCubit})
+      : _correctionOverlayRepository = correctionOverlayRepository,
+        _remarkCubit = remarkCubit,
         super(CorrectionOverlayState.none()) {
     _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);
   }
 
   Future<CorrectionOverlayDocument> _load(
       {required String path, required Submission submission}) async {
-    const bool exists = false;
+    final document = await _correctionOverlayRepository.getDocument(
+        submissionId: submission.id);
 
     late final CorrectionOverlayDocument res;
-    if (!exists) {
-      log("No local overlay document for $path was found. Creating one.");
+    if (document.isEmpty) {
+      log("No local overlay document for ${submission.id} was found. Creating one.");
 
       final file = File(path);
-      final document = PdfDocument(inputBytes: await file.readAsBytes());
+      final sDocument = PdfDocument(inputBytes: await file.readAsBytes());
 
-      log("Submission document has ${document.pages.count} page(s).");
+      log("Submission document has ${sDocument.pages.count} page(s).");
 
       res = CorrectionOverlayDocument(
           submissionId: submission.id,
-          path: path,
-          pages: List.generate(document.pages.count, (index) {
-            final size = document.pages[index].size;
+          pages: List.generate(sDocument.pages.count, (index) {
+            final size = sDocument.pages[index].size;
             // DO NOT MAKE const, as no changes are otherwise possible
             return CorrectionOverlayPage(pageSize: size, inputs: []);
           }));
+
+      await _correctionOverlayRepository.saveDocument(document: res);
     } else {
-      // TODO : Here we would need to load the overlay from storage
+      log("The document was successfully retrieved from the local persistence layer.");
+      log("Overlay document has ${document.pages.length} page(s) and ${document.pages.map((e) => e.inputs.length).reduce((a, b) => a + b)} input(s).");
+
+      res = document;
     }
 
     return res;
@@ -130,11 +136,11 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
     final overlayState = state;
 
-    final documentNumber = overlayState.overlays
-        .indexWhere((element) => element.path == document.path, -1);
+    final documentNumber = overlayState.overlays.indexWhere(
+        (element) => element.submissionId == document.submissionId, -1);
 
     if (documentNumber < 0) {
-      log("Found no existing overlay document for ${document.path}");
+      log("Found no existing overlay document for ${document.submissionId}");
       return;
     }
 
@@ -142,6 +148,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
         documentNumber: documentNumber,
         pageNumber: overlayState.overlays[documentNumber].pageNumber,
         inputs: toOverlayInputs(lines: lines, size: size));
+
+    await _correctionOverlayRepository.saveDocument(
+        document: updatedState.overlays[documentNumber]);
 
     emit(updatedState);
   }
@@ -154,11 +163,11 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       required Size size}) async {
     final overlayState = state;
 
-    final documentNumber = overlayState.overlays
-        .indexWhere((element) => element.path == document.path, -1);
+    final documentNumber = overlayState.overlays.indexWhere(
+        (element) => element.submissionId == document.submissionId, -1);
 
     if (documentNumber < 0) {
-      log("Found no existing overlay document for ${document.path}");
+      log("Found no existing overlay document for ${document.submissionId}");
       return;
     }
 
@@ -195,11 +204,11 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       {required CorrectionOverlayDocument document, required int pageNumber}) {
     final overlayState = state;
 
-    final documentNumber = overlayState.overlays
-        .indexWhere((element) => element.path == document.path, -1);
+    final documentNumber = overlayState.overlays.indexWhere(
+        (element) => element.submissionId == document.submissionId, -1);
 
     if (documentNumber < 0) {
-      log("Found no existing overlay document for ${document.path}");
+      log("Found no existing overlay document for ${document.submissionId}");
       return;
     }
 
@@ -209,7 +218,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       return;
     }
 
-    log("Jumping from ${document.pageNumber} to $pageNumber within ${document.path}");
+    log("Jumping from ${document.pageNumber} to $pageNumber within ${document.submissionId}");
     final updated = overlayState.changeDocument(
         documentNumber: documentNumber,
         document: overlayState.overlays[documentNumber]

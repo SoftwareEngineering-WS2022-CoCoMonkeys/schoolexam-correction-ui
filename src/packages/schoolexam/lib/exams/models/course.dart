@@ -1,4 +1,5 @@
 import 'participant.dart';
+import 'student.dart';
 
 /// Defines a course within the school. This course is allowed to be a participant of an exam and is in turn made up of further participants.
 /// While the most common case is going to be the inclusion of students, nesting courses is a possibility.
@@ -7,8 +8,8 @@ class Course extends Participant {
   final List<Participant> children;
 
   @override
-  List<Participant> getParticipants() =>
-      children.map((e) => e.getParticipants()).fold<List<Participant>>(
+  List<Student> getParticipants() =>
+      children.map((e) => e.getParticipants()).fold<List<Student>>(
           [], (prev, element) => prev..addAll(element)).toList(growable: false);
 
   const Course(

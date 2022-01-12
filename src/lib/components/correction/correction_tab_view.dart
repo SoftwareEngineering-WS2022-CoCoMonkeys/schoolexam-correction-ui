@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_document.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_page_view.dart';
 
@@ -24,8 +24,6 @@ class CorrectionTabView extends StatelessWidget {
   void _update(CorrectionOverlayState state) {
     final document = _getDocument(state);
 
-    print("UPDATE?");
-
     if (document.isEmpty) {
       log("Ignoring state change, as viewed correction is not found within it.");
       return;
@@ -36,7 +34,7 @@ class CorrectionTabView extends StatelessWidget {
 
   CorrectionOverlayDocument _getDocument(CorrectionOverlayState state) =>
       state.overlays.firstWhere(
-          (element) => element.path == correction.submissionPath,
+          (element) => element.submissionId == correction.submission.id,
           orElse: () => CorrectionOverlayDocument.empty);
 
   @override

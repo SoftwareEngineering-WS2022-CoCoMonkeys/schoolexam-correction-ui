@@ -7,7 +7,6 @@ class CorrectionOverlayDocument extends Equatable {
   /// The identification of the correction.
   /// This is a 1:1 mapping to the submission.
   final String submissionId;
-  final String path;
 
   /// The amount of overlay pages is equivalent to the submission pages.
   /// This has to be ensured by the corresponding blocs.
@@ -15,13 +14,10 @@ class CorrectionOverlayDocument extends Equatable {
   final int pageNumber;
 
   const CorrectionOverlayDocument(
-      {required this.submissionId,
-      required this.path,
-      required this.pages,
-      this.pageNumber = 0});
+      {required this.submissionId, required this.pages, this.pageNumber = 0});
 
   @override
-  List<Object?> get props => [submissionId, path, pages, pageNumber];
+  List<Object?> get props => [submissionId, pages, pageNumber];
 
   CorrectionOverlayDocument addInputs(
       {required int pageNumber, required List<CorrectionOverlayInput> inputs}) {
@@ -42,8 +38,7 @@ class CorrectionOverlayDocument extends Equatable {
     return copyWith(pages: updated);
   }
 
-  static const empty =
-      CorrectionOverlayDocument(submissionId: "", path: "", pages: []);
+  static const empty = CorrectionOverlayDocument(submissionId: "", pages: []);
 
   bool get isEmpty => this == CorrectionOverlayDocument.empty;
   bool get isNotEmpty => this != CorrectionOverlayDocument.empty;
@@ -53,6 +48,5 @@ class CorrectionOverlayDocument extends Equatable {
       CorrectionOverlayDocument(
           submissionId: submissionId,
           pageNumber: pageNumber ?? this.pageNumber,
-          path: path,
           pages: pages ?? this.pages);
 }

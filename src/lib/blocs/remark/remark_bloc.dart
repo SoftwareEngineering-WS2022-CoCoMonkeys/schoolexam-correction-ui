@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_document.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'correction.dart';
@@ -65,15 +65,15 @@ class RemarkCubit extends Cubit<RemarkState> {
     final remarkState = state;
 
     final correction = remarkState.corrections.firstWhere(
-        (element) => element.submissionPath == document.path,
+        (element) => element.submission.id == document.submissionId,
         orElse: () => Correction.empty);
 
     if (correction.isEmpty) {
-      log("There is no ongoing correction present for ${document.path}");
+      log("There is no ongoing correction present for ${document.submissionId}");
       return;
     }
 
-    log("Merging correction for ${document.path}");
+    log("Merging correction for ${document.submissionId}");
     final file = File(correction.correctionPath);
     final pdfDocument = PdfDocument(inputBytes: await file.readAsBytes());
     assert(document.pages.length == pdfDocument.pages.count);

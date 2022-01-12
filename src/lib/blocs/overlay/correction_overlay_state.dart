@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
-
-import 'correction_overlay_document.dart';
-import 'correction_overlay_input.dart';
-import 'correction_overlay_page.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 enum CorrectionInputTool { pencil, marker, text, eraser }
 

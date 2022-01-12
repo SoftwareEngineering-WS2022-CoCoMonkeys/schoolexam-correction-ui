@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_document.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 
 /// Renders the submission PDF included within [correction].

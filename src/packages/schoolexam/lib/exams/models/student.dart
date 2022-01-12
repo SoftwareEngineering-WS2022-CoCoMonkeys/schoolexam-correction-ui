@@ -2,7 +2,7 @@ import 'participant.dart';
 
 class Student extends Participant {
   @override
-  List<Participant> getParticipants() => [this];
+  List<Student> getParticipants() => [this];
 
   const Student({required String id, required String displayName})
       : super(id: id, displayName: displayName);

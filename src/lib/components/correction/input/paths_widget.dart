@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:perfect_freehand/perfect_freehand.dart';
-import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay_input.dart';
+import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 class PathsWidget extends StatelessWidget {
   final Size size;
@@ -30,9 +30,8 @@ class PathsWidget extends StatelessWidget {
                 return ClipRect(
                   child: CustomPaint(
                     // TODO : Help
-                    painter: _PathsPainter(
-                        size: size,
-                        inputs: snapshot.data != null ? snapshot.data! : []),
+                    painter:
+                        _PathsPainter(size: size, inputs: snapshot.requireData),
                   ),
                 );
               })));
@@ -46,6 +45,8 @@ class _PathsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    log("Drawing a total of ${inputs.length} input(s) on the canvas.");
+
     for (int i = 0; i < inputs.length; ++i) {
       final input = inputs[i];
       final points = inputs[i]

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
-
 import 'correction_overlay_point.dart';
 
 class CorrectionOverlayInput extends Equatable {

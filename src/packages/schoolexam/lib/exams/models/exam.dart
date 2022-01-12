@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/models/participant.dart';
 
+import 'student.dart';
 import 'task.dart';
 
 enum ExamStatus {
@@ -72,7 +73,7 @@ class Exam extends Equatable {
   bool get isNotEmpty => this != Exam.empty;
 
   /// Returns all participants of an exam
-  List<Participant> getParticipants() =>
-      participants.map((e) => e.getParticipants()).fold<Set<Participant>>(
+  List<Student> getParticipants() =>
+      participants.map((e) => e.getParticipants()).fold<Set<Student>>(
           {}, (prev, element) => prev..addAll(element)).toList(growable: false);
 }
