@@ -29,6 +29,8 @@ class CorrectionTabView extends StatelessWidget {
       return;
     }
 
+    log("Updating document");
+
     documentController.add(document);
   }
 

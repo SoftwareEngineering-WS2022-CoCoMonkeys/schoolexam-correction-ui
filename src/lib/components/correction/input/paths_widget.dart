@@ -45,8 +45,6 @@ class _PathsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    log("Drawing a total of ${inputs.length} input(s) on the canvas.");
-
     for (int i = 0; i < inputs.length; ++i) {
       final input = inputs[i];
       final points = inputs[i]

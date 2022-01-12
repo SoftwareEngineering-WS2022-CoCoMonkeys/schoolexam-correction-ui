@@ -14,7 +14,10 @@ class CorrectionOverlayDocument extends Equatable {
   final int pageNumber;
 
   const CorrectionOverlayDocument(
-      {required this.submissionId, required this.pages, this.pageNumber = 0});
+      {required this.submissionId,
+      required this.pages,
+      this.pageNumber = 0,
+      String? instanceId});
 
   @override
   List<Object?> get props => [submissionId, pages, pageNumber];

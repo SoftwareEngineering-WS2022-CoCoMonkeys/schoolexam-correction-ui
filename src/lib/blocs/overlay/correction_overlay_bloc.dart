@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
@@ -17,19 +18,68 @@ import 'package:schoolexam_correction_ui/repositories/correction_overlay/correct
 import 'correction_overlay_state.dart';
 
 class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
+  // Internal revision history for in memory pages
+  static const int _maximumHistorySize = 20;
+  final Map<String, Queue<CorrectionOverlayPage>> _pageHistory;
+  //
+
   final CorrectionOverlayRepository _correctionOverlayRepository;
   final RemarkCubit _remarkCubit;
   late final StreamSubscription _remarkSubscription;
+  late final StreamSubscription _correctionSubscription;
 
   CorrectionOverlayCubit(
       {required CorrectionOverlayRepository correctionOverlayRepository,
       required RemarkCubit remarkCubit})
       : _correctionOverlayRepository = correctionOverlayRepository,
         _remarkCubit = remarkCubit,
+        _pageHistory = <String, Queue<CorrectionOverlayPage>>{},
         super(CorrectionOverlayState.none()) {
     _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);
+    _correctionSubscription = stream.listen(_onSelfStateChanged);
   }
 
+  /// Listener enacting necessary changes to the correction state, given the remark state changes.
+  /// This may include the inclusion or exclusion of submissions in the correcting process.
+  void _onRemarkStateChanged(RemarkState state) async {
+    /// Added a new correction AND switched to it.
+    if (state is AddedCorrectionState) {
+      final overlays =
+          List<CorrectionOverlayDocument>.from(this.state.overlays);
+      final document = await _load(
+          path: state.added.submissionPath, submission: state.added.submission);
+      overlays.add(document);
+
+      emit(CorrectionOverlayState(
+          documentNumber: overlays.length - 1, overlays: overlays));
+    }
+  }
+
+  /// Listener, that updates the internal history of pages (identified by instanceId).
+  void _onSelfStateChanged(CorrectionOverlayState state) {
+    final currentDocument = state.overlays[state.documentNumber];
+    final currentPage = currentDocument.pages[currentDocument.pageNumber];
+    _pageHistory.putIfAbsent(
+        currentPage.instanceId, () => Queue.from(<CorrectionOverlayPage>[]));
+
+    // Constraint the history size to prevent memory blowup
+    final _currentHistory = _pageHistory[currentPage.instanceId]!;
+
+    if (_currentHistory.length == _maximumHistorySize) {
+      _currentHistory.removeLast();
+    }
+
+    // Cut of history of alternate timeline
+    if (_currentHistory.isNotEmpty && state is UpdatedDrawingsState) {
+      _currentHistory
+          .removeWhere((element) => element.version >= currentPage.version);
+    }
+
+    _currentHistory.addFirst(currentPage);
+  }
+
+  /// Using the specified [submission] and [path] pointing to the local location of the submission PDF,
+  /// the corresponding overlay document is loaded. If no overlay document exists yet, it is created without inputs and locally persisted.
   Future<CorrectionOverlayDocument> _load(
       {required String path, required Submission submission}) async {
     final document = await _correctionOverlayRepository.getDocument(
@@ -61,37 +111,6 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     return res;
-  }
-
-  void _onRemarkStateChanged(RemarkState state) async {
-    /// Added a new correction AND switched to it.
-    if (state is AddedCorrectionState) {
-      final overlays =
-          List<CorrectionOverlayDocument>.from(this.state.overlays);
-      final document = await _load(
-          path: state.added.submissionPath, submission: state.added.submission);
-      overlays.add(document);
-
-      // TODO : Maybe use current answer
-      final current = document.pages[0];
-
-      emit(CorrectionOverlayState(current: current, overlays: overlays));
-    }
-  }
-
-  /// Takes the [lines] and converts them to overlay inputs, using the current remark state for missing information.
-  /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
-  List<CorrectionOverlayInput> toOverlayInputs(
-      {required List<Stroke> lines, required Size size}) {
-    final correctionState = state;
-
-    switch (correctionState.inputTool) {
-      case CorrectionInputTool.pencil:
-        return _convert(
-            lines: lines, size: size, options: correctionState.pencilOptions);
-      default:
-        return [];
-    }
   }
 
   /// Takes the [lines] and [color] to convert them to overlay inputs
@@ -126,6 +145,29 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     return res;
   }
 
+  /// Tries to determine the index to the [document] within the given [state].
+  /// Returns a number smaller then 0, if the [document] is not contained within [state].
+  int _getDocumentNumber(
+          {required CorrectionOverlayState state,
+          required CorrectionOverlayDocument document}) =>
+      state.overlays.indexWhere(
+          (element) => element.submissionId == document.submissionId, -1);
+
+  /// Takes the [lines] and converts them to overlay inputs, using the current remark state for missing information.
+  /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
+  List<CorrectionOverlayInput> toOverlayInputs(
+      {required List<Stroke> lines, required Size size}) {
+    final correctionState = state;
+
+    switch (correctionState.inputTool) {
+      case CorrectionInputTool.pencil:
+        return _convert(
+            lines: lines, size: size, options: correctionState.pencilOptions);
+      default:
+        return [];
+    }
+  }
+
   /// Adds the [lines] into the correction overlay [document].
   /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
   void addDrawing(
@@ -133,11 +175,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       required List<Stroke> lines,
       required Size size}) async {
     log("Adding new drawings");
-
-    final overlayState = state;
-
-    final documentNumber = overlayState.overlays.indexWhere(
-        (element) => element.submissionId == document.submissionId, -1);
+    final correctionState = state;
+    final documentNumber =
+        _getDocumentNumber(state: correctionState, document: document);
 
     if (documentNumber < 0) {
       log("Found no existing overlay document for ${document.submissionId}");
@@ -146,7 +186,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
     final updatedState = state.addInputs(
         documentNumber: documentNumber,
-        pageNumber: overlayState.overlays[documentNumber].pageNumber,
+        pageNumber: correctionState.overlays[documentNumber].pageNumber,
         inputs: toOverlayInputs(lines: lines, size: size));
 
     await _correctionOverlayRepository.saveDocument(
@@ -161,10 +201,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       {required CorrectionOverlayDocument document,
       required Stroke line,
       required Size size}) async {
-    final overlayState = state;
-
-    final documentNumber = overlayState.overlays.indexWhere(
-        (element) => element.submissionId == document.submissionId, -1);
+    final correctionState = state;
+    final documentNumber =
+        _getDocumentNumber(state: correctionState, document: document);
 
     if (documentNumber < 0) {
       log("Found no existing overlay document for ${document.submissionId}");
@@ -172,14 +211,14 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     final updatedState = state.updateInput(
-        index: overlayState
+        index: correctionState
                 .overlays[documentNumber]
-                .pages[overlayState.overlays[documentNumber].pageNumber]
+                .pages[correctionState.overlays[documentNumber].pageNumber]
                 .inputs
                 .length -
             1,
         documentNumber: documentNumber,
-        pageNumber: overlayState.overlays[documentNumber].pageNumber,
+        pageNumber: correctionState.overlays[documentNumber].pageNumber,
         input: toOverlayInputs(lines: [line], size: size)[0]);
 
     emit(updatedState);
@@ -202,10 +241,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
   void jumpToPage(
       {required CorrectionOverlayDocument document, required int pageNumber}) {
-    final overlayState = state;
-
-    final documentNumber = overlayState.overlays.indexWhere(
-        (element) => element.submissionId == document.submissionId, -1);
+    final correctionState = state;
+    final documentNumber =
+        _getDocumentNumber(state: correctionState, document: document);
 
     if (documentNumber < 0) {
       log("Found no existing overlay document for ${document.submissionId}");
@@ -213,23 +251,89 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     if (pageNumber < 0 ||
-        pageNumber >= overlayState.overlays[documentNumber].pages.length) {
+        pageNumber >= correctionState.overlays[documentNumber].pages.length) {
       log("Not jumping to invalid page $pageNumber");
       return;
     }
 
     log("Jumping from ${document.pageNumber} to $pageNumber within ${document.submissionId}");
-    final updated = overlayState.changeDocument(
+    final updated = correctionState.changeDocument(
         documentNumber: documentNumber,
-        document: overlayState.overlays[documentNumber]
+        document: correctionState.overlays[documentNumber]
             .copyWith(pageNumber: pageNumber));
 
     emit(updated);
   }
 
+  /// If possible, an undo of the last change is applied to the current page of [document].
+  Future<void> undo({required CorrectionOverlayDocument document}) async {
+    final correctionState = state;
+    final documentNumber =
+        _getDocumentNumber(state: correctionState, document: document);
+
+    if (documentNumber < 0) {
+      log("Found no existing overlay document for ${document.submissionId}");
+      return;
+    }
+
+    final stateDocument = correctionState.overlays[documentNumber];
+    final statePage = stateDocument.pages[stateDocument.pageNumber];
+
+    if (statePage.version <= 0) {
+      log("Page is already in initial version. Applying no undo.");
+      return;
+    }
+
+    final undoPage = _pageHistory[statePage.instanceId]!.lastWhere(
+        (element) => element.version == statePage.version - 1,
+        orElse: () => CorrectionOverlayPage.empty);
+
+    if (undoPage.isEmpty) {
+      log("History does not contain the version ${statePage.version - 1}");
+      return;
+    }
+
+    final updated = correctionState.changePage(
+        documentNumber: documentNumber,
+        pageNumber: stateDocument.pageNumber,
+        page: undoPage);
+    emit(updated);
+  }
+
+  /// If possible, redo  is applied to the current page of [document].
+  Future<void> redo({required CorrectionOverlayDocument document}) async {
+    final correctionState = state;
+    final documentNumber =
+        _getDocumentNumber(state: correctionState, document: document);
+
+    if (documentNumber < 0) {
+      log("Found no existing overlay document for ${document.submissionId}");
+      return;
+    }
+
+    final stateDocument = correctionState.overlays[documentNumber];
+    final statePage = stateDocument.pages[stateDocument.pageNumber];
+
+    final redoPage = _pageHistory[statePage.instanceId]!.lastWhere(
+        (element) => element.version == statePage.version + 1,
+        orElse: () => CorrectionOverlayPage.empty);
+
+    if (redoPage.isEmpty) {
+      log("The version ${statePage.version} is the most up-to date version known to the history.");
+      return;
+    }
+
+    final updated = correctionState.changePage(
+        documentNumber: documentNumber,
+        pageNumber: stateDocument.pageNumber,
+        page: redoPage);
+    emit(updated);
+  }
+
   @override
   Future<void> close() async {
-    _remarkSubscription.cancel();
-    return super.close();
+    super.close();
+    await _remarkSubscription.cancel();
+    await _correctionSubscription.cancel();
   }
 }

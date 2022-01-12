@@ -8,7 +8,7 @@ import 'package:schoolexam_correction_ui/repositories/correction_overlay/correct
 enum CorrectionInputTool { pencil, marker, text, eraser }
 
 class CorrectionOverlayState extends Equatable {
-  final CorrectionOverlayPage current;
+  final int documentNumber;
   final List<CorrectionOverlayDocument> overlays;
 
   /// The following options define the behavior of the inputs
@@ -21,7 +21,7 @@ class CorrectionOverlayState extends Equatable {
 
   @override
   List<Object?> get props => [
-        current,
+        documentNumber,
         overlays,
         pencilOptions,
         markerOptions,
@@ -31,7 +31,7 @@ class CorrectionOverlayState extends Equatable {
       ];
 
   CorrectionOverlayState(
-      {required this.current,
+      {this.documentNumber = 0,
       required this.overlays,
       this.inputTool = CorrectionInputTool.pencil,
       DrawingInputOptions? pencilOptions,
@@ -46,8 +46,7 @@ class CorrectionOverlayState extends Equatable {
             markerOptions ?? ColoredInputOptions(size: 8, color: Colors.black),
         eraserOptions = eraserOptions ?? InputOptions(size: 8);
 
-  CorrectionOverlayState.none()
-      : this(current: CorrectionOverlayPage.empty, overlays: []);
+  CorrectionOverlayState.none() : this(documentNumber: 0, overlays: []);
 
   CorrectionOverlayState changeDocument(
       {required int documentNumber,
@@ -55,7 +54,20 @@ class CorrectionOverlayState extends Equatable {
     final updated = List<CorrectionOverlayDocument>.from(overlays);
     updated[documentNumber] = document;
 
-    return CorrectionOverlayState(current: current, overlays: updated);
+    return copyWith(overlays: updated);
+  }
+
+  CorrectionOverlayState changePage(
+      {required int documentNumber,
+      required int pageNumber,
+      required CorrectionOverlayPage page}) {
+    final updatedPages =
+        List<CorrectionOverlayPage>.from(overlays[documentNumber].pages);
+    updatedPages[pageNumber] = page;
+
+    return changeDocument(
+        documentNumber: documentNumber,
+        document: overlays[documentNumber].copyWith(pages: updatedPages));
   }
 
   CorrectionOverlayState addInputs(
@@ -67,9 +79,7 @@ class CorrectionOverlayState extends Equatable {
         document: overlays[documentNumber]
             .addInputs(pageNumber: pageNumber, inputs: inputs));
 
-    return CorrectionOverlayState(
-        current: updated.overlays[documentNumber].pages[pageNumber],
-        overlays: updated.overlays);
+    return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
   }
 
   CorrectionOverlayState updateInput(
@@ -82,10 +92,39 @@ class CorrectionOverlayState extends Equatable {
         document: overlays[documentNumber]
             .updateInput(pageNumber: pageNumber, index: index, input: input));
 
-    return CorrectionOverlayState(
-        current: updated.overlays[documentNumber].pages[pageNumber],
-        overlays: updated.overlays);
+    return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
   }
+
+  CorrectionOverlayState copyWith(
+          {int? documentNumber,
+          List<CorrectionOverlayDocument>? overlays,
+          DrawingInputOptions? pencilOptions,
+          DrawingInputOptions? markerOptions,
+          ColoredInputOptions? textOptions,
+          InputOptions? eraserOptions,
+          CorrectionInputTool? inputTool}) =>
+      CorrectionOverlayState(
+          documentNumber: documentNumber ?? this.documentNumber,
+          overlays: overlays ?? this.overlays,
+          pencilOptions: pencilOptions ?? this.pencilOptions,
+          markerOptions: markerOptions ?? this.markerOptions,
+          textOptions: textOptions ?? this.textOptions,
+          eraserOptions: eraserOptions ?? this.eraserOptions,
+          inputTool: inputTool ?? this.inputTool);
+}
+
+class UpdatedDrawingsState extends CorrectionOverlayState {
+  UpdatedDrawingsState.draw({
+    required CorrectionOverlayState initial,
+    required List<CorrectionOverlayDocument> overlays,
+  }) : super(
+            documentNumber: initial.documentNumber,
+            overlays: overlays,
+            inputTool: initial.inputTool,
+            pencilOptions: initial.pencilOptions,
+            markerOptions: initial.markerOptions,
+            textOptions: initial.textOptions,
+            eraserOptions: initial.eraserOptions);
 }
 
 class UpdatedInputOptionsState extends CorrectionOverlayState {
@@ -97,7 +136,7 @@ class UpdatedInputOptionsState extends CorrectionOverlayState {
       ColoredInputOptions? textOptions,
       InputOptions? eraserOptions})
       : super(
-            current: initial.current,
+            documentNumber: initial.documentNumber,
             overlays: initial.overlays,
             inputTool: inputTool ?? initial.inputTool,
             pencilOptions: pencilOptions ?? initial.pencilOptions,

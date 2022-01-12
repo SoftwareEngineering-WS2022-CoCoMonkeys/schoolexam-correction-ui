@@ -63,10 +63,6 @@ class DatabaseCorrectionOverlayRepository extends CorrectionOverlayRepository {
   Future<void> _insertDocument(
       {required CorrectionOverlayDocument document}) async {
     await database!.transaction((txn) async {
-      if (document.pages[0].inputs.isNotEmpty) {
-        print(
-            "TOTAL : ${document.pages.map((e) => e.inputs.map((e) => e.points.length).reduce((a, b) => a + b))}");
-      }
       // 1. Insert Pages
       final pBatch = txn.batch();
       final pages = <CorrectionOverlayPageData>[];

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:schoolexam/schoolexam.dart';
@@ -47,8 +49,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     if (!state.status.isValidated) {
-      // TODO : Logging
-      print("Error : No validation");
+      log("Error during login, the form was not validated.");
       return;
     }
 
