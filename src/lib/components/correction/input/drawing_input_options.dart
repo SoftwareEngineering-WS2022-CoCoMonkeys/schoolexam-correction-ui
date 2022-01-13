@@ -64,13 +64,13 @@ class DrawingInputOptions extends ColoredInputOptions {
             smoothing: 1.0,
             streamline: 1.0,
             taperStart: 0.0,
-            capStart: false,
+            capStart: true,
             taperEnd: 0.0,
-            capEnd: false,
+            capEnd: true,
             simulatePressure: true,
             isComplete: false,
             size: size,
-            color: color);
+            color: color.withOpacity(0.5));
 
   DrawingInputOptions copyWith({
     double? thinning,
