@@ -9,14 +9,9 @@ class ExamsState extends Equatable {
       : exams = [],
         filtered = [];
 
-  const ExamsState.unfiltered({required List<Exam> exams})
-      : this.exams = exams,
-        filtered = exams;
+  const ExamsState.unfiltered({required this.exams}) : filtered = exams;
 
-  const ExamsState.filtered(
-      {required List<Exam> exams, required List<Exam> filtered})
-      : this.exams = exams,
-        this.filtered = filtered;
+  const ExamsState.filtered({required this.exams, required this.filtered});
 
   @override
   List<Object> get props => [exams, filtered];

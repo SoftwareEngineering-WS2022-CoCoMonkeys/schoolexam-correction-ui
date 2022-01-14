@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/exams/models/submission.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
@@ -34,7 +35,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       : _correctionOverlayRepository = correctionOverlayRepository,
         _remarkCubit = remarkCubit,
         _pageHistory = <String, Queue<CorrectionOverlayPage>>{},
-        super(CorrectionOverlayState.none()) {
+        super(InitialOverlayState()) {
     _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);
     _correctionSubscription = stream.listen(_onSelfStateChanged);
   }
@@ -48,15 +49,17 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
           List<CorrectionOverlayDocument>.from(this.state.overlays);
       final document = await _load(
           path: state.added.submissionPath, submission: state.added.submission);
-      overlays.add(document);
 
-      emit(CorrectionOverlayState(
-          documentNumber: overlays.length - 1, overlays: overlays));
+      emit(LoadedOverlayState.add(initial: this.state, document: document));
     }
   }
 
   /// Listener, that updates the internal history of pages (identified by instanceId).
   void _onSelfStateChanged(CorrectionOverlayState state) {
+    if (state is! UpdatedDrawingsState) {
+      return;
+    }
+
     final currentDocument = state.overlays[state.documentNumber];
     final currentPage = currentDocument.pages[currentDocument.pageNumber];
     _pageHistory.putIfAbsent(
@@ -70,7 +73,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     // Cut of history of alternate timeline
-    if (_currentHistory.isNotEmpty && state is UpdatedDrawingsState) {
+    if (_currentHistory.isNotEmpty) {
       _currentHistory
           .removeWhere((element) => element.version >= currentPage.version);
     }
@@ -187,7 +190,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       return;
     }
 
-    final updatedState = state.addInputs(
+    final updatedState = UpdatedDrawingsState.addInputs(
+        initial: correctionState,
         documentNumber: documentNumber,
         pageNumber: correctionState.overlays[documentNumber].pageNumber,
         inputs: toOverlayInputs(lines: lines, size: size));
@@ -211,21 +215,22 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     final pageNumber = correctionState.overlays[documentNumber].pageNumber;
-    final currentPage =
-        correctionState.overlays[documentNumber].pages[pageNumber];
 
-    emit(correctionState.changePage(
+    emit(UpdatedDrawingsState.replaceDrawings(
+        initial: correctionState,
         documentNumber: documentNumber,
         pageNumber: pageNumber,
-        page: currentPage.copyWith(
-            version: currentPage.version + 1, inputs: inputs)));
+        inputs: inputs));
   }
 
   void changePencilOptions(DrawingInputOptions options) => emit(
       UpdatedInputOptionsState.update(initial: state, pencilOptions: options));
 
-  void changeMarkerOptions(DrawingInputOptions options) => emit(
-      UpdatedInputOptionsState.update(initial: state, markerOptions: options));
+  void changeMarkerOptions(DrawingInputOptions options) =>
+      emit(UpdatedInputOptionsState.update(
+          initial: state,
+          markerOptions:
+              options.copyWith(color: options.color.withOpacity(0.5))));
 
   void changeTextOptions(ColoredInputOptions options) => emit(
       UpdatedInputOptionsState.update(initial: state, textOptions: options));
@@ -254,12 +259,10 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     log("Jumping from ${document.pageNumber} to $pageNumber within ${document.submissionId}");
-    final updated = correctionState.changeDocument(
+    emit(UpdatedNavigationState.jump(
+        initial: correctionState,
         documentNumber: documentNumber,
-        document: correctionState.overlays[documentNumber]
-            .copyWith(pageNumber: pageNumber));
-
-    emit(updated);
+        page: pageNumber));
   }
 
   /// If possible, an undo of the last change is applied to the current page of [document].
@@ -290,7 +293,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       return;
     }
 
-    final updated = correctionState.changePage(
+    final updated = RevertedDrawingsState.revert(
+        initial: correctionState,
         documentNumber: documentNumber,
         pageNumber: stateDocument.pageNumber,
         page: undoPage);
@@ -320,7 +324,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       return;
     }
 
-    final updated = correctionState.changePage(
+    final updated = RevertedDrawingsState.revert(
+        initial: correctionState,
         documentNumber: documentNumber,
         pageNumber: stateDocument.pageNumber,
         page: redoPage);

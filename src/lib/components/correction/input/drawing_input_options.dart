@@ -30,7 +30,7 @@ class DrawingInputOptions extends ColoredInputOptions {
   // Whether the line is complete.
   final bool isComplete;
 
-  DrawingInputOptions._(
+  const DrawingInputOptions._(
       {required this.thinning,
       required this.smoothing,
       required this.streamline,
@@ -44,7 +44,7 @@ class DrawingInputOptions extends ColoredInputOptions {
       required Color color})
       : super(size: size, color: color);
 
-  DrawingInputOptions.pencil({required int size, required Color color})
+  const DrawingInputOptions.pencil({required int size, required Color color})
       : this._(
             thinning: 0.7,
             smoothing: 0.5,
@@ -58,7 +58,7 @@ class DrawingInputOptions extends ColoredInputOptions {
             size: size,
             color: color);
 
-  DrawingInputOptions.marker({required int size, required Color color})
+  const DrawingInputOptions.marker({required int size, required Color color})
       : this._(
             thinning: 0.0,
             smoothing: 1.0,
@@ -70,8 +70,9 @@ class DrawingInputOptions extends ColoredInputOptions {
             simulatePressure: true,
             isComplete: false,
             size: size,
-            color: color.withOpacity(0.5));
+            color: color);
 
+  @override
   DrawingInputOptions copyWith({
     double? thinning,
     double? smoothing,
