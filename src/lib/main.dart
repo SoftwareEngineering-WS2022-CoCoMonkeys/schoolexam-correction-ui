@@ -11,6 +11,7 @@ import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/database_correction_overlay_repository.dart';
 
+import 'blocs/exams/details_exam_bloc.dart';
 import 'blocs/overlay/correction_overlay.dart';
 import 'blocs/remark/remark.dart';
 
@@ -62,7 +63,13 @@ void main() {
                   correctionOverlayRepository:
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
-                  remarkCubit: BlocProvider.of<RemarkCubit>(context)))
+                  remarkCubit: BlocProvider.of<RemarkCubit>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => ExamDetailsBloc(
+                  authenticationRepository:
+                      RepositoryProvider.of<AuthenticationRepository>(
+                          context))),
         ],
         child: const SchoolExamCorrectionUI(),
       )));

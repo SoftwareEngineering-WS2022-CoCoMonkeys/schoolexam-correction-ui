@@ -13,4 +13,7 @@ abstract class ExamsRepository {
 
   /// Returns all the submissions currently uploaded for an exam
   Future<List<Submission>> getSubmissions({required String examId});
+
+  /// Uploads a newly created exam
+  //Future<void> insertExam({required Exam exam});
 }
