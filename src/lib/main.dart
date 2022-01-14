@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam/exams/hybrid_exams_repository.dart';
 import 'package:schoolexam/exams/local_exams_repository.dart';
 import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
@@ -22,8 +23,8 @@ void main() {
         RepositoryProvider(create: (context) => AuthenticationRepository()),
         RepositoryProvider(create: (context) => const UserRepository()),
         RepositoryProvider<ExamsRepository>(
-            create: (context) => OnlineExamsRepository(
-                authenticationRepository:
+            create: (context) => HybridExamsRepository(
+                repository:
                     RepositoryProvider.of<AuthenticationRepository>(context))),
         RepositoryProvider<CorrectionOverlayRepository>(
             create: (context) => DatabaseCorrectionOverlayRepository())

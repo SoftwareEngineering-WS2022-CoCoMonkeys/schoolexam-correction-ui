@@ -70,7 +70,7 @@ class ExamDTO extends Equatable {
   Exam toModel() {
     return Exam(
         status: ExamStatus.values.firstWhere(
-            (element) => element.name == status,
+            (element) => element.index == status,
             orElse: () => ExamStatus.unknown),
         id: id,
         title: title,
