@@ -16,7 +16,6 @@ import 'blocs/remark/remark.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // cfg. await GlobalConfiguration().loadFromAsset("api");
   runApp(MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => AuthenticationRepository()),
