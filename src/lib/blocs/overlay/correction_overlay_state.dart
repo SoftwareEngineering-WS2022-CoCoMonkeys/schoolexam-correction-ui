@@ -7,7 +7,7 @@ import 'package:schoolexam_correction_ui/repositories/correction_overlay/correct
 
 enum CorrectionInputTool { pencil, marker, text, eraser }
 
-class CorrectionOverlayState extends Equatable {
+abstract class CorrectionOverlayState extends Equatable {
   final int documentNumber;
   final List<CorrectionOverlayDocument> overlays;
 
@@ -30,7 +30,7 @@ class CorrectionOverlayState extends Equatable {
         inputTool
       ];
 
-  CorrectionOverlayState(
+  CorrectionOverlayState._(
       {this.documentNumber = 0,
       required this.overlays,
       this.inputTool = CorrectionInputTool.pencil,
@@ -39,88 +39,87 @@ class CorrectionOverlayState extends Equatable {
       ColoredInputOptions? textOptions,
       InputOptions? eraserOptions})
       : pencilOptions = pencilOptions ??
-            DrawingInputOptions.pencil(size: 8, color: Colors.black),
+            const DrawingInputOptions.pencil(size: 4, color: Colors.black),
         markerOptions = markerOptions ??
-            DrawingInputOptions.marker(size: 8, color: Colors.yellow),
+            DrawingInputOptions.marker(
+                size: 4, color: Colors.yellow.withOpacity(0.5)),
         textOptions =
-            markerOptions ?? ColoredInputOptions(size: 8, color: Colors.black),
-        eraserOptions = eraserOptions ?? InputOptions(size: 8);
+            textOptions ?? const ColoredInputOptions(size: 4, color: Colors.black),
+        eraserOptions = eraserOptions ?? const InputOptions(size: 4);
 
-  CorrectionOverlayState.none() : this(documentNumber: 0, overlays: []);
-
-  CorrectionOverlayState changeDocument(
-      {required int documentNumber,
+  /// Using this method the document [documentNumber] is replaced.
+  static List<CorrectionOverlayDocument> _changeDocument(
+      {required CorrectionOverlayState initial,
+      required int documentNumber,
       required CorrectionOverlayDocument document}) {
-    final updated = List<CorrectionOverlayDocument>.from(overlays);
+    final updated = List<CorrectionOverlayDocument>.from(initial.overlays);
     updated[documentNumber] = document;
-
-    return copyWith(overlays: updated);
+    return updated;
   }
 
   /// Using this method the page [pageNumber] for the document [documentNumber] is replaced.
-  /// Importantly, this returns a general [CorrectionOverlayState] type and should there not be used for state changes occurring through drawings.
-  CorrectionOverlayState changePage(
-      {required int documentNumber,
+  static List<CorrectionOverlayDocument> _changePage(
+      {required CorrectionOverlayState initial,
+      required int documentNumber,
       required int pageNumber,
       required CorrectionOverlayPage page}) {
-    final updatedPages =
-        List<CorrectionOverlayPage>.from(overlays[documentNumber].pages);
+    final updatedPages = List<CorrectionOverlayPage>.from(
+        initial.overlays[documentNumber].pages);
     updatedPages[pageNumber] = page;
 
-    return changeDocument(
+    return CorrectionOverlayState._changeDocument(
+        initial: initial,
         documentNumber: documentNumber,
-        document: overlays[documentNumber].copyWith(pages: updatedPages));
+        document:
+            initial.overlays[documentNumber].copyWith(pages: updatedPages));
   }
-
-  UpdatedDrawingsState addInputs(
-      {required int documentNumber,
-      required int pageNumber,
-      required List<CorrectionOverlayInput> inputs}) {
-    final updated = changeDocument(
-        documentNumber: documentNumber,
-        document: overlays[documentNumber]
-            .addInputs(pageNumber: pageNumber, inputs: inputs));
-
-    return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
-  }
-
-  UpdatedDrawingsState updateInputs(
-      {required int documentNumber,
-      required int pageNumber,
-      required List<CorrectionOverlayInput> inputs}) {
-    final updated = changeDocument(
-        documentNumber: documentNumber,
-        document: overlays[documentNumber]
-            .addInputs(pageNumber: pageNumber, inputs: inputs));
-
-    return UpdatedDrawingsState.draw(initial: this, overlays: updated.overlays);
-  }
-
-  CorrectionOverlayState copyWith(
-          {int? documentNumber,
-          List<CorrectionOverlayDocument>? overlays,
-          DrawingInputOptions? pencilOptions,
-          DrawingInputOptions? markerOptions,
-          ColoredInputOptions? textOptions,
-          InputOptions? eraserOptions,
-          CorrectionInputTool? inputTool}) =>
-      CorrectionOverlayState(
-          documentNumber: documentNumber ?? this.documentNumber,
-          overlays: overlays ?? this.overlays,
-          pencilOptions: pencilOptions ?? this.pencilOptions,
-          markerOptions: markerOptions ?? this.markerOptions,
-          textOptions: textOptions ?? this.textOptions,
-          eraserOptions: eraserOptions ?? this.eraserOptions,
-          inputTool: inputTool ?? this.inputTool);
 }
 
-class UpdatedDrawingsState extends CorrectionOverlayState {
-  UpdatedDrawingsState.draw({
-    required CorrectionOverlayState initial,
-    required List<CorrectionOverlayDocument> overlays,
-  }) : super(
-            documentNumber: initial.documentNumber,
+/// Document was nearly added
+class LoadedOverlayState extends CorrectionOverlayState {
+  LoadedOverlayState.add(
+      {required CorrectionOverlayState initial,
+      required CorrectionOverlayDocument document})
+      : super._(
+            overlays: List<CorrectionOverlayDocument>.from(initial.overlays)
+              ..add(document),
+            documentNumber: initial.overlays.length);
+
+  LoadedOverlayState._(
+      {required List<CorrectionOverlayDocument> overlays,
+      int? documentNumber,
+      CorrectionInputTool? inputTool,
+      DrawingInputOptions? pencilOptions,
+      DrawingInputOptions? markerOptions,
+      ColoredInputOptions? textOptions,
+      InputOptions? eraserOptions})
+      : super._(
+            documentNumber: documentNumber ?? 0,
             overlays: overlays,
+            inputTool: inputTool ?? CorrectionInputTool.pencil,
+            pencilOptions: pencilOptions,
+            markerOptions: markerOptions,
+            textOptions: textOptions,
+            eraserOptions: eraserOptions);
+}
+
+class InitialOverlayState extends LoadedOverlayState {
+  InitialOverlayState() : super._(documentNumber: 0, overlays: []);
+}
+
+/// The user navigated to a new page, loaded e.g. a new document ...
+class UpdatedNavigationState extends LoadedOverlayState {
+  UpdatedNavigationState.jump(
+      {required CorrectionOverlayState initial,
+      required int documentNumber,
+      required int page})
+      : super._(
+            documentNumber: initial.documentNumber,
+            overlays: CorrectionOverlayState._changeDocument(
+                initial: initial,
+                documentNumber: documentNumber,
+                document: initial.overlays[documentNumber]
+                    .copyWith(pageNumber: page)),
             inputTool: initial.inputTool,
             pencilOptions: initial.pencilOptions,
             markerOptions: initial.markerOptions,
@@ -128,7 +127,87 @@ class UpdatedDrawingsState extends CorrectionOverlayState {
             eraserOptions: initial.eraserOptions);
 }
 
-class UpdatedInputOptionsState extends CorrectionOverlayState {
+/// Applied a change to the document overlay without using an input tool.
+class RevertedDrawingsState extends LoadedOverlayState {
+  RevertedDrawingsState.revert(
+      {required CorrectionOverlayState initial,
+      required int documentNumber,
+      required int pageNumber,
+      required CorrectionOverlayPage page})
+      : super._(
+            documentNumber: initial.documentNumber,
+            overlays: CorrectionOverlayState._changePage(
+                initial: initial,
+                documentNumber: documentNumber,
+                pageNumber: pageNumber,
+                page: page),
+            inputTool: initial.inputTool,
+            pencilOptions: initial.pencilOptions,
+            markerOptions: initial.markerOptions,
+            textOptions: initial.textOptions,
+            eraserOptions: initial.eraserOptions);
+}
+
+/// Applied a change to the document overlay with using an input tool.
+class UpdatedDrawingsState extends LoadedOverlayState {
+  UpdatedDrawingsState.draw({
+    required CorrectionOverlayState initial,
+    required List<CorrectionOverlayDocument> overlays,
+  }) : super._(
+            documentNumber: initial.documentNumber,
+            overlays: overlays,
+            inputTool: initial.inputTool,
+            pencilOptions: initial.pencilOptions,
+            markerOptions: initial.markerOptions,
+            textOptions: initial.textOptions,
+            eraserOptions: initial.eraserOptions);
+
+  static UpdatedDrawingsState addInputs(
+          {required CorrectionOverlayState initial,
+          required int documentNumber,
+          required int pageNumber,
+          required List<CorrectionOverlayInput> inputs}) =>
+      UpdatedDrawingsState.draw(
+          overlays: CorrectionOverlayState._changeDocument(
+              documentNumber: documentNumber,
+              document: initial.overlays[documentNumber]
+                  .addInputs(pageNumber: pageNumber, inputs: inputs),
+              initial: initial),
+          initial: initial);
+
+  static UpdatedDrawingsState updateInputs(
+          {required CorrectionOverlayState initial,
+          required int documentNumber,
+          required int pageNumber,
+          required List<CorrectionOverlayInput> inputs}) =>
+      UpdatedDrawingsState.draw(
+          overlays: CorrectionOverlayState._changeDocument(
+              initial: initial,
+              documentNumber: documentNumber,
+              document: initial.overlays[documentNumber]
+                  .addInputs(pageNumber: pageNumber, inputs: inputs)),
+          initial: initial);
+
+  static UpdatedDrawingsState replaceDrawings(
+          {required CorrectionOverlayState initial,
+          required int documentNumber,
+          required int pageNumber,
+          required List<CorrectionOverlayInput> inputs}) =>
+      UpdatedDrawingsState.draw(
+          overlays: CorrectionOverlayState._changePage(
+              initial: initial,
+              documentNumber: documentNumber,
+              pageNumber: pageNumber,
+              page: initial.overlays[documentNumber].pages[pageNumber].copyWith(
+                  inputs: inputs,
+                  version: initial
+                          .overlays[documentNumber].pages[pageNumber].version +
+                      1)),
+          initial: initial);
+}
+
+/// The user changes the behavior of the input tools.
+class UpdatedInputOptionsState extends LoadedOverlayState {
   UpdatedInputOptionsState.update(
       {required CorrectionOverlayState initial,
       CorrectionInputTool? inputTool,
@@ -136,7 +215,7 @@ class UpdatedInputOptionsState extends CorrectionOverlayState {
       DrawingInputOptions? markerOptions,
       ColoredInputOptions? textOptions,
       InputOptions? eraserOptions})
-      : super(
+      : super._(
             documentNumber: initial.documentNumber,
             overlays: initial.overlays,
             inputTool: inputTool ?? initial.inputTool,
