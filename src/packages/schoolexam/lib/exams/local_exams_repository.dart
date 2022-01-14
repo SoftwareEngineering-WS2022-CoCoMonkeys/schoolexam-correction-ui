@@ -9,57 +9,41 @@ import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository.db');
-
-    // DEBUG PURPOSES
-    bool dbExists = await File(path).exists();
-
-    if (!dbExists) {
-      // Copy from asset
-      ByteData data =
-          await rootBundle.load(p.join("assets", "databases", "dummy.db"));
-      List<int> bytes =
-          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-      // Write and flush the bytes written
-      await File(path).writeAsBytes(bytes, flush: true);
-    }
-    //
+    final path = p.join(await getDatabasesPath(), 'exams_repository_test1.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
       db.execute(
           'CREATE TABLE IF NOT EXISTS participants(id TEXT PRIMARY KEY, displayName TEXT NOT NULL)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS students(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS students(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS courses(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS courses(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS courses_children(courseId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(courseId, participantId), FOREIGN KEY(courseId) REFERENCES courses(id), FOREIGN KEY(participantId) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS courses_children(courseId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(courseId, participantId), FOREIGN KEY(courseId) REFERENCES courses(id), FOREIGN KEY(participantId) REFERENCES participants(id) ON DELETE CASCADE)');
 
       /// EXAM
       db.execute(
           'CREATE TABLE IF NOT EXISTS exams(id TEXT PRIMARY KEY, status TEXT NOT NULL, title TEXT NOT NULL, dateOfExam TEXT, dueDate TEXT, topic TEXT NOT NULL)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS exams_participants(examId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(examId, participantId), FOREIGN KEY(examId) REFERENCES exams(id), FOREIGN KEY(participantId) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS exams_participants(examId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(examId, participantId), FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(participantId) REFERENCES participants(id) ON DELETE CASCADE)');
 
       /// TASK
       db.execute(
-          'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id))');
+          'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
 
       /// CORRECTABLE
       db.execute(
-          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id), FOREIGN KEY(studentId) REFERENCES students(id))');
+          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id), FOREIGN KEY(taskId) REFERENCES tasks(id))');
+          'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id), FOREIGN KEY(taskId) REFERENCES tasks(id))');
+          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
     }, version: 1);
   }
 
@@ -162,6 +146,50 @@ class LocalExamsRepository extends ExamsRepository {
             task: mTasks.firstWhere((element) => element.id == answer.taskId),
             segments: answerSegments[answer.taskId]!)
     ];
+  }
+
+  /// Inserts the [exams] into the local persistence layer.
+  /// However, this may cascade into a deletion of referencing entities.
+  Future<void> insertExams({required List<Exam> exams}) async {
+    if (database == null) {
+      await init();
+    }
+
+    await database!.transaction((txn) async {
+      // 1. Insert exams
+      final eBatch = txn.batch();
+      for (final exam in exams) {
+        eBatch.insert('exams', ExamData.fromModel(exam).toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        // 2. Insert tasks
+        for (final task in exam.tasks) {
+          eBatch.insert('tasks', TaskData.fromModel(task, exam).toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        // 3. Insert participants
+        for (final participant in exam.participants) {
+          if (participant is Course) {
+            eBatch.insert(
+                'participants', CourseData.fromModel(participant).toMap(),
+                conflictAlgorithm: ConflictAlgorithm.replace);
+            eBatch.insert(
+                'courses', {"id" : participant.id},
+                conflictAlgorithm: ConflictAlgorithm.replace);
+          } else if (participant is Student) {
+            eBatch.insert(
+                'participants', StudentData.fromModel(participant).toMap(),
+                conflictAlgorithm: ConflictAlgorithm.replace);
+            eBatch.insert(
+                'students', {"id" : participant.id},
+                conflictAlgorithm: ConflictAlgorithm.replace);
+          }
+        }
+      }
+
+      eBatch.commit(noResult: true);
+    });
   }
 
   @override

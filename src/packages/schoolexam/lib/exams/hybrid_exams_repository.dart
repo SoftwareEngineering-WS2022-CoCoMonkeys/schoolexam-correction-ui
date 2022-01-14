@@ -13,26 +13,26 @@ class HybridExamsRepository extends ExamsRepository {
         local = LocalExamsRepository();
 
   @override
-  Future<Exam> getExam(String examId) {
+  Future<Exam> getExam(String examId) async {
     late final exam;
     try {
-      exam = online.getExam(examId);
-      // TODO : insert into local
+      exam = await online.getExam(examId);
+      await local.insertExams(exams: [exam]);
     } on NetworkException catch (_) {
-      exam = local.getExam(examId);
+      exam = await local.getExam(examId);
     }
 
     return exam;
   }
 
   @override
-  Future<List<Exam>> getExams() {
+  Future<List<Exam>> getExams() async {
     late final exams;
     try {
-      exams = online.getExams();
-      // TODO : insert into local
+      exams = await online.getExams();
+      await local.insertExams(exams: exams);
     } on NetworkException catch (_) {
-      exams = local.getExams();
+      exams = await local.getExams();
     }
 
     return exams;
