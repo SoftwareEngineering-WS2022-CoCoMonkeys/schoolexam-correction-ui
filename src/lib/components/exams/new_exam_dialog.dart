@@ -26,8 +26,8 @@ class NewExamDialogState extends State<NewExamDialog> {
 
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
-      ;
-    }, builder: (context, state) {
+          ;
+        }, builder: (context, state) {
       return SimpleDialog(
         children: [
           Container(
@@ -40,142 +40,157 @@ class NewExamDialogState extends State<NewExamDialog> {
                   ExamFormRow(
                       prefix: 'Titel',
                       value: state.examTitle.value,
-                      callback: () => showCupertinoModalBottomSheet(
+                      callback: () =>
+                          showCupertinoModalBottomSheet(
                             context: context,
-                            builder: (context) => Material(
-                              child: Container(
-                                height: 1000,
-                                child: Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(30),
-                                    child: Column(
-                                      children: [
-                                        const Text("Titel",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 36)),
-                                        CupertinoTextField(
-                                            style: TextStyle(
-                                              fontSize: 36,
-                                            ),
-                                            onChanged: (examTitle) => context
-                                                .read<ExamDetailsBloc>()
-                                                .add(ExamTitleChanged(
-                                                    examTitle))),
-                                      ],
+                            builder: (context) =>
+                                Material(
+                                  child: Container(
+                                    height: 1000,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(30),
+                                        child: Column(
+                                          children: [
+                                            const Text("Titel",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 36)),
+                                            CupertinoTextField(
+                                                style: TextStyle(
+                                                  fontSize: 36,
+                                                ),
+                                                onChanged: (examTitle) =>
+                                                    context
+                                                        .read<ExamDetailsBloc>()
+                                                        .add(ExamTitleChanged(
+                                                        examTitle))),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
                           )),
                   ExamFormRow(
                       prefix: 'Thema',
                       value: state.examTopic.value,
-                      callback: () => showCupertinoModalBottomSheet(
+                      callback: () =>
+                          showCupertinoModalBottomSheet(
                             context: context,
-                            builder: (context) => Material(
-                              child: Container(
-                                height: 1000,
-                                child: Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(30),
-                                    child: Column(
-                                      children: [
-                                        const Text("Thema",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 36)),
-                                        CupertinoTextField(
-                                            style: TextStyle(
-                                              fontSize: 36,
-                                            ),
-                                            onChanged: (examTopic) => context
-                                                .read<ExamDetailsBloc>()
-                                                .add(ExamTopicChanged(
-                                                    examTopic))),
-                                      ],
+                            builder: (context) =>
+                                Material(
+                                  child: Container(
+                                    height: 1000,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(30),
+                                        child: Column(
+                                          children: [
+                                            const Text("Thema",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 36)),
+                                            CupertinoTextField(
+                                                style: TextStyle(
+                                                  fontSize: 36,
+                                                ),
+                                                onChanged: (examTopic) =>
+                                                    context
+                                                        .read<ExamDetailsBloc>()
+                                                        .add(ExamTopicChanged(
+                                                        examTopic))),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
                           )),
                   ExamFormRow(
                       prefix: 'Kurs',
                       value: state.examCourse.value.displayName,
-                      callback: () => showCupertinoModalBottomSheet(
+                      callback: () =>
+                          showCupertinoModalBottomSheet(
                             context: context,
-                            builder: (context) => Material(
-                              child: Container(
-                                height: 1000,
-                                child: Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(30),
-                                    child: Column(
-                                      children: [
-                                        const Text("Kurs",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 36)),
-                                        Container(
-                                          height: 300,
-                                          child: CupertinoPicker(
-                                              itemExtent: 50,
-                                              onSelectedItemChanged:
-                                                  (int value) {
-                                                print(value);
-                                              },
-                                              children: state.validCourses
-                                                  .map(
-                                                      (c) => Text(c.displayName,
-                                                          style: TextStyle(
-                                                            fontSize: 36,
-                                                          )))
-                                                  .toList()),
+                            builder: (context) =>
+                                Material(
+                                  child: Container(
+                                    height: 1000,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(30),
+                                        child: Column(
+                                          children: [
+                                            const Text("Kurs",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 36)),
+                                            Container(
+                                              height: 300,
+                                              child: CupertinoPicker(
+                                                  itemExtent: 50,
+                                                  onSelectedItemChanged:
+                                                      (int index) {
+                                                    context.read<
+                                                        ExamDetailsBloc>().add(
+                                                        ExamCourseChanged(state
+                                                            .validCourses[index]));
+                                                  },
+                                                  children: state.validCourses
+                                                      .map(
+                                                          (c) =>
+                                                          Text(c.displayName,
+                                                              style: TextStyle(
+                                                                fontSize: 36,
+                                                              )))
+                                                      .toList()),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
                           )),
                   ExamFormRow(
                       prefix: 'Prüfungsdatum',
                       value: formatter.format(state.examDate.value.toLocal()),
-                      callback: () => showCupertinoModalBottomSheet(
+                      callback: () =>
+                          showCupertinoModalBottomSheet(
                             context: context,
-                            builder: (context) => Material(
-                              child: Container(
-                                height: 1000,
-                                child: Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(30),
-                                    child: Column(
-                                      children: [
-                                        const Text("Prüfungsdatum",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 36)),
-                                        Container(
-                                          height: 300,
-                                          child: CupertinoDatePicker(
-                                            minimumDate: DateTime.now(),
-                                            mode: CupertinoDatePickerMode.date,
-                                            onDateTimeChanged: (dateTime) =>
-                                                context
-                                                    .read<ExamDetailsBloc>()
-                                                    .add(ExamDateChanged(
+                            builder: (context) =>
+                                Material(
+                                  child: Container(
+                                    height: 1000,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(30),
+                                        child: Column(
+                                          children: [
+                                            const Text("Prüfungsdatum",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 36)),
+                                            Container(
+                                              height: 300,
+                                              child: CupertinoDatePicker(
+                                                minimumDate: DateTime.now(),
+                                                mode: CupertinoDatePickerMode
+                                                    .date,
+                                                onDateTimeChanged: (dateTime) =>
+                                                    context
+                                                        .read<ExamDetailsBloc>()
+                                                        .add(ExamDateChanged(
                                                         dateTime)),
-                                          ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
                           )),
                   Padding(
                     padding: EdgeInsets.only(top: 30.0),
@@ -188,6 +203,8 @@ class NewExamDialogState extends State<NewExamDialog> {
                                 style: ElevatedButton.styleFrom(
                                     primary: Colors.blue),
                                 onPressed: () {
+                                  context.read<ExamDetailsBloc>().add(
+                                      const ExamSubmitted());
                                   Navigator.pop(context);
                                 },
                                 child: Text('Erstellen'),

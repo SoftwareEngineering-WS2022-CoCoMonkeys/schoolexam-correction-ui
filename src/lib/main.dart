@@ -70,8 +70,8 @@ void main() {
           BlocProvider(
               lazy: false,
               create: (context) => ExamDetailsBloc(
-                  authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(
+                  examsRepository:
+                      RepositoryProvider.of<ExamsRepository>(
                           context))),
         ],
         child: const SchoolExamCorrectionUI(),

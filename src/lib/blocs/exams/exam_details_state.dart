@@ -34,7 +34,7 @@ class ExamDetailsState extends Equatable {
           Course(
             children: List.empty(),
             id: "12",
-            displayName: "kek1",
+            displayName: "kek2",
           )
         ]);
 
