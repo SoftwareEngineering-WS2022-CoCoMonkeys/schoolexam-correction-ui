@@ -33,8 +33,8 @@ class ExamDTO extends Equatable {
         title = ApiHelper.getValue(map: json, keys: ["title"], value: ""),
         topic = ApiHelper.getValue(map: json, keys: ["topic"], value: ""),
         quota = ApiHelper.getValue(map: json, keys: ["quota"], value: 0.0),
-        dateOfExam = ApiHelper.getValue(
-            map: json, keys: ["dateOfExam"], value: DateTime(0)),
+        dateOfExam =
+            ApiHelper.getValue(map: json, keys: ["date"], value: DateTime(0)),
         dueDate = ApiHelper.getValue(
             map: json, keys: ["dueDate"], value: DateTime(0)),
         participants = List<Map<String, dynamic>>.from(ApiHelper.getValue(
