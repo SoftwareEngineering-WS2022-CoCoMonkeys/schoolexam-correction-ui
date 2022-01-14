@@ -16,3 +16,15 @@ dependencies:
 
   # Used for persisting data
   sqflite: ^2.0.1
+
+  #
+  http: ^0.13.4
+
+  # Configuration for api values etc.
+  global_configuration: ^2.0.0-nullsafety.1
+
+  # Used for persisting user secrets
+  flutter_secure_storage: ^5.0.2
+
+  # Get token meta data
+  jwt_decoder: ^2.0.1

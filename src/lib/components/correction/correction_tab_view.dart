@@ -42,31 +42,54 @@ class CorrectionTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BlocConsumer<CorrectionOverlayCubit, CorrectionOverlayState>(
+          listenWhen: (old, current) => current is! UpdatedInputOptionsState,
           listener: (context, state) => _update(state),
-          builder: (context, state) => StreamBuilder<CorrectionOverlayDocument>(
-              stream: documentController.stream,
-              initialData: _getDocument(state),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
-                }
+          buildWhen: (old, current) => false,
+          builder: (context, state) => _CorrectionTabView(
+                correction: correction,
+                initial: _getDocument(state),
+                controller: documentController,
+              ));
+}
 
-                return Column(
-                  children: [
-                    Container(
-                      color: null,
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7),
-                      child: CorrectionPageView(
-                        correction: correction,
-                        initialDocument: snapshot.requireData,
-                        documentController: documentController,
-                      ),
-                    ),
-                    CorrectionPageNavigation(
-                      document: snapshot.requireData,
-                    )
-                  ],
-                );
-              }));
+class _CorrectionTabView extends StatelessWidget {
+  final Correction correction;
+  final CorrectionOverlayDocument initial;
+  final StreamController<CorrectionOverlayDocument> controller;
+
+  const _CorrectionTabView(
+      {Key? key,
+      required this.initial,
+      required this.controller,
+      required this.correction})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<CorrectionOverlayDocument>(
+          stream: controller.stream,
+          initialData: initial,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const CircularProgressIndicator();
+            }
+
+            return Column(
+              children: [
+                Container(
+                  color: null,
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.7),
+                  child: CorrectionPageView(
+                    correction: correction,
+                    initialDocument: snapshot.requireData,
+                    documentController: controller,
+                  ),
+                ),
+                CorrectionPageNavigation(
+                  document: snapshot.requireData,
+                )
+              ],
+            );
+          });
 }

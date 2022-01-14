@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam/exams/hybrid_exams_repository.dart';
 import 'package:schoolexam/exams/local_exams_repository.dart';
+import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -17,13 +19,14 @@ import 'blocs/remark/remark.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // cfg. await GlobalConfiguration().loadFromAsset("api");
   runApp(MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => AuthenticationRepository()),
         RepositoryProvider(create: (context) => const UserRepository()),
         RepositoryProvider<ExamsRepository>(
-            create: (context) => LocalExamsRepository()),
+            create: (context) => HybridExamsRepository(
+                repository:
+                    RepositoryProvider.of<AuthenticationRepository>(context))),
         RepositoryProvider<CorrectionOverlayRepository>(
             create: (context) => DatabaseCorrectionOverlayRepository())
       ],

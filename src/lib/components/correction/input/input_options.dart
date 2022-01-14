@@ -1,5 +1,13 @@
 class InputOptions {
-  int size;
+  final int size;
 
-  InputOptions({required this.size});
+  const InputOptions({required this.size});
+
+  InputOptions copyWith({
+    int? size,
+  }) {
+    return InputOptions(
+      size: size ?? this.size,
+    );
+  }
 }

@@ -19,7 +19,11 @@ class CorrectionView extends StatelessWidget {
 
         return Column(
           children: [
-            const CorrectionInputHeader(),
+            // TODO TabView over all corrections
+            CorrectionInputHeader(
+              exam: state.exam,
+              correction: state.corrections[state.selectedCorrection],
+            ),
             Container(
                 color: null,
                 constraints: BoxConstraints(
