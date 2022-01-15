@@ -21,7 +21,8 @@ class HybridExamsRepository extends ExamsRepository {
     try {
       exam = await online.getExam(examId);
       await local.insertExams(exams: [exam]);
-    } on NetworkException catch (_) {
+    } on NetworkException catch (e) {
+      log("Falling back to offline repository because of error $e");
       exam = await local.getExam(examId);
     }
 
@@ -34,7 +35,8 @@ class HybridExamsRepository extends ExamsRepository {
     try {
       exams = await online.getExams();
       await local.insertExams(exams: exams);
-    } on NetworkException catch (_) {
+    } on NetworkException catch (e) {
+      log("Falling back to offline repository because of error $e");
       exams = await local.getExams();
     }
 
@@ -49,7 +51,8 @@ class HybridExamsRepository extends ExamsRepository {
     try {
       submissions = online.getSubmissions(examId: examId);
       // TODO : insert into local
-    } on NetworkException catch (_) {
+    } on NetworkException catch (e) {
+      log("Falling back to offline repository because of error $e");
       submissions = local.getSubmissions(examId: examId);
     }
 
@@ -61,7 +64,8 @@ class HybridExamsRepository extends ExamsRepository {
     try {
       log("Trying to upload new exam to online repository");
       return await online.uploadExam(exam: exam);
-    } on NetworkException catch (_) {
+    } on NetworkException catch (e) {
+      log("Falling back to offline repository because of error $e");
       return await local.uploadExam(exam: exam);
     }
   }
@@ -72,7 +76,8 @@ class HybridExamsRepository extends ExamsRepository {
     try {
       log("Trying to update exam using online repository");
       return await online.updateExam(exam: exam, examId: examId);
-    } on NetworkException catch (_) {
+    } on NetworkException catch (e) {
+      log("Falling back to offline repository because of error $e");
       return await local.updateExam(exam: exam, examId: examId);
     }
   }

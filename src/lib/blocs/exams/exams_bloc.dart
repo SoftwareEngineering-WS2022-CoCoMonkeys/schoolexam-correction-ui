@@ -1,23 +1,40 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:formz/formz.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exam_details_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exam_details_state.dart';
 
 import 'exams_state.dart';
 
 class ExamsCubit extends Cubit<ExamsState> {
   late final StreamSubscription _authenticationSubscription;
+  late final StreamSubscription _examSubscription;
 
   final ExamsRepository _examsRepository;
 
   ExamsCubit(
       {required ExamsRepository examsRepository,
-      required AuthenticationBloc authenticationBloc})
+      required AuthenticationBloc authenticationBloc,
+      required ExamDetailsBloc examsDetailBloc})
       : _examsRepository = examsRepository,
         super(ExamsState.empty()) {
+    _examSubscription =
+        examsDetailBloc.stream.listen(_onExamDetailsStateChanged);
     _authenticationSubscription =
         authenticationBloc.stream.listen(_onAuthenticationStateChanged);
+  }
+
+  void _onExamDetailsStateChanged(ExamDetailsState state) async {
+    switch (state.status) {
+      case FormzStatus.submissionSuccess:
+        await loadExams();
+        break;
+      default:
+        return;
+    }
   }
 
   void _onAuthenticationStateChanged(AuthenticationState state) async {

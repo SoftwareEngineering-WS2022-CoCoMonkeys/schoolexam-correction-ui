@@ -49,7 +49,7 @@ class OnlineExamsRepository extends ExamsRepository {
       {required NewExamDTO exam, required String examId}) async {
     await provider.query(
         path: "/exam/$examId/update",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.PUT,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
   }
