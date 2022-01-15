@@ -67,12 +67,26 @@ class HybridExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> updateExam({required NewExamDTO exam, required String examId}) async {
+  Future<void> updateExam(
+      {required NewExamDTO exam, required String examId}) async {
     try {
       log("Trying to update exam using online repository");
       return await online.updateExam(exam: exam, examId: examId);
     } on NetworkException catch (_) {
       return await local.updateExam(exam: exam, examId: examId);
     }
+  }
+
+  @override
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) async {
+    // TODO: implement setPoints in local with synchronization after a while
+    log("Trying to set $achievedPoints for the task $taskId withint $submissionId");
+    await online.setPoints(
+        submissionId: submissionId,
+        taskId: taskId,
+        achievedPoints: achievedPoints);
   }
 }

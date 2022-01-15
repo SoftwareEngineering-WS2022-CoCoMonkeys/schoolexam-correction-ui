@@ -332,4 +332,10 @@ class LocalExamsRepository extends ExamsRepository {
     // TODO: implement updateExam
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> setPoints({required String submissionId,  required String taskId, required double achievedPoints}) {
+    // TODO: implement setPoints
+    throw UnimplementedError();
+  }
 }

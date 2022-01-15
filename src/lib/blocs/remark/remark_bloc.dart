@@ -176,6 +176,40 @@ class RemarkCubit extends Cubit<RemarkState> {
     emit(NavigatedRemarkState.navigated(initial: state, navigated: correction));
   }
 
+  /// Marks the [task] with [points].
+  Future<void> mark(
+      {required Submission submission,
+      required Task task,
+      required double achievedPoints}) async {
+    log("Requested to set $task to $achievedPoints for ${submission.student.displayName}");
+
+    final examSubmission = state.submissions.firstWhere(
+        (element) => element.id == submission.id,
+        orElse: () => Submission.empty);
+    final answer = submission.answers.firstWhere(
+        (element) => element.task.id == task.id,
+        orElse: () => Answer.empty);
+
+    if (answer.isEmpty) {
+      log("Found no matching task or answer in exam.");
+      return;
+    }
+
+    await _examsRepository.setPoints(
+        submissionId: submission.id,
+        taskId: answer.task.id,
+        achievedPoints: achievedPoints);
+
+    emit(UpdatedRemarksState.marked(
+        initial: state,
+        marked: examSubmission.copyWith(
+            answers: List<Answer>.from(examSubmission.answers)
+                .map((e) => (e.task.id == answer.task.id)
+                    ? answer.copyWith(achievedPoints: achievedPoints)
+                    : e)
+                .toList())));
+  }
+
   @override
   Future<void> close() async {
     _navigationSubscription.cancel();

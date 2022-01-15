@@ -49,10 +49,10 @@ class NewExamDialog extends StatelessWidget {
                         TextField(
                             controller: TextEditingController(
                                 text: state.examTitle.value),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 36,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: "Titel",
                             ),
                             onChanged: (examTitle) => context
@@ -70,10 +70,10 @@ class NewExamDialog extends StatelessWidget {
                         TextField(
                             controller: TextEditingController(
                                 text: state.examTopic.value),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 36,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: "Thema",
                             ),
                             onChanged: (examTopic) => context
@@ -102,7 +102,7 @@ class NewExamDialog extends StatelessWidget {
                               },
                               children: state.validCourses
                                   .map((c) => Text(c.displayName,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 36,
                                       )))
                                   .toList()),
@@ -133,7 +133,7 @@ class NewExamDialog extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 30.0),
+                    padding: const EdgeInsets.only(top: 30.0),
                     child: Row(
                       children: [
                         Expanded(
@@ -165,7 +165,7 @@ class NewExamDialog extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: Text('Abbrechen'),
+                                child: const Text('Abbrechen'),
                               ),
                             ),
                           ),

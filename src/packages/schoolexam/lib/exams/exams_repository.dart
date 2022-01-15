@@ -15,6 +15,9 @@ abstract class ExamsRepository {
   /// Returns all the submissions currently uploaded for an exam
   Future<List<Submission>> getSubmissions({required String examId});
 
+  /// Set the achieved points for a task
+  Future<void> setPoints({required String submissionId, required String taskId, required double achievedPoints});
+
   /// Uploads a newly created exam
   Future<void> uploadExam({required NewExamDTO exam});
 

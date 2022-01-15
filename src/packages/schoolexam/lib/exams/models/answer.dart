@@ -25,6 +25,19 @@ class Answer extends Correctable {
 
   @override
   List<Object?> get props => [status, achievedPoints, segments, task];
+
+  Answer copyWith({
+    Task? task,
+    List<AnswerSegment>? segments,
+    double? achievedPoints,
+    CorrectableStatus? status,
+  }) {
+    return Answer(
+        task: task ?? this.task,
+        segments: segments ?? this.segments,
+        achievedPoints: achievedPoints ?? this.achievedPoints,
+        status: status ?? this.status);
+  }
 }
 
 /// Defines a segment within the PDF that is associated to an answer

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/hybrid_exams_repository.dart';
-import 'package:schoolexam/exams/local_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -22,9 +21,10 @@ void main() {
   runApp(MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => AuthenticationRepository()),
-        RepositoryProvider(create: (context) => const UserRepository()),
         RepositoryProvider<ExamsRepository>(
-            create: (context) => LocalExamsRepository()),
+            create: (context) => HybridExamsRepository(
+                repository:
+                    RepositoryProvider.of<AuthenticationRepository>(context))),
         RepositoryProvider<CorrectionOverlayRepository>(
             create: (context) => DatabaseCorrectionOverlayRepository())
       ],
@@ -33,9 +33,8 @@ void main() {
           BlocProvider(
               create: (context) => AuthenticationBloc(
                   authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(context),
-                  userRepository:
-                      RepositoryProvider.of<UserRepository>(context))),
+                      RepositoryProvider.of<AuthenticationRepository>(
+                          context))),
           BlocProvider(
               create: (context) => LoginBloc(
                   authenticationRepository:

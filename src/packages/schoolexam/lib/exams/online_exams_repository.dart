@@ -53,4 +53,16 @@ class OnlineExamsRepository extends ExamsRepository {
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
   }
+
+  @override
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) async {
+    await provider.query(
+        path: "/submission/$submissionId/setpoints",
+        method: HTTPMethod.POST,
+        body: {"taskId": taskId, "achievedPoints": achievedPoints},
+        key: await authenticationRepository.getKey());
+  }
 }
