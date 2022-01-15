@@ -15,7 +15,7 @@ class PersonDTO extends Equatable {
   Person toModel() => Person(
       firstName: firstName, lastName: lastName, emailAddress: emailAddress);
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'firstName': this.firstName,
       'lastName': this.lastName,
@@ -23,7 +23,7 @@ class PersonDTO extends Equatable {
     };
   }
 
-  factory PersonDTO.fromMap(Map<String, dynamic> map) {
+  factory PersonDTO.fromJson(Map<String, dynamic> map) {
     return PersonDTO(
       firstName: ApiHelper.getValue(map: map, keys: ["firstName"], value: ""),
       lastName: ApiHelper.getValue(map: map, keys: ["lastName"], value: ""),

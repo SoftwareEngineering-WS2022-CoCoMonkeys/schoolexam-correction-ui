@@ -12,11 +12,18 @@ abstract class ExamsRepository {
   /// Returns all the exams a teacher is allowed to retrieve
   Future<List<Exam>> getExams();
 
-  /// Returns all the submissions currently uploaded for an exam
-  Future<List<Submission>> getSubmissions({required String examId});
+  /// Returns all the submissions overviews currently uploaded for an exam
+  Future<List<SubmissionOverview>> getSubmissions({required String examId});
+
+  /// Returns the details for the requested submission
+  Future<List<Submission>> getSubmissionDetails(
+      {required String examId, required List<String> submissionIds});
 
   /// Set the achieved points for a task
-  Future<void> setPoints({required String submissionId, required String taskId, required double achievedPoints});
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints});
 
   /// Uploads a newly created exam
   Future<void> uploadExam({required NewExamDTO exam});

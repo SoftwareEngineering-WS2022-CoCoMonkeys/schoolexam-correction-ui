@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
@@ -9,8 +11,6 @@ import 'package:schoolexam/exams/persistence/exam_data.dart';
 import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
@@ -56,7 +56,7 @@ class LocalExamsRepository extends ExamsRepository {
 
       /// CORRECTABLE
       db.execute(
-          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
+          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, isMatchedToStudent BOOL NOT NULL, isCompleted BOOL NOT NULL, updatedAt INT NOT NULL, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
       db.execute(
           'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
       db.execute(
@@ -165,8 +165,33 @@ class LocalExamsRepository extends ExamsRepository {
     ];
   }
 
+  /// Inserts the [submission] into the local persistence layer.
+  // TODO : 16.01
+  Future<void> insertSubmissions(
+      {required List<Submission> submissions}) async {
+    if (database == null) {
+      await init();
+    }
+
+    await database!.transaction((txn) async {
+      // 1. Insert Exams
+      await insertExams(exams: submissions.map((e) => e.exam).toSet().toList());
+
+      // 2. Insert submissions
+      final eBatch = txn.batch();
+      for (final submission in submissions) {
+        // Ensure that a submission with that ID exists
+        final dSubmission = SubmissionData.fromModel(model: submission);
+        eBatch.insert('submissions', dSubmission.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.ignore);
+        // Update possibly old submission data
+        eBatch.update('submissions', dSubmission.toMap(),
+            where: 'id = ?', whereArgs: [dSubmission.id]);
+      }
+    });
+  }
+
   /// Inserts the [exams] into the local persistence layer.
-  /// However, this may cascade into a deletion of referencing entities.
   Future<void> insertExams({required List<Exam> exams}) async {
     if (database == null) {
       await init();
@@ -322,6 +347,17 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+  Future<List<Submission>> getSubmissionDetails(
+      {required String examId, required List<String> submissionIds}) async {
+    var res = await getSubmissions(examId: examId);
+
+    return res
+        .cast<Submission>()
+        .where((element) => submissionIds.contains(element.id))
+        .toList();
+  }
+
+  @override
   Future<void> uploadExam({required NewExamDTO exam}) {
     // TODO: implement uploadExam
     throw UnimplementedError();
@@ -334,7 +370,10 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> setPoints({required String submissionId,  required String taskId, required double achievedPoints}) {
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) {
     // TODO: implement setPoints
     throw UnimplementedError();
   }

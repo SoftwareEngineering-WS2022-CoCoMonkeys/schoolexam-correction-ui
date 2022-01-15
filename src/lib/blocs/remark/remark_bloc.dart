@@ -42,7 +42,7 @@ class RemarkCubit extends Cubit<RemarkState> {
   /// Start the correction for the [exam].
   /// This includes the retrieval of the corresponding submissions.
   Future<void> correct(Exam exam) async {
-    final submissions = await _examsRepository.getSubmissions(examId: exam.id);
+    final submissions = await _examsRepository.getSubmissionDetails(examId: exam.id, submissionIds: (await _examsRepository.getSubmissions(examId: exam.id)).map((e) => e.id).toList());
 
     log("Determined submissions : $submissions");
 

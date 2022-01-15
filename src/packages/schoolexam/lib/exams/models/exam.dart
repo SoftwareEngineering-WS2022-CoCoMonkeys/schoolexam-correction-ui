@@ -71,6 +71,7 @@ class Exam extends Equatable {
       tasks: []);
 
   bool get isEmpty => this == Exam.empty;
+
   bool get isNotEmpty => this != Exam.empty;
 
   /// Returns all participants of an exam

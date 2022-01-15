@@ -10,5 +10,6 @@ class Student extends Participant {
   static const empty = const Student(id: "", displayName: "");
 
   bool get isEmpty => this == Student.empty;
+
   bool get isNotEmpty => this != Student.empty;
 }

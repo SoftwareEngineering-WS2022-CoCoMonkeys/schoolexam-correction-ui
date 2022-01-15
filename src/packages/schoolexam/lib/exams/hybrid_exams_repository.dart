@@ -50,13 +50,21 @@ class HybridExamsRepository extends ExamsRepository {
     late final submissions;
     try {
       submissions = online.getSubmissions(examId: examId);
-      // TODO : insert into local
+
+
     } on NetworkException catch (e) {
       log("Falling back to offline repository because of error $e");
       submissions = local.getSubmissions(examId: examId);
     }
 
     return submissions;
+  }
+
+  @override
+  Future<List<Submission>> getSubmissionDetails({required String examId, required List<String> submissionIds}) {
+    // TODO: implement getSubmissionDetails
+    // TODO : 16.01
+    throw UnimplementedError();
   }
 
   @override

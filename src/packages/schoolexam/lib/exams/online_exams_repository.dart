@@ -1,6 +1,8 @@
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
+import 'package:schoolexam/exams/dto/submission_details_dto.dart';
+import 'package:schoolexam/exams/dto/submission_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/utils/api_provider.dart';
 
@@ -24,15 +26,8 @@ class OnlineExamsRepository extends ExamsRepository {
         path: "/exam/byteacher",
         method: HTTPMethod.GET,
         key: await authenticationRepository.getKey());
-    print(res);
     var exams = List<Map<String, dynamic>>.from(res);
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
-  }
-
-  @override
-  Future<List<Submission>> getSubmissions({required String examId}) {
-    // TODO: implement getSubmissions
-    throw UnimplementedError();
   }
 
   @override
@@ -64,5 +59,39 @@ class OnlineExamsRepository extends ExamsRepository {
         method: HTTPMethod.POST,
         body: {"taskId": taskId, "achievedPoints": achievedPoints},
         key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<List<SubmissionOverview>> getSubmissions(
+      {required String examId}) async {
+    final exam = await getExam(examId);
+
+    var res = await provider.query(
+        path: "/submission/byexam/$examId",
+        method: HTTPMethod.GET,
+        key: await authenticationRepository.getKey());
+
+    var submissions = List<Map<String, dynamic>>.from(res);
+    return submissions
+        .map((e) => SubmissionDTO.fromJson(e).toModel(exam: exam))
+        .toList();
+  }
+
+  @override
+  Future<List<Submission>> getSubmissionDetails(
+      {required String examId, required List<String> submissionIds}) async {
+    final exam = await getExam(examId);
+
+    // TODO : 16.01
+    var res = await provider.query(
+        path: "/submission/byidswithdetails",
+        method: HTTPMethod.POST,
+        body: {"ids": submissionIds},
+        key: await authenticationRepository.getKey());
+
+    var submissions = List<Map<String, dynamic>>.from(res);
+    return submissions
+        .map((e) => SubmissionDetailsDTO.fromJson(e).toModel(exam: exam))
+        .toList();
   }
 }

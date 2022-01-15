@@ -4,8 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/dto/task_dto.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
-import 'participant_dto.dart';
 import '../models/exam.dart';
+import 'participant_dto.dart';
 
 class ExamDTO extends Equatable {
   final String id;
@@ -33,10 +33,8 @@ class ExamDTO extends Equatable {
         title = ApiHelper.getValue(map: json, keys: ["title"], value: ""),
         topic = ApiHelper.getValue(map: json, keys: ["topic"], value: ""),
         quota = ApiHelper.getValue(map: json, keys: ["quota"], value: 0.0),
-        dateOfExam =
-            ApiHelper.getValue(map: json, keys: ["date"], value: ""),
-        dueDate = ApiHelper.getValue(
-            map: json, keys: ["dueDate"], value: ""),
+        dateOfExam = ApiHelper.getValue(map: json, keys: ["date"], value: ""),
+        dueDate = ApiHelper.getValue(map: json, keys: ["dueDate"], value: ""),
         participants = List<Map<String, dynamic>>.from(ApiHelper.getValue(
             map: json,
             keys: ["participants"],

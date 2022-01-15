@@ -12,17 +12,17 @@ class AuthenticationDTO extends Equatable {
   Authentication toModel() =>
       Authentication(token: token, user: user.toModel());
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'token': this.token,
-      'user': this.user.toMap(),
+      'user': this.user.toJson(),
     };
   }
 
-  factory AuthenticationDTO.fromMap(Map<String, dynamic> map) {
+  factory AuthenticationDTO.fromJson(Map<String, dynamic> map) {
     return AuthenticationDTO(
       token: ApiHelper.getValue(map: map, keys: ["token"], value: ""),
-      user: UserDTO.fromMap(
+      user: UserDTO.fromJson(
           ApiHelper.getValue(map: map, keys: ["user"], value: {})),
     );
   }

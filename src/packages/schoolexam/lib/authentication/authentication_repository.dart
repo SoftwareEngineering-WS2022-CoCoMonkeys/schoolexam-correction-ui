@@ -54,7 +54,7 @@ class AuthenticationRepository {
         body: {"username": username, "password": password},
         method: HTTPMethod.POST);
 
-    _authentication = AuthenticationDTO.fromMap(response).toModel();
+    _authentication = AuthenticationDTO.fromJson(response).toModel();
 
     // Update
     _storage.write(key: _storage_user_key, value: username);

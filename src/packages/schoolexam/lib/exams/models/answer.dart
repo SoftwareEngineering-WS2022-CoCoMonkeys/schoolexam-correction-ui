@@ -21,6 +21,7 @@ class Answer extends Correctable {
       status: CorrectableStatus.unknown);
 
   bool get isEmpty => this == Answer.empty;
+
   bool get isNotEmpty => this != Answer.empty;
 
   @override
