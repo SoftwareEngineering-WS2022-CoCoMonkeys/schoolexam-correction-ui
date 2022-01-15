@@ -6,7 +6,7 @@ class ExamData {
   final String title;
 
   /// Date when exam was written by all students
-  final String? dateOfExam;
+  final String dateOfExam;
 
   /// Final date for the completion of the correction
   final String? dueDate;
@@ -17,7 +17,7 @@ class ExamData {
       {required this.id,
       required this.status,
       required this.title,
-      this.dateOfExam,
+      required this.dateOfExam,
       this.dueDate,
       required this.topic});
 
@@ -37,7 +37,8 @@ class ExamData {
       id: model.id,
       status: model.status.name,
       title: model.title,
-      topic: model.topic);
+      topic: model.topic,
+      dateOfExam: model.dateOfExam.toString());
 
   Exam toModel(
           {required List<Participant> participants,
@@ -51,7 +52,8 @@ class ExamData {
           topic: topic,
           quota: 0.0,
           participants: participants,
-          tasks: tasks);
+          tasks: tasks,
+          dateOfExam: DateTime.parse(dateOfExam));
 
   static ExamData fromMap(Map<String, dynamic> data) {
     return ExamData(

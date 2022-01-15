@@ -74,6 +74,12 @@ dependencies:
   # Used for persisting data
   sqflite: ^2.0.1
 
+  # Used for dotted borders within new exam card
+  dotted_border: ^2.0.0
+
+  # Used for modal bottom sheets during exam creation
+  modal_bottom_sheet: ^2.0.0
+
   # Reload of exams page
   pull_to_refresh: ^2.0.0
 

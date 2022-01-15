@@ -20,7 +20,7 @@ class Exam extends Equatable {
   final String title;
 
   /// Date when exam was written by all students
-  final DateTime? dateOfExam;
+  final DateTime dateOfExam;
 
   /// Final date for the completion of the correction
   final DateTime? dueDate;
@@ -53,19 +53,20 @@ class Exam extends Equatable {
       {required this.id,
       required this.status,
       required this.title,
-      this.dateOfExam,
+      required this.dateOfExam,
       this.dueDate,
       required this.topic,
       required this.quota,
       required this.participants,
       required this.tasks});
 
-  static const empty = const Exam(
+  static final empty = Exam(
       id: "",
       status: ExamStatus.unknown,
       title: "",
       topic: "",
       quota: 0,
+      dateOfExam: DateTime.now(),
       participants: [],
       tasks: []);
 

@@ -1,5 +1,6 @@
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
+import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/utils/api_provider.dart';
 
@@ -32,5 +33,24 @@ class OnlineExamsRepository extends ExamsRepository {
   Future<List<Submission>> getSubmissions({required String examId}) {
     // TODO: implement getSubmissions
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> uploadExam({required NewExamDTO exam}) async {
+    await provider.query(
+        path: "/exam/create",
+        method: HTTPMethod.POST,
+        body: exam.toJson(),
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> updateExam(
+      {required NewExamDTO exam, required String examId}) async {
+    await provider.query(
+        path: "/exam/$examId/update",
+        method: HTTPMethod.POST,
+        body: exam.toJson(),
+        key: await authenticationRepository.getKey());
   }
 }
