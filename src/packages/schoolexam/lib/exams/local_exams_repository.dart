@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
 import 'package:schoolexam/exams/persistence/correctable_data.dart';
@@ -301,5 +302,17 @@ class LocalExamsRepository extends ExamsRepository {
             answers: await getAnswers(
                 examId: submission.examId, submissionId: submission.id))
     ];
+  }
+
+  @override
+  Future<void> uploadExam({required NewExamDTO exam}) {
+    // TODO: implement uploadExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
+    // TODO: implement updateExam
+    throw UnimplementedError();
   }
 }

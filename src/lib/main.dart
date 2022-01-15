@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/hybrid_exams_repository.dart';
-import 'package:schoolexam/exams/local_exams_repository.dart';
-import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -13,6 +11,7 @@ import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/database_correction_overlay_repository.dart';
 
+import 'blocs/exams/exam_details_bloc.dart';
 import 'blocs/overlay/correction_overlay.dart';
 import 'blocs/remark/remark.dart';
 
@@ -65,7 +64,13 @@ void main() {
                   correctionOverlayRepository:
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
-                  remarkCubit: BlocProvider.of<RemarkCubit>(context)))
+                  remarkCubit: BlocProvider.of<RemarkCubit>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => ExamDetailsBloc(
+                  examsRepository:
+                      RepositoryProvider.of<ExamsRepository>(
+                          context))),
         ],
         child: const SchoolExamCorrectionUI(),
       )));

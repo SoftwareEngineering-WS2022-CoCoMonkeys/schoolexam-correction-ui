@@ -1,3 +1,4 @@
+import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 
 import 'models/exam.dart';
@@ -13,4 +14,11 @@ abstract class ExamsRepository {
 
   /// Returns all the submissions currently uploaded for an exam
   Future<List<Submission>> getSubmissions({required String examId});
+
+  /// Uploads a newly created exam
+  Future<void> uploadExam({required NewExamDTO exam});
+
+  /// Update an existing exam
+  // TODO use ExamDTO
+  Future<void> updateExam({required NewExamDTO exam, required String examId});
 }

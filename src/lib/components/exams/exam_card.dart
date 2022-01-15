@@ -31,7 +31,7 @@ class ExamCard extends StatelessWidget {
               ),
               Text(
                 (exam.dateOfExam != null)
-                    ? formatter.format(exam.dateOfExam!)
+                    ? formatter.format(exam.dateOfExam)
                     : "",
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
