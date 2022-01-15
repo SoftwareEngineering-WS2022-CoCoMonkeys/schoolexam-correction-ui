@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:schoolexam/exams/dto/authentication_dto.dart';
+import 'package:schoolexam/exams/models/authentication.dart';
+import 'package:schoolexam/exams/models/person.dart';
 
 import 'package:schoolexam/utils/api_provider.dart';
 
@@ -13,7 +16,7 @@ class AuthenticationRepository {
 
   // Create storage
   final FlutterSecureStorage _storage;
-  String? _token;
+  Authentication _authentication;
 
   static const _storage_user_key = "authentication_repository:user:key";
   static const _storage_password_key = "authentication_repository:password:key";
@@ -21,7 +24,8 @@ class AuthenticationRepository {
   AuthenticationRepository()
       : _controller = StreamController<AuthenticationStatus>(),
         _provider = ApiProvider(),
-        _storage = FlutterSecureStorage();
+        _storage = FlutterSecureStorage(),
+        _authentication = Authentication.empty;
 
   // Why the initial state should never change from unauthenticated :
   // This app provides access to sensitive data.
@@ -34,50 +38,52 @@ class AuthenticationRepository {
 
   Future<String> _getTokenUsingStoredCredentials() async {
     if (await _storage.containsKey(key: _storage_password_key)) {
-      return await _getTokenFromLogin(
-          username: (await _storage.read(key: _storage_user_key))!,
-          password: (await _storage.read(key: _storage_password_key))!);
+      return (await _getAuthenticationFromLogin(
+              username: (await _storage.read(key: _storage_user_key))!,
+              password: (await _storage.read(key: _storage_password_key))!))
+          .token;
     } else {
       return "";
     }
   }
 
-  Future<String> _getTokenFromLogin(
+  Future<Authentication> _getAuthenticationFromLogin(
       {required String username, required String password}) async {
     final response = await _provider.query(
         path: "/authentication/authenticate",
         body: {"username": username, "password": password},
         method: HTTPMethod.POST);
 
+    _authentication = AuthenticationDTO.fromMap(response).toModel();
+
     // Update
     _storage.write(key: _storage_user_key, value: username);
     _storage.write(key: _storage_password_key, value: password);
-    _token = response;
 
-    return response;
+    return _authentication;
   }
+
+  Future<Person> getAccount() async => _authentication.user.person;
 
   Future<void> logIn(
       {required String username, required String password}) async {
-    await _getTokenFromLogin(username: username, password: password);
+    await _getAuthenticationFromLogin(username: username, password: password);
     _controller.add(AuthenticationStatus.authenticated);
-
-    print(await getKey());
   }
 
   Future<String> getKey() async {
-    if (_token != null) {
+    if (_authentication.isNotEmpty) {
       final expiry = DateTime.fromMillisecondsSinceEpoch(
-          (JwtDecoder.decode(_token!))["exp"] * 1000);
+          (JwtDecoder.decode(_authentication.token))["exp"] * 1000);
       if (expiry.difference(DateTime.now()).inMinutes >= 5) {
-        return _token!;
+        return _authentication.token;
       }
     }
 
     return _getTokenUsingStoredCredentials();
   }
 
-  void logOut() async {
+  Future<void> logOut() async {
     // TODO : Maybe terminate session with School Exam
     await _storage.delete(key: _storage_user_key);
     await _storage.delete(key: _storage_password_key);

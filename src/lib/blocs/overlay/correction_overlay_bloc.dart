@@ -22,6 +22,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   // Internal revision history for in memory pages
   static const int _maximumHistorySize = 20;
   final Map<String, Queue<CorrectionOverlayPage>> _pageHistory;
+
   //
 
   final CorrectionOverlayRepository _correctionOverlayRepository;
@@ -45,12 +46,39 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   void _onRemarkStateChanged(RemarkState state) async {
     /// Added a new correction AND switched to it.
     if (state is AddedCorrectionState) {
-      final overlays =
-          List<CorrectionOverlayDocument>.from(this.state.overlays);
+      log("Reacting to addition within the remark state by loading overlay document");
       final document = await _load(
           path: state.added.submissionPath, submission: state.added.submission);
 
       emit(LoadedOverlayState.add(initial: this.state, document: document));
+    }
+
+    /// Navigated to a new answer
+    else if (state is NavigatedRemarkState) {
+      log("Analyzing navigational change within remark state");
+
+      final document = this.state.overlays.firstWhere(
+          (element) => element.submissionId == state.navigated.submission.id,
+          orElse: () => CorrectionOverlayDocument.empty);
+      final documentNumber =
+          _getDocumentNumber(state: this.state, document: document);
+
+      if (documentNumber < 0) {
+        log("Discarding navigational change within the remark state, as no matching overlay could be determined");
+        return;
+      }
+
+      if (state.navigated.currentAnswer.isEmpty ||
+          state.navigated.currentAnswer.segments.isEmpty) {
+        log("Discarding navigational change within the remark state, as no answer segments could be determined");
+        return;
+      }
+
+      // Jump to initial segment
+      final page = state.navigated.currentAnswer.segments[0].start.page;
+      log("Document should change to page $page within overlay $documentNumber");
+      emit(UpdatedNavigationState.jump(
+          initial: this.state, documentNumber: documentNumber, page: page));
     }
   }
 

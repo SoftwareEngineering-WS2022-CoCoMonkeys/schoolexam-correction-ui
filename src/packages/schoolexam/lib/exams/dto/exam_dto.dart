@@ -13,10 +13,10 @@ class ExamDTO extends Equatable {
   final String title;
 
   /// Date when exam was written by all students
-  final DateTime dateOfExam;
+  final String dateOfExam;
 
   /// Final date for the completion of the correction
-  final DateTime dueDate;
+  final String dueDate;
 
   final String topic;
 
@@ -34,9 +34,9 @@ class ExamDTO extends Equatable {
         topic = ApiHelper.getValue(map: json, keys: ["topic"], value: ""),
         quota = ApiHelper.getValue(map: json, keys: ["quota"], value: 0.0),
         dateOfExam =
-            ApiHelper.getValue(map: json, keys: ["date"], value: DateTime(0)),
+            ApiHelper.getValue(map: json, keys: ["date"], value: ""),
         dueDate = ApiHelper.getValue(
-            map: json, keys: ["dueDate"], value: DateTime(0)),
+            map: json, keys: ["dueDate"], value: ""),
         participants = List<Map<String, dynamic>>.from(ApiHelper.getValue(
             map: json,
             keys: ["participants"],
@@ -77,8 +77,8 @@ class ExamDTO extends Equatable {
         title: title,
         topic: topic,
         quota: quota,
-        dateOfExam: dateOfExam,
-        dueDate: dueDate,
+        dateOfExam: DateTime.parse(dateOfExam),
+        dueDate: DateTime.parse(dueDate),
         participants:
             participants.map((e) => e.toModel()).toList(growable: false),
         tasks: tasks.map((e) => e.toModel()).toList(growable: false));

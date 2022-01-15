@@ -7,21 +7,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
+import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_gesture_recognizer.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 class DrawingInputOverlay extends StatefulWidget {
-  final CorrectionOverlayDocument initialDocument;
-
+  final Correction initial;
   final Size size;
   final StreamController<List<CorrectionOverlayInput>> linesController;
-  final StreamController<CorrectionOverlayDocument> documentController;
 
   const DrawingInputOverlay(
       {Key? key,
-      required this.initialDocument,
-      required this.documentController,
+      required this.initial,
       required this.size,
       required this.linesController})
       : super(key: key);
@@ -74,31 +72,29 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
 
   @override
   Widget build(BuildContext context) =>
-      StreamBuilder<CorrectionOverlayDocument>(
-          initialData: widget.initialDocument,
-          stream: widget.documentController.stream,
-          builder: (context, snapshot) {
-            final document = snapshot.requireData;
+      BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
+          builder: (context, state) {
+        final document = state.getCurrent(widget.initial);
 
-            return RawGestureDetector(
-              gestures: {
-                DrawingGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                        DrawingGestureRecognizer>(
+        return RawGestureDetector(
+          gestures: {
+            DrawingGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<DrawingGestureRecognizer>(
                     () => DrawingGestureRecognizer(),
                     (DrawingGestureRecognizer instance) {
-                  instance.onStart = (DragStartDetails details) =>
-                      onPanStart(context, details, document);
-                  instance.onUpdate = (DragUpdateDetails details) =>
-                      onPanUpdate(context, details, document);
-                  instance.onEnd = (DragEndDetails details) =>
-                      onPanEnd(context, details, document);
-                })
-              },
-              child: Container(
-                width: widget.size.width,
-                height: widget.size.height,
-                color: Colors.transparent,
-              ),
-            );
-          });
+              instance.onStart = (DragStartDetails details) =>
+                  onPanStart(context, details, document);
+              instance.onUpdate = (DragUpdateDetails details) =>
+                  onPanUpdate(context, details, document);
+              instance.onEnd = (DragEndDetails details) =>
+                  onPanEnd(context, details, document);
+            })
+          },
+          child: Container(
+            width: widget.size.width,
+            height: widget.size.height,
+            color: Colors.transparent,
+          ),
+        );
+      });
 }

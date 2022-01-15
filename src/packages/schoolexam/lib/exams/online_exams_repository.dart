@@ -24,7 +24,7 @@ class OnlineExamsRepository extends ExamsRepository {
         path: "/exam/byteacher",
         method: HTTPMethod.GET,
         key: await authenticationRepository.getKey());
-
+    print(res);
     var exams = List<Map<String, dynamic>>.from(res);
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
   }
@@ -51,6 +51,18 @@ class OnlineExamsRepository extends ExamsRepository {
         path: "/exam/$examId/update",
         method: HTTPMethod.POST,
         body: exam.toJson(),
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) async {
+    await provider.query(
+        path: "/submission/$submissionId/setpoints",
+        method: HTTPMethod.POST,
+        body: {"taskId": taskId, "achievedPoints": achievedPoints},
         key: await authenticationRepository.getKey());
   }
 }

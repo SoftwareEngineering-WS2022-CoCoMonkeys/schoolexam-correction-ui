@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
+import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 import 'drawing_gesture_recognizer.dart';
@@ -11,16 +12,13 @@ import 'input_options.dart';
 
 class EraserInputOverlay extends StatefulWidget {
   final Size size;
-  final CorrectionOverlayDocument initialDocument;
-
+  final Correction initial;
   final StreamController<List<CorrectionOverlayInput>> linesController;
-  final StreamController<CorrectionOverlayDocument> documentController;
 
   const EraserInputOverlay(
       {Key? key,
       required this.size,
-      required this.initialDocument,
-      required this.documentController,
+      required this.initial,
       required this.linesController})
       : super(key: key);
 
@@ -107,53 +105,50 @@ class _EraserInputOverlayState extends State<EraserInputOverlay> {
 
   @override
   Widget build(BuildContext context) =>
-      StreamBuilder<CorrectionOverlayDocument>(
-          initialData: widget.initialDocument,
-          stream: widget.documentController.stream,
-          builder: (context, snapshot) {
-            final document = snapshot.requireData;
-            return StreamBuilder<List<CorrectionOverlayInput>>(
-                initialData: document.pages[document.pageNumber].inputs,
-                stream: widget.linesController.stream,
-                builder: (context, snapshot) =>
-                    BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
-                        builder: (context, state) {
-                      return RawGestureDetector(
-                        gestures: {
-                          DrawingGestureRecognizer:
-                              GestureRecognizerFactoryWithHandlers<
-                                      DrawingGestureRecognizer>(
-                                  () => DrawingGestureRecognizer(),
-                                  (DrawingGestureRecognizer instance) {
-                            instance.onStart =
-                                (DragStartDetails details) async =>
-                                    await onPanStart(
-                                        options: state.eraserOptions,
-                                        context: context,
-                                        document: document,
-                                        details: details,
-                                        inputs: snapshot.requireData);
-                            instance.onUpdate =
-                                (DragUpdateDetails details) async =>
-                                    await onPanUpdate(
-                                        options: state.eraserOptions,
-                                        context: context,
-                                        document: document,
-                                        details: details,
-                                        inputs: snapshot.requireData);
-                            instance.onEnd = (DragEndDetails details) async =>
-                                await onPanEnd(
-                                    context: context,
-                                    document: document,
-                                    inputs: snapshot.requireData);
-                          })
-                        },
-                        child: Container(
-                          width: widget.size.width,
-                          height: widget.size.height,
-                          color: Colors.transparent,
-                        ),
-                      );
-                    }));
-          });
+      BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
+          builder: (context, state) {
+        final document = state.getCurrent(widget.initial);
+
+        return StreamBuilder<List<CorrectionOverlayInput>>(
+            initialData: document.pages[document.pageNumber].inputs,
+            stream: widget.linesController.stream,
+            builder: (context, snapshot) =>
+                BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
+                    builder: (context, state) {
+                  return RawGestureDetector(
+                    gestures: {
+                      DrawingGestureRecognizer:
+                          GestureRecognizerFactoryWithHandlers<
+                                  DrawingGestureRecognizer>(
+                              () => DrawingGestureRecognizer(),
+                              (DrawingGestureRecognizer instance) {
+                        instance.onStart = (DragStartDetails details) async =>
+                            await onPanStart(
+                                options: state.eraserOptions,
+                                context: context,
+                                document: document,
+                                details: details,
+                                inputs: snapshot.requireData);
+                        instance.onUpdate = (DragUpdateDetails details) async =>
+                            await onPanUpdate(
+                                options: state.eraserOptions,
+                                context: context,
+                                document: document,
+                                details: details,
+                                inputs: snapshot.requireData);
+                        instance.onEnd = (DragEndDetails details) async =>
+                            await onPanEnd(
+                                context: context,
+                                document: document,
+                                inputs: snapshot.requireData);
+                      })
+                    },
+                    child: Container(
+                      width: widget.size.width,
+                      height: widget.size.height,
+                      color: Colors.transparent,
+                    ),
+                  );
+                }));
+      });
 }

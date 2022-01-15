@@ -29,7 +29,8 @@ class ExamCardActionsBar extends StatelessWidget {
             icon: const Icon(Icons.edit),
             onPressed: () {
               context.read<ExamDetailsBloc>().add(AdjustExamOpened(exam));
-              showCupertinoDialog(context: context, builder: (_) => const NewExamDialog());
+              showCupertinoDialog(
+                  context: context, builder: (_) => const NewExamDialog());
             },
             label: const Text("Anpassen"),
           ),

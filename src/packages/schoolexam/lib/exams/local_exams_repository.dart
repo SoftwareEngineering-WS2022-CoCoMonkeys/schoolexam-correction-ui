@@ -10,12 +10,28 @@ import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
+import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
     final path = p.join(await getDatabasesPath(), 'exams_repository.db');
+
+    // DEBUG PURPOSES
+    bool dbExists = await File(path).exists();
+
+    if (!dbExists) {
+      // Copy from asset
+      ByteData data =
+          await rootBundle.load(p.join("assets", "databases", "dummy.db"));
+      List<int> bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+
+      // Write and flush the bytes written
+      await File(path).writeAsBytes(bytes, flush: true);
+    }
+    //
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
@@ -209,7 +225,8 @@ class LocalExamsRepository extends ExamsRepository {
           eBatch.update('participants', dParticipant.toMap(),
               where: 'id = ?', whereArgs: [dParticipant.id]);
 
-          eBatch.insert(childTable, {"id": participant.id}, conflictAlgorithm: ConflictAlgorithm.ignore);
+          eBatch.insert(childTable, {"id": participant.id},
+              conflictAlgorithm: ConflictAlgorithm.ignore);
         }
       }
 
@@ -313,6 +330,12 @@ class LocalExamsRepository extends ExamsRepository {
   @override
   Future<void> updateExam({required NewExamDTO exam, required String examId}) {
     // TODO: implement updateExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setPoints({required String submissionId,  required String taskId, required double achievedPoints}) {
+    // TODO: implement setPoints
     throw UnimplementedError();
   }
 }

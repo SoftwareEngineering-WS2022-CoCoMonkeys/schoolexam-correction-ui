@@ -65,8 +65,10 @@ class ExamDetailsState extends Equatable {
             adjustedExamId: exam.id,
             examTitle: ExamTitle.dirty(value: exam.title),
             examTopic: ExamTopic.dirty(value: exam.topic),
-            examCourse:
-                ExamCourse.dirty(value: exam.participants.first as Course),
+            examCourse: ExamCourse.dirty(
+                value: exam.participants.firstWhere(
+                    (element) => element is Course,
+                    orElse: () => Course.empty) as Course),
             examDate: ExamDate.dirty(exam.dateOfExam));
 
   ExamDetailsState copyWith({
@@ -98,6 +100,14 @@ class ExamDetailsState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, examTitle, examTopic, examCourse, examDate, isNewExamEdit, adjustedExamId, validCourses];
+  List<Object?> get props => [
+        status,
+        examTitle,
+        examTopic,
+        examCourse,
+        examDate,
+        isNewExamEdit,
+        adjustedExamId,
+        validCourses
+      ];
 }

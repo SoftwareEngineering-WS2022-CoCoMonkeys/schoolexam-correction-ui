@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
@@ -18,6 +19,13 @@ abstract class CorrectionOverlayState extends Equatable {
   final InputOptions eraserOptions;
 
   final CorrectionInputTool inputTool;
+
+  /// Callback to retrieve the updated document from the state.
+  /// This allows to centralize the logic, while allowing widgets to define their rebuild logic based on state changes.
+  CorrectionOverlayDocument getCurrent(Correction initial) =>
+      overlays.firstWhere(
+          (element) => element.submissionId == initial.submission.id,
+          orElse: () => CorrectionOverlayDocument.empty);
 
   @override
   List<Object?> get props => [
@@ -43,8 +51,8 @@ abstract class CorrectionOverlayState extends Equatable {
         markerOptions = markerOptions ??
             DrawingInputOptions.marker(
                 size: 4, color: Colors.yellow.withOpacity(0.5)),
-        textOptions =
-            textOptions ?? const ColoredInputOptions(size: 4, color: Colors.black),
+        textOptions = textOptions ??
+            const ColoredInputOptions(size: 4, color: Colors.black),
         eraserOptions = eraserOptions ?? const InputOptions(size: 4);
 
   /// Using this method the document [documentNumber] is replaced.

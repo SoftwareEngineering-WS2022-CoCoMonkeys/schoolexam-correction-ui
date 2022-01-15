@@ -46,6 +46,7 @@ class CorrectionOverlayPage extends Equatable {
       pageSize: Size.zero, inputs: const [], version: 0, instanceId: "");
 
   bool get isEmpty => this == CorrectionOverlayPage.empty;
+
   bool get isNotEmpty => this != CorrectionOverlayPage.empty;
 
   CorrectionOverlayPage copyWith({
