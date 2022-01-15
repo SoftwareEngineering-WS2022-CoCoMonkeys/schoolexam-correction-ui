@@ -25,41 +25,41 @@ class ExamDetailsBloc extends Bloc<ExamDetailsEvent, ExamDetailsState> {
     on<ExamSubmitted>(_onExamSubmitted);
   }
 
-  _onNewExamOpened(NewExamOpened event, Emitter<ExamDetailsState> emit) {
+  void _onNewExamOpened(NewExamOpened event, Emitter<ExamDetailsState> emit) {
     // only reset form values if we switch from an exam adjustment to an exam creation
     if (!state.isNewExamEdit) {
       emit(ExamDetailsState.initialNewExam());
     }
   }
 
-  _onAdjustExamOpened(AdjustExamOpened event, Emitter<ExamDetailsState> emit) {
+  void _onAdjustExamOpened(AdjustExamOpened event, Emitter<ExamDetailsState> emit) {
     final examToAdjust = event.exam;
     // Force form status update
     emit(ExamDetailsState.initialAdjustExam(exam: examToAdjust).copyWith());
   }
 
-  _onExamTitleChanged(ExamTitleChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamTitleChanged(ExamTitleChanged event, Emitter<ExamDetailsState> emit) {
     final examTitle = ExamTitle.dirty(value: event.examTitle);
     emit(state.copyWith(examTitle: examTitle));
   }
 
-  _onExamTopicChanged(ExamTopicChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamTopicChanged(ExamTopicChanged event, Emitter<ExamDetailsState> emit) {
     final examTopic = ExamTopic.dirty(value: event.examTopic);
     emit(state.copyWith(examTopic: examTopic));
   }
 
-  _onExamCourseChanged(
+  void _onExamCourseChanged(
       ExamCourseChanged event, Emitter<ExamDetailsState> emit) {
     final examCourse = ExamCourse.dirty(value: event.examCourse);
     emit(state.copyWith(examCourse: examCourse));
   }
 
-  _onExamDateChanged(ExamDateChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamDateChanged(ExamDateChanged event, Emitter<ExamDetailsState> emit) {
     final examDate = ExamDate.dirty(event.examDate);
     emit(state.copyWith(examDate: examDate));
   }
 
-  _onExamSubmitted(ExamSubmitted event, Emitter<ExamDetailsState> emit) async {
+  void _onExamSubmitted(ExamSubmitted event, Emitter<ExamDetailsState> emit) async {
     if (!state.status.isValidated) {
       log("Error during exam creation/adjustment, the form was not validated.");
       return;
@@ -78,7 +78,7 @@ class ExamDetailsBloc extends Bloc<ExamDetailsEvent, ExamDetailsState> {
         await _examsRepository.uploadExam(exam: examDto);
         emit(state.copyWith(status: FormzStatus.submissionSuccess));
       } catch (e) {
-        print("Upload failed with error: $e");
+        log("Upload failed with error: ${e.toString()}");
         emit(state.copyWith(status: FormzStatus.submissionFailure));
       }
     } else if (state.adjustedExamId != null) {
@@ -93,7 +93,7 @@ class ExamDetailsBloc extends Bloc<ExamDetailsEvent, ExamDetailsState> {
             exam: adjustedExamDto, examId: state.adjustedExamId!);
         emit(state.copyWith(status: FormzStatus.submissionSuccess));
       } catch (e) {
-        print(e);
+        log(e.toString());
         emit(state.copyWith(status: FormzStatus.submissionFailure));
       }
     } else {
