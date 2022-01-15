@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 import 'package:schoolexam/schoolexam.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_form.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_form.dart';
 
 import 'exam_details_form_input.dart';
 

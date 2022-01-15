@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_state.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
 
 import 'exams_state.dart';
 
