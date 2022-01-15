@@ -63,7 +63,18 @@ class HybridExamsRepository extends ExamsRepository {
       return await online.uploadExam(exam: exam);
       // TODO : insert into local
     } on NetworkException catch (_) {
-      return await  local.uploadExam(exam: exam);
+      return await local.uploadExam(exam: exam);
+    }
+  }
+
+  @override
+  Future<void> updateExam({required NewExamDTO exam, required String examId}) async {
+    try {
+      log("Trying to update exam using online repository");
+      return await online.updateExam(exam: exam, examId: examId);
+      // TODO : insert into local
+    } on NetworkException catch (_) {
+      return await local.updateExam(exam: exam, examId: examId);
     }
   }
 }

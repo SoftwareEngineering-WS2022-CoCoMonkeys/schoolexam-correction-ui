@@ -37,8 +37,18 @@ class OnlineExamsRepository extends ExamsRepository {
 
   @override
   Future<void> uploadExam({required NewExamDTO exam}) async {
-    final response = await provider.query(
+    await provider.query(
         path: "/exam/create",
+        method: HTTPMethod.POST,
+        body: exam.toJson(),
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> updateExam(
+      {required NewExamDTO exam, required String examId}) async {
+    await provider.query(
+        path: "/exam/$examId/update",
         method: HTTPMethod.POST,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());

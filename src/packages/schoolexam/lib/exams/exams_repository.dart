@@ -17,4 +17,8 @@ abstract class ExamsRepository {
 
   /// Uploads a newly created exam
   Future<void> uploadExam({required NewExamDTO exam});
+
+  /// Update an existing exam
+  // TODO use ExamDTO
+  Future<void> updateExam({required NewExamDTO exam, required String examId});
 }

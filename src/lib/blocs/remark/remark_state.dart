@@ -16,12 +16,12 @@ class RemarkState extends Equatable {
   final List<Correction> corrections;
 
   const RemarkState._(
-      {this.exam = Exam.empty,
+      {required this.exam,
       this.selectedCorrection = 0,
       required this.submissions,
       required this.corrections});
 
-  RemarkState.none() : this._(submissions: [], corrections: []);
+  RemarkState.none() : this._(exam: Exam.empty, submissions: [], corrections: []);
 
   @override
   List<Object> get props => [

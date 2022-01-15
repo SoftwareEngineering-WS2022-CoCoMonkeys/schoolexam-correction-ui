@@ -1,11 +1,25 @@
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/models/course.dart';
+import 'package:schoolexam/exams/models/exam.dart';
 
 abstract class ExamDetailsEvent extends Equatable {
   const ExamDetailsEvent();
 
   @override
   List<Object> get props => [];
+}
+
+class NewExamOpened extends ExamDetailsEvent {
+  const NewExamOpened();
+}
+
+class AdjustExamOpened extends ExamDetailsEvent {
+  const AdjustExamOpened(this.exam);
+
+  final Exam exam;
+
+  @override
+  List<Object> get props => [exam];
 }
 
 class ExamTitleChanged extends ExamDetailsEvent {

@@ -28,6 +28,7 @@ class ExamTopic extends FormzInput<String, ExamTopicValidationError> {
   }
 }
 
+// TODO change to participant
 class ExamCourse extends FormzInput<Course, ExamCourseValidationError> {
   const ExamCourse.pure() : super.pure(Course.empty);
 

@@ -1,24 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:schoolexam/exams/models/course.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/details_exam_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exam_details_event.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_form_input.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exam_details_state.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_form_row.dart';
 
-class NewExamDialog extends StatefulWidget {
-  NewExamDialog({Key? key}) : super(key: key);
+class NewExamDialog extends StatelessWidget {
 
-  @override
-  NewExamDialogState createState() => NewExamDialogState();
-}
+  const NewExamDialog({Key? key}) : super(key: key);
 
-class NewExamDialogState extends State<NewExamDialog> {
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
@@ -57,6 +50,9 @@ class NewExamDialogState extends State<NewExamDialog> {
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 36)),
                                             CupertinoTextField(
+                                              controller: TextEditingController(
+                                                text: state.examTitle.value
+                                              ),
                                                 style: TextStyle(
                                                   fontSize: 36,
                                                 ),
@@ -92,6 +88,9 @@ class NewExamDialogState extends State<NewExamDialog> {
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 36)),
                                             CupertinoTextField(
+                                                controller: TextEditingController(
+                                                    text: state.examTopic.value
+                                                ),
                                                 style: TextStyle(
                                                   fontSize: 36,
                                                 ),

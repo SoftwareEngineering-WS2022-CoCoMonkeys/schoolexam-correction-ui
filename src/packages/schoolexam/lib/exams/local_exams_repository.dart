@@ -257,4 +257,10 @@ class LocalExamsRepository extends ExamsRepository {
     // TODO: implement uploadExam
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
+    // TODO: implement updateExam
+    throw UnimplementedError();
+  }
 }
