@@ -10,7 +10,6 @@ import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
@@ -18,49 +17,34 @@ class LocalExamsRepository extends ExamsRepository {
   Future<void> init() async {
     final path = p.join(await getDatabasesPath(), 'exams_repository.db');
 
-    // DEBUG PURPOSES
-    bool dbExists = await File(path).exists();
-
-    if (!dbExists) {
-      // Copy from asset
-      ByteData data =
-          await rootBundle.load(p.join("assets", "databases", "dummy.db"));
-      List<int> bytes =
-          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-      // Write and flush the bytes written
-      await File(path).writeAsBytes(bytes, flush: true);
-    }
-    //
-
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
       db.execute(
           'CREATE TABLE IF NOT EXISTS participants(id TEXT PRIMARY KEY, displayName TEXT NOT NULL)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS students(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS students(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS courses(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS courses(id TEXT PRIMARY KEY, FOREIGN KEY(id) REFERENCES participants(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS courses_children(courseId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(courseId, participantId), FOREIGN KEY(courseId) REFERENCES courses(id), FOREIGN KEY(participantId) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS courses_children(courseId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(courseId, participantId), FOREIGN KEY(courseId) REFERENCES courses(id), FOREIGN KEY(participantId) REFERENCES participants(id) ON DELETE CASCADE)');
 
       /// EXAM
       db.execute(
           'CREATE TABLE IF NOT EXISTS exams(id TEXT PRIMARY KEY, status TEXT NOT NULL, title TEXT NOT NULL, dateOfExam TEXT, dueDate TEXT, topic TEXT NOT NULL)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS exams_participants(examId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(examId, participantId), FOREIGN KEY(examId) REFERENCES exams(id), FOREIGN KEY(participantId) REFERENCES participants(id))');
+          'CREATE TABLE IF NOT EXISTS exams_participants(examId TEXT NOT NULL, participantId TEXT NOT NULL, PRIMARY KEY(examId, participantId), FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(participantId) REFERENCES participants(id) ON DELETE CASCADE)');
 
       /// TASK
       db.execute(
-          'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id))');
+          'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
 
       /// CORRECTABLE
       db.execute(
-          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id), FOREIGN KEY(studentId) REFERENCES students(id))');
+          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id), FOREIGN KEY(taskId) REFERENCES tasks(id))');
+          'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id), FOREIGN KEY(taskId) REFERENCES tasks(id))');
+          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
     }, version: 1);
   }
 
@@ -163,6 +147,74 @@ class LocalExamsRepository extends ExamsRepository {
             task: mTasks.firstWhere((element) => element.id == answer.taskId),
             segments: answerSegments[answer.taskId]!)
     ];
+  }
+
+  /// Inserts the [exams] into the local persistence layer.
+  /// However, this may cascade into a deletion of referencing entities.
+  Future<void> insertExams({required List<Exam> exams}) async {
+    if (database == null) {
+      await init();
+    }
+
+    await database!.transaction((txn) async {
+      // 1. Insert exams
+      final eBatch = txn.batch();
+      for (final exam in exams) {
+        // Ensure that an exam with that ID exists
+        final dExam = ExamData.fromModel(exam);
+        eBatch.insert('exams', ExamData.fromModel(exam).toMap(),
+            conflictAlgorithm: ConflictAlgorithm.ignore);
+        // Update possibly old exam data
+        eBatch.update('exams', dExam.toMap(),
+            where: 'id = ?', whereArgs: [dExam.id]);
+
+        // 2. Insert tasks
+        for (final task in exam.tasks) {
+          final dTask = TaskData.fromModel(task, exam);
+          // Ensure that a task with that ID exists
+          eBatch.insert('tasks', dTask.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+          // Update possibly old task data
+          eBatch.update('tasks', dTask.toMap(),
+              where: 'id = ?', whereArgs: [dTask.id]);
+        }
+        // 2a. Delete tasks
+        // Scenario : Teacher creates an exam. After some initial work on the exam, it is decided to remove a task from the exam.
+        eBatch.delete('tasks',
+            where:
+                'examId = ? AND NOT id IN (${exam.tasks.map((e) => "\'${e.id}\'").join(",")})');
+
+        // 3. Insert participants
+        // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
+        for (final participant in exam.participants) {
+          late final String childTable;
+          late final ParticipantData dParticipant;
+
+          if (participant is Course) {
+            dParticipant = CourseData.fromModel(participant);
+            childTable = 'courses';
+          } else if (participant is Student) {
+            dParticipant = StudentData.fromModel(participant);
+            childTable = 'students';
+          } else {
+            // Triggers rollback of transaction
+            throw Exception(
+                "The participant type ${participant.runtimeType} is unknown.");
+          }
+
+          // Ensure that a participant with that ID exists
+          eBatch.insert('participants', dParticipant.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+          // Update possibly old participant data
+          eBatch.update('participants', dParticipant.toMap(),
+              where: 'id = ?', whereArgs: [dParticipant.id]);
+
+          eBatch.insert(childTable, {"id": participant.id}, conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+      }
+
+      eBatch.commit(noResult: true);
+    });
   }
 
   @override

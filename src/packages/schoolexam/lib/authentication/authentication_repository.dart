@@ -23,18 +23,12 @@ class AuthenticationRepository {
         _provider = ApiProvider(),
         _storage = FlutterSecureStorage();
 
+  // Why the initial state should never change from unauthenticated :
+  // This app provides access to sensitive data.
+  // Some form of authentication is always going to be required.
+  // A way of improving the usage could be the inclusion of TouchID to use the currently stored credentials.
   Stream<AuthenticationStatus> get status async* {
-    yield AuthenticationStatus.unknown;
-
-    try {
-      final response = await _getTokenUsingStoredCredentials();
-      if (response.isEmpty) {
-        yield AuthenticationStatus.unauthenticated;
-      }
-    } catch (_) {
-      yield AuthenticationStatus.unauthenticated;
-    }
-
+    yield AuthenticationStatus.unauthenticated;
     yield* _controller.stream;
   }
 
@@ -84,9 +78,9 @@ class AuthenticationRepository {
   }
 
   void logOut() async {
+    // TODO : Maybe terminate session with School Exam
     await _storage.delete(key: _storage_user_key);
     await _storage.delete(key: _storage_password_key);
-    // TODO : Maybe terminate session with School Exam
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 
