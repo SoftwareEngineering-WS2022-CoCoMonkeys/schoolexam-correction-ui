@@ -29,7 +29,8 @@ class RemarkState extends Equatable {
       required this.submissions,
       required this.corrections});
 
-  RemarkState.none() : this._(exam: Exam.empty, submissions: [], corrections: []);
+  RemarkState.none()
+      : this._(exam: Exam.empty, submissions: [], corrections: []);
 
   @override
   List<Object> get props => [

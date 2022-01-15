@@ -19,16 +19,17 @@ class ExamFormRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(20.0),
       child: InkWell(
         onTap: () => showCupertinoModalBottomSheet(
             context: context,
             builder: (context) => Material(
-                child: Container(
+                child: SizedBox(
                     height: 1000,
                     child: Center(
                         child: Padding(
-                            padding: EdgeInsets.all(30), child: child))))),
+                            padding: const EdgeInsets.all(30),
+                            child: child))))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

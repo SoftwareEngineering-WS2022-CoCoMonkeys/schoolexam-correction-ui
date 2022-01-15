@@ -43,6 +43,7 @@ class CorrectionOverlayDocument extends Equatable {
   static const empty = CorrectionOverlayDocument(submissionId: "", pages: []);
 
   bool get isEmpty => this == CorrectionOverlayDocument.empty;
+
   bool get isNotEmpty => this != CorrectionOverlayDocument.empty;
 
   CorrectionOverlayDocument copyWith({

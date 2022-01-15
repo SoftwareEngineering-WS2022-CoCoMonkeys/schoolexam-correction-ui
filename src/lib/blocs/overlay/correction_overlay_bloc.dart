@@ -22,6 +22,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   // Internal revision history for in memory pages
   static const int _maximumHistorySize = 20;
   final Map<String, Queue<CorrectionOverlayPage>> _pageHistory;
+
   //
 
   final CorrectionOverlayRepository _correctionOverlayRepository;

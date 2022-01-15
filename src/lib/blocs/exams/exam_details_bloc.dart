@@ -32,18 +32,21 @@ class ExamDetailsBloc extends Bloc<ExamDetailsEvent, ExamDetailsState> {
     }
   }
 
-  void _onAdjustExamOpened(AdjustExamOpened event, Emitter<ExamDetailsState> emit) {
+  void _onAdjustExamOpened(
+      AdjustExamOpened event, Emitter<ExamDetailsState> emit) {
     final examToAdjust = event.exam;
     // Force form status update
     emit(ExamDetailsState.initialAdjustExam(exam: examToAdjust).copyWith());
   }
 
-  void _onExamTitleChanged(ExamTitleChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamTitleChanged(
+      ExamTitleChanged event, Emitter<ExamDetailsState> emit) {
     final examTitle = ExamTitle.dirty(value: event.examTitle);
     emit(state.copyWith(examTitle: examTitle));
   }
 
-  void _onExamTopicChanged(ExamTopicChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamTopicChanged(
+      ExamTopicChanged event, Emitter<ExamDetailsState> emit) {
     final examTopic = ExamTopic.dirty(value: event.examTopic);
     emit(state.copyWith(examTopic: examTopic));
   }
@@ -54,12 +57,14 @@ class ExamDetailsBloc extends Bloc<ExamDetailsEvent, ExamDetailsState> {
     emit(state.copyWith(examCourse: examCourse));
   }
 
-  void _onExamDateChanged(ExamDateChanged event, Emitter<ExamDetailsState> emit) {
+  void _onExamDateChanged(
+      ExamDateChanged event, Emitter<ExamDetailsState> emit) {
     final examDate = ExamDate.dirty(event.examDate);
     emit(state.copyWith(examDate: examDate));
   }
 
-  void _onExamSubmitted(ExamSubmitted event, Emitter<ExamDetailsState> emit) async {
+  void _onExamSubmitted(
+      ExamSubmitted event, Emitter<ExamDetailsState> emit) async {
     if (!state.status.isValidated) {
       log("Error during exam creation/adjustment, the form was not validated.");
       return;

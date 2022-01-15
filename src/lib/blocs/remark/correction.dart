@@ -101,6 +101,7 @@ class Correction extends Equatable {
       currentAnswer: Answer.empty);
 
   bool get isEmpty => this == Correction.empty;
+
   bool get isNotEmpty => this != Correction.empty;
 
   @override

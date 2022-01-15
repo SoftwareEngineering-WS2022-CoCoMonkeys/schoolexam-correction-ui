@@ -163,7 +163,8 @@ class _InputSettingsWidget extends StatelessWidget {
                 height: options.size * 1.0,
                 width: 24,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12), color: Colors.black),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.black),
               ),
             ),
             if (options is ColoredInputOptions)

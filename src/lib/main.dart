@@ -23,7 +23,9 @@ void main() {
         RepositoryProvider(create: (context) => AuthenticationRepository()),
         RepositoryProvider(create: (context) => const UserRepository()),
         RepositoryProvider<ExamsRepository>(
-            create: (context) => LocalExamsRepository()),
+            create: (context) => HybridExamsRepository(
+                repository:
+                    RepositoryProvider.of<AuthenticationRepository>(context))),
         RepositoryProvider<CorrectionOverlayRepository>(
             create: (context) => DatabaseCorrectionOverlayRepository())
       ],
@@ -68,8 +70,7 @@ void main() {
               lazy: false,
               create: (context) => ExamDetailsBloc(
                   examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(
-                          context))),
+                      RepositoryProvider.of<ExamsRepository>(context))),
         ],
         child: const SchoolExamCorrectionUI(),
       )));

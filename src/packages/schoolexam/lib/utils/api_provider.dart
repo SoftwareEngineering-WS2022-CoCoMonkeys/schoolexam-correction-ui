@@ -73,7 +73,7 @@ class ApiProvider {
     switch (response.statusCode) {
       case 200:
       case 201:
-        return json.decode(response.body);
+        return (response.body.isEmpty) ? "" : json.decode(response.body);
       case 204:
         return "";
       case 400:

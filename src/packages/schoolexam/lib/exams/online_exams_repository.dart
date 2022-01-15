@@ -24,7 +24,7 @@ class OnlineExamsRepository extends ExamsRepository {
         path: "/exam/byteacher",
         method: HTTPMethod.GET,
         key: await authenticationRepository.getKey());
-
+    print(res);
     var exams = List<Map<String, dynamic>>.from(res);
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
   }
