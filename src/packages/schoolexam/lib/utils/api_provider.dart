@@ -8,7 +8,7 @@ import 'package:schoolexam/configuration.dart';
 
 import 'network_exceptions.dart';
 
-enum HTTPMethod { GET, POST, PATCH, DELETE }
+enum HTTPMethod { GET, POST, PATCH, PUT, DELETE }
 
 class ApiProvider {
   Future<http.Response> _httpRequest(
@@ -24,6 +24,9 @@ class ApiProvider {
         break;
       case HTTPMethod.PATCH:
         methodKey = 'PATCH';
+        break;
+      case HTTPMethod.PUT:
+        methodKey = 'PUT';
         break;
       default:
         methodKey = 'GET';

@@ -41,16 +41,22 @@ void main() {
                       RepositoryProvider.of<AuthenticationRepository>(
                           context))),
           BlocProvider(
+              create: (context) => NavigationCubit(
+                  authenticationBloc:
+                      BlocProvider.of<AuthenticationBloc>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => ExamDetailsBloc(
+                  examsRepository:
+                      RepositoryProvider.of<ExamsRepository>(context))),
+          BlocProvider(
               lazy: false,
               create: (context) => ExamsCubit(
                   examsRepository:
                       RepositoryProvider.of<ExamsRepository>(context),
                   authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context))),
-          BlocProvider(
-              create: (context) => NavigationCubit(
-                  authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context))),
+                      BlocProvider.of<AuthenticationBloc>(context),
+                  examsDetailBloc: BlocProvider.of<ExamDetailsBloc>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => RemarkCubit(
@@ -64,11 +70,6 @@ void main() {
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
                   remarkCubit: BlocProvider.of<RemarkCubit>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => ExamDetailsBloc(
-                  examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context))),
         ],
         child: const SchoolExamCorrectionUI(),
       )));
