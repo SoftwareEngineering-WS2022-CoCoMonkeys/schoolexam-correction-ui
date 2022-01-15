@@ -14,7 +14,7 @@ class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository_test1.db');
+    final path = p.join(await getDatabasesPath(), 'exams_repository.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
@@ -159,32 +159,56 @@ class LocalExamsRepository extends ExamsRepository {
       // 1. Insert exams
       final eBatch = txn.batch();
       for (final exam in exams) {
+        // Ensure that an exam with that ID exists
+        final dExam = ExamData.fromModel(exam);
         eBatch.insert('exams', ExamData.fromModel(exam).toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace);
+            conflictAlgorithm: ConflictAlgorithm.ignore);
+        // Update possibly old exam data
+        eBatch.update('exams', dExam.toMap(),
+            where: 'id = ?', whereArgs: [dExam.id]);
 
         // 2. Insert tasks
         for (final task in exam.tasks) {
-          eBatch.insert('tasks', TaskData.fromModel(task, exam).toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
+          final dTask = TaskData.fromModel(task, exam);
+          // Ensure that a task with that ID exists
+          eBatch.insert('tasks', dTask.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+          // Update possibly old task data
+          eBatch.update('tasks', dTask.toMap(),
+              where: 'id = ?', whereArgs: [dTask.id]);
         }
+        // 2a. Delete tasks
+        // Scenario : Teacher creates an exam. After some initial work on the exam, it is decided to remove a task from the exam.
+        eBatch.delete('tasks',
+            where:
+                'examId = ? AND NOT id IN (${exam.tasks.map((e) => "\'${e.id}\'").join(",")})');
 
         // 3. Insert participants
+        // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
         for (final participant in exam.participants) {
+          late final String childTable;
+          late final ParticipantData dParticipant;
+
           if (participant is Course) {
-            eBatch.insert(
-                'participants', CourseData.fromModel(participant).toMap(),
-                conflictAlgorithm: ConflictAlgorithm.replace);
-            eBatch.insert(
-                'courses', {"id" : participant.id},
-                conflictAlgorithm: ConflictAlgorithm.replace);
+            dParticipant = CourseData.fromModel(participant);
+            childTable = 'courses';
           } else if (participant is Student) {
-            eBatch.insert(
-                'participants', StudentData.fromModel(participant).toMap(),
-                conflictAlgorithm: ConflictAlgorithm.replace);
-            eBatch.insert(
-                'students', {"id" : participant.id},
-                conflictAlgorithm: ConflictAlgorithm.replace);
+            dParticipant = StudentData.fromModel(participant);
+            childTable = 'students';
+          } else {
+            // Triggers rollback of transaction
+            throw Exception(
+                "The participant type ${participant.runtimeType} is unknown.");
           }
+
+          // Ensure that a participant with that ID exists
+          eBatch.insert('participants', dParticipant.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+          // Update possibly old participant data
+          eBatch.update('participants', dParticipant.toMap(),
+              where: 'id = ?', whereArgs: [dParticipant.id]);
+
+          eBatch.insert(childTable, {"id": participant.id}, conflictAlgorithm: ConflictAlgorithm.ignore);
         }
       }
 

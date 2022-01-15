@@ -9,7 +9,7 @@ import '../models/exam.dart';
 
 class ExamDTO extends Equatable {
   final String id;
-  final int status;
+  final String status;
   final String title;
 
   /// Date when exam was written by all students
@@ -29,7 +29,7 @@ class ExamDTO extends Equatable {
 
   ExamDTO.fromJson(Map<String, dynamic> json)
       : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
-        status = ApiHelper.getValue(map: json, keys: ["status"], value: 0),
+        status = ApiHelper.getValue(map: json, keys: ["status"], value: ""),
         title = ApiHelper.getValue(map: json, keys: ["title"], value: ""),
         topic = ApiHelper.getValue(map: json, keys: ["topic"], value: ""),
         quota = ApiHelper.getValue(map: json, keys: ["quota"], value: 0.0),
@@ -70,8 +70,8 @@ class ExamDTO extends Equatable {
   Exam toModel() {
     return Exam(
         status: ExamStatus.values.firstWhere(
-          // Unknown is not known to API
-            (element) => element.index == status + 1,
+            // Unknown is not known to API
+            (element) => element.name.toLowerCase() == status.toLowerCase(),
             orElse: () => ExamStatus.unknown),
         id: id,
         title: title,
