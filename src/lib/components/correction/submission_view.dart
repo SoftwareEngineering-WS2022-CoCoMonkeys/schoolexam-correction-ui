@@ -39,19 +39,21 @@ class SubmissionViewState extends State<SubmissionView> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConsumer<CorrectionOverlayCubit, CorrectionOverlayState>(
-          // Only reload when we changed the navigation
-          // TODO : Mark changed document
-          listenWhen: (old, current) => current is UpdatedNavigationState,
-          listener: (context, state) =>
-              _onDocumentChange(state.getCurrent(widget.initial)),
-          buildWhen: (old, current) => false,
-          builder: (context, state) {
-            final document = state.getCurrent(widget.initial);
+  Widget build(BuildContext context) => BlocConsumer<CorrectionOverlayCubit,
+          CorrectionOverlayState>(
+      // Only reload when we changed the navigation
+      // TODO : Mark changed document
+      listenWhen: (old, current) => current is UpdatedNavigationState,
+      listener: (context, state) =>
+          _onDocumentChange(state.getCurrent(widget.initial)),
+      buildWhen: (old, current) => false,
+      builder: (context, state) {
+        final document = state.getCurrent(widget.initial);
 
-            return BlocBuilder<RemarkCubit, RemarkState>(
-                builder: (context, state) {
+        return BlocBuilder<RemarkCubit, RemarkState>(
+            // We never need to rebuild
+            buildWhen: (old, current) => false,
+            builder: (context, state) {
               return SizedBox(
                 width: widget.size.width,
                 height: widget.size.height,
@@ -83,5 +85,5 @@ class SubmissionViewState extends State<SubmissionView> {
                     }),
               );
             });
-          });
+      });
 }

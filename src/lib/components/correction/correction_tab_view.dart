@@ -20,30 +20,37 @@ class CorrectionTabView extends StatefulWidget {
   State<StatefulWidget> createState() => _CorrectionTabViewState();
 }
 
-class _CorrectionTabViewState extends State<CorrectionTabView> {
+class _CorrectionTabViewState extends State<CorrectionTabView>
+    with AutomaticKeepAliveClientMixin<CorrectionTabView> {
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          CorrectionInputHeader(
-            initial: widget.initial,
-          ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: Column(
-                children: [
-                  Container(
-                    color: null,
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.7),
-                    child: CorrectionPageView(
-                      initial: widget.initial,
-                    ),
-                  ),
-                  CorrectionPageNavigation(
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Column(
+      children: [
+        CorrectionInputHeader(
+          initial: widget.initial,
+        ),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            child: Column(
+              children: [
+                Container(
+                  color: null,
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.7),
+                  child: CorrectionPageView(
                     initial: widget.initial,
-                  )
-                ],
-              )),
-        ],
-      );
+                  ),
+                ),
+                CorrectionPageNavigation(
+                  initial: widget.initial,
+                )
+              ],
+            )),
+      ],
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

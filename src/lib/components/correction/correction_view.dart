@@ -8,56 +8,74 @@ import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'correction_tab_view.dart';
 
 /// A view over all currently active corrections.
-class CorrectionView extends StatefulWidget {
-  final int corrections;
-
-  const CorrectionView({Key? key, required this.corrections}) : super(key: key);
+class CorrectionView extends StatelessWidget {
+  const CorrectionView({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CorrectionViewState();
+  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
+      buildWhen: (old, current) =>
+          current is RemovedCorrectionState || current is AddedCorrectionState,
+      builder: (context, state) => _CorrectionViewTabContainer(
+            key: ValueKey<List<Correction>>(state.corrections),
+            corrections: state.corrections,
+          ));
 }
 
-class _CorrectionViewState extends State<CorrectionView>
-    with TickerProviderStateMixin {
+class _CorrectionViewTabContainer extends StatefulWidget {
+  final List<Correction> corrections;
+
+  const _CorrectionViewTabContainer({Key? key, required this.corrections})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _CorrectionViewTabContainerState();
+}
+
+class _CorrectionViewTabContainerState
+    extends State<_CorrectionViewTabContainer> with TickerProviderStateMixin {
   TabController? _controller;
 
   @override
   void initState() {
-    _controller = TabController(length: widget.corrections, vsync: this);
+    _controller = TabController(length: widget.corrections.length, vsync: this);
+    _controller!.addListener(_handleTabSelection);
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<RemarkCubit, RemarkState>(builder: (context, state) {
-        return Column(
-          children: [
-            SizedBox(
-              height: 44,
-              width: double.infinity,
-              child: TabBar(
-                  labelPadding: EdgeInsets.zero,
-                  isScrollable: true,
-                  controller: _controller!,
-                  tabs: state.corrections
-                      .map((e) => _CorrectionTab(
-                            correction: e,
-                          ))
-                      .toList()),
-            ),
-            Expanded(
-              child: TabBarView(
+  Widget build(BuildContext context) => Column(
+        children: [
+          SizedBox(
+            height: 44,
+            width: double.infinity,
+            child: TabBar(
+                labelPadding: EdgeInsets.zero,
+                isScrollable: true,
                 controller: _controller!,
-                children: state.corrections
-                    .map((e) => CorrectionTabView(
-                          initial: e,
+                tabs: widget.corrections
+                    .map((e) => _CorrectionTab(
+                          correction: e,
                         ))
-                    .toList(),
-              ),
-            )
-          ],
-        );
-      });
+                    .toList()),
+          ),
+          Expanded(
+            child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _controller!,
+              children: widget.corrections
+                  .map((e) => CorrectionTabView(
+                        initial: e,
+                      ))
+                  .toList(),
+            ),
+          )
+        ],
+      );
+
+  void _handleTabSelection() {
+    BlocProvider.of<RemarkCubit>(context).changeTo(
+        submission: widget.corrections[_controller!.index].submission);
+  }
 }
 
 class _CorrectionTab extends StatelessWidget {
@@ -79,8 +97,10 @@ class _CorrectionTab extends StatelessWidget {
             child: Stack(
               children: [
                 IconButton(
-                    // TODO : Remove Tab
-                    onPressed: () {},
+                    onPressed: () {
+                      BlocProvider.of<RemarkCubit>(context)
+                          .stop(correction.submission);
+                    },
                     icon: const Icon(
                       Icons.close,
                       color: Colors.black,

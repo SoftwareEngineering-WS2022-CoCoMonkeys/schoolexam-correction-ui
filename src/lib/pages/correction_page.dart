@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_overview.dart';
+import 'package:schoolexam_correction_ui/components/correction/correction_participant_selection_widget.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_view.dart';
 
 class CorrectionPage extends StatelessWidget {
@@ -24,6 +25,7 @@ class CorrectionPage extends StatelessWidget {
               child:
                   const Material(child: SafeArea(child: CorrectionOverview())));
         } else {
+          print("REBUILD");
           return Material(
             child: CupertinoPageScaffold(
                 navigationBar: CupertinoNavigationBar(
@@ -32,13 +34,16 @@ class CorrectionPage extends StatelessWidget {
                       Icons.person_add_outlined,
                       color: Theme.of(context).primaryColor,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => const Dialog(
+                              child: CorrectionParticipantSelectionWidget()));
+                    },
                   ),
                   middle: Text(state.exam.title),
                 ),
-                child: SafeArea(
-                    child:
-                        CorrectionView(corrections: state.corrections.length))),
+                child: const SafeArea(child: CorrectionView())),
           );
         }
       });

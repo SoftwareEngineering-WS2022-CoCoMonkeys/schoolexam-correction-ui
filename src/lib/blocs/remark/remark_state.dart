@@ -60,6 +60,20 @@ class AddedCorrectionState extends RemarkState {
             corrections: <Correction>[...initial.corrections, added]);
 }
 
+/// Removed a correction from active working.
+class RemovedCorrectionState extends RemarkState {
+  final Correction removed;
+
+  RemovedCorrectionState.remove(
+      {required RemarkState initial, required this.removed})
+      : super._(
+            exam: initial.exam,
+            selectedCorrection: initial.corrections.length,
+            submissions: initial.submissions,
+            corrections: <Correction>[...initial.corrections]..remove(removed));
+}
+
+/// Switching the active correction.
 class SwitchedCorrectionState extends RemarkState {
   SwitchedCorrectionState.change(
       {required RemarkState initial, required int selectedCorrection})

@@ -39,6 +39,8 @@ class RemarkCubit extends Cubit<RemarkState> {
     await correct(await _examsRepository.getExam(state.examId));
   }
 
+  /// Start the correction for the [exam].
+  /// This includes the retrieval of the corresponding submissions.
   Future<void> correct(Exam exam) async {
     final submissions = await _examsRepository.getSubmissions(examId: exam.id);
 
@@ -50,12 +52,28 @@ class RemarkCubit extends Cubit<RemarkState> {
     emit(state);
   }
 
+  /// Opens the [submission] for correction
   Future<void> open(Submission submission) async {
     log("Requested to correct submission $submission");
 
     // Switch active pdf
     var newState = AddedCorrectionState.add(
         initial: state, added: await Correction.start(submission: submission));
+
+    emit(newState);
+  }
+
+  /// Closes the [submission].
+  Future<void> stop(Submission submission) async {
+    log("Requested to close submission $submission");
+
+    final correction = state.corrections.firstWhere(
+        (element) => element.submission.id == submission.id,
+        orElse: () => Correction.empty);
+
+    // Switch active pdf
+    var newState =
+        RemovedCorrectionState.remove(initial: state, removed: correction);
 
     emit(newState);
   }
@@ -120,7 +138,27 @@ class RemarkCubit extends Cubit<RemarkState> {
         merged: correction.copyWith(correctionData: Uint8List.fromList(res))));
   }
 
-  // TODO : THIS IS NOT WORKING
+  /// Changes the active correction to match the desired [submission].
+  Future<void> changeTo({required Submission submission}) async {
+    log("Requested to change to $submission");
+
+    if (state.corrections.isEmpty) {
+      log("No corrections currently present.");
+      return;
+    }
+
+    final selection = state.corrections
+        .indexWhere((element) => element.submission.id == submission.id, -1);
+    if (selection < 0) {
+      log("Found no correction for ${submission.id}");
+      return;
+    }
+
+    emit(SwitchedCorrectionState.change(
+        initial: state, selectedCorrection: selection));
+  }
+
+  /// Moves the currently selected correction to the desired [task].
   void moveTo({required Task task}) {
     log("Requested to move to $task");
 
