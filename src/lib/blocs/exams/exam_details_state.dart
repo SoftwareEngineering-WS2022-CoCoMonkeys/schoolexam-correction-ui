@@ -98,6 +98,6 @@ class ExamDetailsState extends Equatable {
   }
 
   @override
-  List<Object> get props =>
-      [examTitle, examTopic, examCourse, examDate, isNewExamEdit, validCourses];
+  List<Object?> get props =>
+      [status, examTitle, examTopic, examCourse, examDate, isNewExamEdit, adjustedExamId, validCourses];
 }

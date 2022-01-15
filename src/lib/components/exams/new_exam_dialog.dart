@@ -18,19 +18,19 @@ class NewExamDialog extends StatelessWidget {
 
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
-          if (state.status.isSubmissionFailure) {
-            // TODO : Improve errors
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                    content: Text(
-                        "${state.isNewExamEdit
-                            ? "Erstellung"
-                            : "Anpassung"} fehlgeschlagen")),
-              );
-          }
-        }, builder: (context, state) {
+      if (state.status.isSubmissionFailure) {
+        // TODO : Improve errors
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+                content: Text(
+                    "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
+          );
+      } else if (state.status.isSubmissionSuccess) {
+        Navigator.pop(context);
+      }
+    }, builder: (context, state) {
       return SimpleDialog(
         children: [
           Container(
@@ -55,10 +55,9 @@ class NewExamDialog extends StatelessWidget {
                             decoration: InputDecoration(
                               labelText: "Titel",
                             ),
-                            onChanged: (examTitle) =>
-                                context
-                                    .read<ExamDetailsBloc>()
-                                    .add(ExamTitleChanged(examTitle))),
+                            onChanged: (examTitle) => context
+                                .read<ExamDetailsBloc>()
+                                .add(ExamTitleChanged(examTitle))),
                       ],
                     ),
                   ),
@@ -77,10 +76,9 @@ class NewExamDialog extends StatelessWidget {
                             decoration: InputDecoration(
                               labelText: "Thema",
                             ),
-                            onChanged: (examTopic) =>
-                                context
-                                    .read<ExamDetailsBloc>()
-                                    .add(ExamTopicChanged(examTopic))),
+                            onChanged: (examTopic) => context
+                                .read<ExamDetailsBloc>()
+                                .add(ExamTopicChanged(examTopic))),
                       ],
                     ),
                   ),
@@ -103,8 +101,7 @@ class NewExamDialog extends StatelessWidget {
                                         state.validCourses[index]));
                               },
                               children: state.validCourses
-                                  .map((c) =>
-                                  Text(c.displayName,
+                                  .map((c) => Text(c.displayName,
                                       style: TextStyle(
                                         fontSize: 36,
                                       )))
@@ -127,10 +124,9 @@ class NewExamDialog extends StatelessWidget {
                           child: CupertinoDatePicker(
                             minimumDate: DateTime.now(),
                             mode: CupertinoDatePickerMode.date,
-                            onDateTimeChanged: (dateTime) =>
-                                context
-                                    .read<ExamDetailsBloc>()
-                                    .add(ExamDateChanged(dateTime)),
+                            onDateTimeChanged: (dateTime) => context
+                                .read<ExamDetailsBloc>()
+                                .add(ExamDateChanged(dateTime)),
                           ),
                         ),
                       ],
@@ -146,12 +142,13 @@ class NewExamDialog extends StatelessWidget {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     primary: Colors.blue),
-                                onPressed: () {
-                                  context
-                                      .read<ExamDetailsBloc>()
-                                      .add(const ExamSubmitted());
-                                  Navigator.pop(context);
-                                },
+                                onPressed: state.status.isValidated
+                                    ? () {
+                                        context
+                                            .read<ExamDetailsBloc>()
+                                            .add(const ExamSubmitted());
+                                      }
+                                    : null,
                                 child: Text(state.isNewExamEdit
                                     ? "Erstellen"
                                     : "Anpassen"),
