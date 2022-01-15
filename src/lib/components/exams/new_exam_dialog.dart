@@ -18,17 +18,19 @@ class NewExamDialog extends StatelessWidget {
 
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
-      if (state.status.isSubmissionFailure) {
-        // TODO : Improve errors
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-                content: Text(
-                    "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
-          );
-      }
-    }, builder: (context, state) {
+          if (state.status.isSubmissionFailure) {
+            // TODO : Improve errors
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                    content: Text(
+                        "${state.isNewExamEdit
+                            ? "Erstellung"
+                            : "Anpassung"} fehlgeschlagen")),
+              );
+          }
+        }, builder: (context, state) {
       return SimpleDialog(
         children: [
           Container(
@@ -52,13 +54,11 @@ class NewExamDialog extends StatelessWidget {
                             ),
                             decoration: InputDecoration(
                               labelText: "Titel",
-                              errorText: state.examTitle.invalid
-                                  ? "Ungültiger Titel"
-                                  : null,
                             ),
-                            onChanged: (examTitle) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamTitleChanged(examTitle))),
+                            onChanged: (examTitle) =>
+                                context
+                                    .read<ExamDetailsBloc>()
+                                    .add(ExamTitleChanged(examTitle))),
                       ],
                     ),
                   ),
@@ -76,13 +76,11 @@ class NewExamDialog extends StatelessWidget {
                             ),
                             decoration: InputDecoration(
                               labelText: "Thema",
-                              errorText: state.examTopic.invalid
-                                  ? "Ungültiges Thema"
-                                  : null,
                             ),
-                            onChanged: (examTopic) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamTopicChanged(examTopic))),
+                            onChanged: (examTopic) =>
+                                context
+                                    .read<ExamDetailsBloc>()
+                                    .add(ExamTopicChanged(examTopic))),
                       ],
                     ),
                   ),
@@ -105,7 +103,8 @@ class NewExamDialog extends StatelessWidget {
                                         state.validCourses[index]));
                               },
                               children: state.validCourses
-                                  .map((c) => Text(c.displayName,
+                                  .map((c) =>
+                                  Text(c.displayName,
                                       style: TextStyle(
                                         fontSize: 36,
                                       )))
@@ -128,9 +127,10 @@ class NewExamDialog extends StatelessWidget {
                           child: CupertinoDatePicker(
                             minimumDate: DateTime.now(),
                             mode: CupertinoDatePickerMode.date,
-                            onDateTimeChanged: (dateTime) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamDateChanged(dateTime)),
+                            onDateTimeChanged: (dateTime) =>
+                                context
+                                    .read<ExamDetailsBloc>()
+                                    .add(ExamDateChanged(dateTime)),
                           ),
                         ),
                       ],
