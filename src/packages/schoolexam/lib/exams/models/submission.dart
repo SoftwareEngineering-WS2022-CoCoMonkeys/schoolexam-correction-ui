@@ -1,10 +1,11 @@
+import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/models/student.dart';
 
 import 'answer.dart';
 import 'correctable.dart';
 import 'exam.dart';
 
-class Submission extends Correctable {
+class Submission extends Correctable{
   final String id;
 
   final Exam exam;
@@ -41,4 +42,7 @@ class Submission extends Correctable {
 
   bool get isEmpty => this == Submission.empty;
   bool get isNotEmpty => this != Submission.empty;
+
+  @override
+  List<Object?> get props => [id, exam, data, student, answers, status, achievedPoints];
 }

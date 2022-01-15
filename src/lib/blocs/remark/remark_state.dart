@@ -3,6 +3,8 @@ import 'package:schoolexam/schoolexam.dart';
 
 import 'correction.dart';
 
+typedef CorrectionRetrievalCallback = Correction Function(Correction initial);
+
 class RemarkState extends Equatable {
   /// We may only provide remarks for one exam at the time. This contains information about the subject, participants etc.
   final Exam exam;
@@ -14,6 +16,12 @@ class RemarkState extends Equatable {
   /// If corrections is empty, no correction is active
   final int selectedCorrection;
   final List<Correction> corrections;
+
+  /// Callback to retrieve the updated correction from the state.
+  /// This allows to centralize the logic, while allowing widgets to define their rebuild logic based on state changes.
+  Correction getCurrent(Correction initial) => corrections.firstWhere(
+      (element) => element.submission.id == initial.submission.id,
+      orElse: () => Correction.empty);
 
   const RemarkState._(
       {this.exam = Exam.empty,
@@ -74,7 +82,22 @@ class MergedCorrectionState extends RemarkState {
             selectedCorrection: initial.selectedCorrection,
             submissions: initial.submissions,
             corrections: <Correction>[
+              ...initial.corrections.map(
+                  (e) => (e.submission.id == merged.submission.id) ? merged : e)
+            ]);
+}
+
+class NavigatedRemarkState extends RemarkState {
+  final Correction navigated;
+
+  NavigatedRemarkState.navigated(
+      {required RemarkState initial, required this.navigated})
+      : super._(
+            exam: initial.exam,
+            selectedCorrection: initial.selectedCorrection,
+            submissions: initial.submissions,
+            corrections: <Correction>[
               ...initial.corrections.map((e) =>
-                  (e.correctionPath == merged.correctionPath) ? merged : e)
+                  (e.submission.id == navigated.submission.id) ? navigated : e)
             ]);
 }

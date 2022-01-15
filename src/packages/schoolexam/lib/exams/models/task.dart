@@ -1,4 +1,6 @@
-class Task {
+import 'package:equatable/equatable.dart';
+
+class Task extends Equatable {
   final String id;
   final String title;
   final double maxPoints;
@@ -14,4 +16,7 @@ class Task {
   String toString() {
     return "($id) $title : $maxPoints";
   }
+
+  @override
+  List<Object?> get props => [id, title, maxPoints];
 }

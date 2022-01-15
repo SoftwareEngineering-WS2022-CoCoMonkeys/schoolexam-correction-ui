@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/hybrid_exams_repository.dart';
@@ -23,9 +24,7 @@ void main() {
         RepositoryProvider(create: (context) => AuthenticationRepository()),
         RepositoryProvider(create: (context) => const UserRepository()),
         RepositoryProvider<ExamsRepository>(
-            create: (context) => HybridExamsRepository(
-                repository:
-                    RepositoryProvider.of<AuthenticationRepository>(context))),
+            create: (context) => LocalExamsRepository()),
         RepositoryProvider<CorrectionOverlayRepository>(
             create: (context) => DatabaseCorrectionOverlayRepository())
       ],

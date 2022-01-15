@@ -121,7 +121,7 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   // TODO : THIS IS NOT WORKING
-  void moveTo(Task task) {
+  void moveTo({required Task task}) {
     log("Requested to move to $task");
 
     if (state.corrections.isEmpty) {
@@ -129,15 +129,13 @@ class RemarkCubit extends Cubit<RemarkState> {
       return;
     }
 
-    // TODO : Ensures state change. However, this copy seems rather ugly
-    var corrections = <Correction>[...state.corrections];
-    corrections[state.selectedCorrection] =
-        corrections[state.selectedCorrection].copyWith(
-            currentAnswer: corrections[state.selectedCorrection]
-                .submission
-                .answers
-                .firstWhere((element) => element.task.id == task.id,
-                    orElse: () => Answer.empty));
+    final correction = state.corrections[state.selectedCorrection].copyWith(
+        currentAnswer: state
+            .corrections[state.selectedCorrection].submission.answers
+            .firstWhere((element) => element.task.id == task.id,
+                orElse: () => Answer.empty));
+
+    emit(NavigatedRemarkState.navigated(initial: state, navigated: correction));
   }
 
   @override

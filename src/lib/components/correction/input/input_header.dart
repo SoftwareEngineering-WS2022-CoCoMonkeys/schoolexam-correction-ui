@@ -17,6 +17,8 @@ class InputHeader extends StatelessWidget {
         builder: (context, state) => Container(
             constraints: const BoxConstraints(maxHeight: 48),
             child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                     onPressed: () {
