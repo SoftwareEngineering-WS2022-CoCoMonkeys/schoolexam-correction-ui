@@ -74,6 +74,9 @@ dependencies:
   # Used for persisting data
   sqflite: ^2.0.1
 
+  # Reload of exams page
+  pull_to_refresh: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
