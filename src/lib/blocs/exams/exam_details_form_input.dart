@@ -1,5 +1,6 @@
 import 'package:formz/formz.dart';
 import 'package:schoolexam/exams/models/course.dart';
+import 'package:schoolexam_correction_ui/extensions/date_time_extensions.dart';
 
 enum ExamTitleValidationError { empty, invalid }
 enum ExamTopicValidationError { empty, invalid }
@@ -50,7 +51,7 @@ class ExamDate extends FormzInput<DateTime, ExamDateValidationError> {
     if (value == null) {
       return ExamDateValidationError.empty;
     }
-    return value.isAfter(DateTime.now()) || value.isAtSameMomentAs(DateTime.now())
+    return value.isAfter(DateTime.now()) || value.isSameDate(DateTime.now())
         ? null
         : ExamDateValidationError.invalid;
   }
