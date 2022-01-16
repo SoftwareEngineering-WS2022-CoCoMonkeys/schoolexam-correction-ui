@@ -47,8 +47,12 @@ class LoadingExamsErrorState extends ExamsState implements BlocException {
 }
 
 class LoadedExamsState extends ExamsState {
-  LoadedExamsState.empty()
-      : super(exams: [], filtered: [], states: [], search: "");
+  LoadedExamsState.initial()
+      : super(
+            exams: [],
+            filtered: [],
+            states: [ExamStatus.planned, ExamStatus.inCorrection],
+            search: "");
 
   const LoadedExamsState.loaded(
       {required List<Exam> exams,

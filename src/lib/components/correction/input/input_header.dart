@@ -67,8 +67,9 @@ class _InputIconButton extends StatelessWidget {
           builder: (context, state) {
         return IconButton(
           icon: icon,
-          color:
-              (tool == state.inputTool) ? Theme.of(context).primaryColor : Colors.black,
+          color: (tool == state.inputTool)
+              ? Theme.of(context).primaryColor
+              : Colors.black,
           onPressed: () async {
             if (tool == state.inputTool) {
               switch (tool) {

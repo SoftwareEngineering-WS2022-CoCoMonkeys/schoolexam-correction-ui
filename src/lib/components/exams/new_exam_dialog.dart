@@ -19,19 +19,19 @@ class NewExamDialog extends StatelessWidget {
 
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
-          if (state.status.isSubmissionFailure) {
-            // TODO : Improve errors
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                    content: Text(
-                        "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
-              );
-          } else if (state.status.isSubmissionSuccess) {
-            Navigator.pop(context);
-          }
-        }, builder: (context, state) {
+      if (state.status.isSubmissionFailure) {
+        // TODO : Improve errors
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+                content: Text(
+                    "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
+          );
+      } else if (state.status.isSubmissionSuccess) {
+        Navigator.pop(context);
+      }
+    }, builder: (context, state) {
       return SimpleDialog(
         children: [
           Container(
@@ -55,7 +55,7 @@ class NewExamDialog extends StatelessWidget {
                             ),
                             decoration: InputDecoration(
                               labelText:
-                              AppLocalizations.of(context)!.newExamTitle,
+                                  AppLocalizations.of(context)!.newExamTitle,
                             ),
                             onChanged: (examTitle) => context
                                 .read<ExamDetailsBloc>()
@@ -77,7 +77,7 @@ class NewExamDialog extends StatelessWidget {
                             ),
                             decoration: InputDecoration(
                               labelText:
-                              AppLocalizations.of(context)!.newExamTopic,
+                                  AppLocalizations.of(context)!.newExamTopic,
                             ),
                             onChanged: (examTopic) => context
                                 .read<ExamDetailsBloc>()
@@ -105,9 +105,9 @@ class NewExamDialog extends StatelessWidget {
                               },
                               children: state.validCourses
                                   .map((c) => Text(c.displayName,
-                                  style: const TextStyle(
-                                    fontSize: 36,
-                                  )))
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                      )))
                                   .toList()),
                         ),
                       ],
@@ -147,16 +147,16 @@ class NewExamDialog extends StatelessWidget {
                                     primary: Colors.blue),
                                 onPressed: state.status.isValidated
                                     ? () {
-                                  context
-                                      .read<ExamDetailsBloc>()
-                                      .add(const ExamSubmitted());
-                                }
+                                        context
+                                            .read<ExamDetailsBloc>()
+                                            .add(const ExamSubmitted());
+                                      }
                                     : null,
                                 child: Text(state.isNewExamEdit
                                     ? AppLocalizations.of(context)!
-                                    .newExamButtonCreate
+                                        .newExamButtonCreate
                                     : AppLocalizations.of(context)!
-                                    .newExamButtonEdit),
+                                        .newExamButtonEdit),
                               ),
                             ),
                           ),

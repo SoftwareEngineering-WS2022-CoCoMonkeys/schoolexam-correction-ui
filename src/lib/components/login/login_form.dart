@@ -86,7 +86,7 @@ class _UsernameInput extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
               ),
               border:
-              OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
               isDense: true,
               labelText: AppLocalizations.of(context)!.userName,
               errorText: state.username.invalid ? 'invalid username' : null,
@@ -119,7 +119,7 @@ class _PasswordInput extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
               ),
               border:
-              OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
               isDense: true,
               labelText: AppLocalizations.of(context)!.password,
               errorText: state.password.invalid ? 'invalid password' : null,
@@ -140,23 +140,23 @@ class _LoginButton extends StatelessWidget {
         return state.status.isSubmissionInProgress
             ? const CircularProgressIndicator()
             : Container(
-          padding: EdgeInsets.all(10),
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: Size(400, 50)),
-            key: const Key('loginForm_continue_raisedButton'),
-            child: Text(
-              AppLocalizations.of(context)!.login,
-              textScaleFactor: 1.5,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            onPressed: state.status.isValidated
-                ? () {
-              context.read<LoginBloc>().add(const LoginSubmitted());
-            }
-                : null,
-          ),
-        );
+                padding: EdgeInsets.all(10),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: Size(400, 50)),
+                  key: const Key('loginForm_continue_raisedButton'),
+                  child: Text(
+                    AppLocalizations.of(context)!.login,
+                    textScaleFactor: 1.5,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: state.status.isValidated
+                      ? () {
+                          context.read<LoginBloc>().add(const LoginSubmitted());
+                        }
+                      : null,
+                ),
+              );
       },
     );
   }

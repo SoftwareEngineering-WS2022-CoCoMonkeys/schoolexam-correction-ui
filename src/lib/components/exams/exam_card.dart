@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam_correction_ui/extensions/exam_status_helper.dart';
 
 import 'exam_card_action_bar.dart';
 
@@ -48,7 +49,8 @@ class ExamCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       flex: 4,
-                      child: Text(exam.status.name),
+                      child: Text(
+                          ExamHelper.toValue(exam.status, context: context)),
                     )
                   ],
                 ),

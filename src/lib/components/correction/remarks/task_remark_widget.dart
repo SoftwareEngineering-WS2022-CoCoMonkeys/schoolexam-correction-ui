@@ -18,18 +18,18 @@ class AnswerRemarkWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) =>
-        BlocBuilder<RemarkCubit, RemarkState>(
+        builder: (context, constraints) =>
+            BlocBuilder<RemarkCubit, RemarkState>(
           builder: (context, state) {
             final correction = state.getCurrent(initial);
             final answer = correction.submission.answers.firstWhere(
-                    (element) => element.task.id == task.id,
+                (element) => element.task.id == task.id,
                 orElse: () => Answer.empty);
 
             return Container(
               width: double.infinity,
               constraints:
-              BoxConstraints(maxHeight: constraints.maxHeight * 0.3),
+                  BoxConstraints(maxHeight: constraints.maxHeight * 0.3),
               decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: const BorderRadius.only(
@@ -74,7 +74,7 @@ class AnswerRemarkWidget extends StatelessWidget {
             );
           },
         ),
-  );
+      );
 }
 
 class _TaskRemarkSelectionWidget extends StatefulWidget {
@@ -102,22 +102,22 @@ class _TaskRemarkSelectionWidgetState
 
   @override
   Widget build(BuildContext context) => TextField(
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-    inputFormatters: [
-      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-    ],
-    controller: controller,
-    style: const TextStyle(
-      fontSize: 36,
-    ),
-    decoration: InputDecoration(
-      labelText: AppLocalizations.of(context)!.taskRemarkPoints,
-    ),
-    onSubmitted: (text) => BlocProvider.of<RemarkCubit>(context).mark(
-        submission: widget.submission,
-        task: widget.answer.task,
-        achievedPoints: double.parse(text)),
-  );
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+        ],
+        controller: controller,
+        style: const TextStyle(
+          fontSize: 36,
+        ),
+        decoration: InputDecoration(
+          labelText: AppLocalizations.of(context)!.taskRemarkPoints,
+        ),
+        onSubmitted: (text) => BlocProvider.of<RemarkCubit>(context).mark(
+            submission: widget.submission,
+            task: widget.answer.task,
+            achievedPoints: double.parse(text)),
+      );
 
   @override
   void dispose() {
@@ -166,7 +166,7 @@ class _TaskRemarkIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: _getIcon(size: 34),
-  );
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: _getIcon(size: 34),
+      );
 }

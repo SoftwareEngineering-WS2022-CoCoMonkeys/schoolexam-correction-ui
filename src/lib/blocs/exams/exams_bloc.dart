@@ -20,12 +20,13 @@ class ExamsCubit extends Cubit<ExamsState> {
       required AuthenticationBloc authenticationBloc,
       required ExamDetailsBloc examsDetailBloc})
       : _examsRepository = examsRepository,
-        super(LoadedExamsState.empty()) {
+        super(LoadedExamsState.initial()) {
     _examSubscription =
         examsDetailBloc.stream.listen(_onExamDetailsStateChanged);
     _authenticationSubscription =
         authenticationBloc.stream.listen(_onAuthenticationStateChanged);
   }
+
   void _onExamDetailsStateChanged(ExamDetailsState state) async {
     switch (state.status) {
       case FormzStatus.submissionSuccess:
@@ -42,19 +43,20 @@ class ExamsCubit extends Cubit<ExamsState> {
         await loadExams();
         break;
       case AuthenticationStatus.unauthenticated:
-        emit(LoadedExamsState.empty());
+        emit(LoadedExamsState.initial());
         break;
       case AuthenticationStatus.unknown:
         break;
     }
   }
 
-  Future<void> _searchExams({String? search, List<ExamStatus>? states}) async {
+  Future<void> _searchExams(
+      {String? search, List<ExamStatus>? states, bool? refresh}) async {
     final fSearch = search ?? state.search;
     final fStates = states ?? state.states;
 
     late final List<Exam> exams;
-    if (state.exams.isEmpty) {
+    if (state.exams.isEmpty || (refresh != null && refresh)) {
       emit(LoadingExamsState.loading(
           old: state, search: fSearch, states: fStates));
       exams = await _examsRepository.getExams();
@@ -89,7 +91,7 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// The user requested a reload of the exams using the current search parameters.
-  Future<void> loadExams() async => _searchExams();
+  Future<void> loadExams() async => _searchExams(refresh: true);
 
   @override
   Future<void> close() async {

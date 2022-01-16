@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -10,21 +9,8 @@ import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart'
 import 'package:schoolexam_correction_ui/components/loading_widget.dart';
 import 'package:schoolexam_correction_ui/extensions/exam_status_helper.dart';
 
-class ExamsPage extends StatefulWidget {
+class ExamsPage extends StatelessWidget {
   const ExamsPage({Key? key}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _ExamsPageState();
-}
-
-class _ExamsPageState extends State<ExamsPage> {
-  RefreshController? refreshController;
-
-  @override
-  void initState() {
-    refreshController = RefreshController(initialRefresh: false);
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,47 +55,40 @@ class _ExamsPageState extends State<ExamsPage> {
               return const ErrorStateWidget();
             }
 
-            return SmartRefresher(
-              enablePullDown: true,
-              controller: refreshController!,
-              onRefresh: () {
-                context.read<ExamsCubit>().loadExams();
-                refreshController!.refreshCompleted();
-              },
-              child: Container(
-                alignment: Alignment.topCenter,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      child: Card(
-                        child: TextField(
-                          onChanged: (search) => context
-                              .read<ExamsCubit>()
-                              .onSearchChanged(search.toLowerCase()),
-                          onSubmitted: (search) => context
-                              .read<ExamsCubit>()
-                              .onSearchChanged(search.toLowerCase()),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.search_outlined,
-                              size: 40,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            labelText: AppLocalizations.of(context)!.exam,
+            return Container(
+              alignment: Alignment.topCenter,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Card(
+                      child: TextField(
+                        onChanged: (search) => context
+                            .read<ExamsCubit>()
+                            .onSearchChanged(search.toLowerCase()),
+                        onSubmitted: (search) => context
+                            .read<ExamsCubit>()
+                            .onSearchChanged(search.toLowerCase()),
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.search_outlined,
+                            size: 40,
+                            color: Theme.of(context).primaryColor,
                           ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          labelText: AppLocalizations.of(context)!.exam,
                         ),
                       ),
                     ),
-                    const StateSelectorChips(),
-                    Expanded(child: ExamScreenBody(state.filtered))
-                  ],
-                ),
+                  ),
+                  const StateSelectorChips(),
+                  Expanded(flex: 1, child: ExamScreenBody(state.filtered))
+                ],
               ),
             );
           },
@@ -152,7 +131,6 @@ class _StateSelectorChipsState extends State<StateSelectorChips> {
                           selected: state.states.any((element) =>
                               element.name == selectable[index].name),
                           onSelected: (bool choice) => setState(() {
-                            final initial = List.from(state.states);
                             BlocProvider.of<ExamsCubit>(context)
                                 .onStatusChanged(
                                     status: selectable[index], added: choice);

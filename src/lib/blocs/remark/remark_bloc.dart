@@ -5,17 +5,16 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:tuple/tuple.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
-import 'package:path/path.dart' as p;
 
 /// This cubit is responsible for managing the currently active corrections.
 /// It therefore has to provide knowledge about the underlying submissions and corresponding students.

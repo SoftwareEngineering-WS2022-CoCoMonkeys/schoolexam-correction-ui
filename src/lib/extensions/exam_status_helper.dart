@@ -4,9 +4,9 @@ import 'package:schoolexam/exams/models/exam.dart';
 
 abstract class ExamHelper {
   static String toValue(
-      ExamStatus exam, {
-        required BuildContext context,
-      }) {
+    ExamStatus exam, {
+    required BuildContext context,
+  }) {
     switch (exam) {
       case ExamStatus.planned:
         return AppLocalizations.of(context)!.statePlanned;
