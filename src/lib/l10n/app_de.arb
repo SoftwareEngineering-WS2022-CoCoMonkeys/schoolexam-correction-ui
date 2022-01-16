@@ -44,5 +44,7 @@
   },
   "correction": "Korrektur",
   "taskRemarkEvaluate": "Bewerten",
-  "taskRemarkPoints": "Punkte"
+  "taskRemarkPoints": "Punkte",
+  "errorTitle": "Fehler",
+  "authenticationError": "Die Anmeldung ist fehlgeschlagen."
 }

@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/exams/models/submission.dart';
@@ -169,19 +170,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     final res = <CorrectionOverlayInput>[];
 
     for (int i = 0; i < lines.length; ++i) {
-      final outlinePoints = getStroke(
-        lines[i].points,
-        size: options.size * 1.0,
-        thinning: options.thinning,
-        smoothing: options.smoothing,
-        streamline: options.streamline,
-        taperStart: options.taperStart,
-        capStart: options.capStart,
-        taperEnd: options.taperEnd,
-        capEnd: options.capEnd,
-        simulatePressure: options.simulatePressure,
-        isComplete: options.isComplete,
-      )
+      final outlinePoints = convertStroke(line: lines[i])
+          .points
           .map((e) => CorrectionOverlayPoint.fromAbsolute(point: e, size: size))
           .where((element) => !element.isInvalid)
           .toList();
@@ -205,18 +195,47 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   /// Importantly [size] has to be the dimension of the FULL REPRESENTATION OF THE PAGE one is drawing on.
   List<CorrectionOverlayInput> toOverlayInputs(
       {required List<Stroke> lines, required Size size}) {
-    final correctionState = state;
-
-    switch (correctionState.inputTool) {
+    switch (state.inputTool) {
       case CorrectionInputTool.pencil:
-        return _convert(
-            lines: lines, size: size, options: correctionState.pencilOptions);
+        return _convert(lines: lines, size: size, options: state.pencilOptions);
       case CorrectionInputTool.marker:
-        return _convert(
-            lines: lines, size: size, options: correctionState.markerOptions);
+        return _convert(lines: lines, size: size, options: state.markerOptions);
       default:
         return [];
     }
+  }
+
+  /// Uses a rough input [line] and beautifies it.
+  CorrectionOverlayAbsoluteInput convertStroke({required Stroke line}) {
+    late final DrawingInputOptions options;
+    switch (state.inputTool) {
+      case CorrectionInputTool.pencil:
+        options = state.pencilOptions;
+        break;
+      case CorrectionInputTool.marker:
+        options = state.markerOptions;
+        break;
+      default:
+        return const CorrectionOverlayAbsoluteInput(
+            color: Colors.transparent, points: []);
+    }
+
+    final outlinePoints = getStroke(
+      line.points,
+      size: options.size * 1.0,
+      thinning: options.thinning,
+      smoothing: options.smoothing,
+      streamline: options.streamline,
+      taperStart: options.taperStart,
+      capStart: options.capStart,
+      taperEnd: options.taperEnd,
+      capEnd: options.capEnd,
+      simulatePressure: options.simulatePressure,
+      isComplete: options.isComplete,
+    );
+
+    return CorrectionOverlayAbsoluteInput(
+        color: options.color, points: outlinePoints);
   }
 
   /// Adds the [lines] into the correction overlay [document].

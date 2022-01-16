@@ -29,7 +29,8 @@ class Correction extends Equatable {
       required this.currentAnswer});
 
   Correction copyWith(
-      {Answer? currentAnswer,
+      {Submission? submission,
+      Answer? currentAnswer,
       Uint8List? submissionData,
       Uint8List? correctionData}) {
     return Correction(
@@ -37,7 +38,7 @@ class Correction extends Equatable {
         correctionPath: correctionPath,
         submissionData: submissionData ?? this.submissionData,
         submissionPath: submissionPath,
-        submission: submission,
+        submission: submission ?? this.submission,
         currentAnswer: currentAnswer ?? this.currentAnswer);
   }
 

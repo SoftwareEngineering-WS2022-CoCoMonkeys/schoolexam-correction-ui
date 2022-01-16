@@ -54,6 +54,11 @@ class AnswerSegment extends Equatable {
 
   AnswerSegment({required this.start, required this.end});
 
+  int compareTo(AnswerSegment other) {
+    int c1 = start.compareTo(other.start);
+    return (c1 == 0) ? end.compareTo(other.end) : c1;
+  }
+
   @override
   List<Object?> get props => [start, end];
 }
@@ -67,4 +72,10 @@ class SegmentPosition extends Equatable {
 
   @override
   List<Object?> get props => [page, y];
+
+  int compareTo(SegmentPosition other) {
+    int c1 = page.compareTo(other.page);
+    // Das Koordinatensystem in PDFs beginnt links unten
+    return (c1 == 0) ? y.compareTo(other.y) * -1 : c1;
+  }
 }

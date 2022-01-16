@@ -41,6 +41,7 @@ class CorrectionPage extends StatelessWidget {
         } else {
           return Material(
             child: CupertinoPageScaffold(
+                resizeToAvoidBottomInset: false,
                 navigationBar: CupertinoNavigationBar(
                   trailing: IconButton(
                     icon: Icon(

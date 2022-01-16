@@ -15,13 +15,13 @@ import 'package:schoolexam_correction_ui/repositories/correction_overlay/correct
 class DrawingInputOverlay extends StatefulWidget {
   final Correction initial;
   final Size size;
-  final StreamController<List<CorrectionOverlayInput>> linesController;
+  final StreamController<CorrectionOverlayAbsoluteInput> lineController;
 
   const DrawingInputOverlay(
       {Key? key,
       required this.initial,
       required this.size,
-      required this.linesController})
+      required this.lineController})
       : super(key: key);
 
   @override
@@ -30,44 +30,53 @@ class DrawingInputOverlay extends StatefulWidget {
 
 class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
   Stroke? line;
+  CorrectionOverlayCubit? cubit;
 
-  void _addUpdate(
-      BuildContext context, CorrectionOverlayDocument document) async {
-    widget.linesController.add(List<CorrectionOverlayInput>.from(
-        document.pages[document.pageNumber].inputs)
-      ..addAll(BlocProvider.of<CorrectionOverlayCubit>(context)
-          .toOverlayInputs(lines: [line!], size: widget.size)));
+  @override
+  void initState() {
+    cubit = BlocProvider.of<CorrectionOverlayCubit>(context);
+    super.initState();
   }
 
-  void onPanStart(BuildContext context, DragStartDetails details,
-      CorrectionOverlayDocument document) {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
+  void onPointerDown(PointerDownEvent details) {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    final offset = details.localPosition;
+    final point = Point(offset.dx, offset.dy, details.pressure);
     final points = [point];
 
-    log("Starting at : ${point.x}, ${point.y} with ${box.size.width}, ${box.size.height} box size");
+    log("Starting at : ${point.x}, ${point.y} ");
 
     line = Stroke(points);
-    _addUpdate(context, document);
+    final input = cubit!.convertStroke(line: line!);
+    widget.lineController.add(input);
   }
 
-  void onPanUpdate(BuildContext context, DragUpdateDetails details,
-      CorrectionOverlayDocument document) {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
+  void onPointerMove(PointerMoveEvent details) {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    final offset = details.localPosition;
+    final point = Point(offset.dx, offset.dy, details.pressure);
     final points = [...line!.points, point];
 
     line = Stroke(points);
-    _addUpdate(context, document);
+    final input = cubit!.convertStroke(line: line!);
+    widget.lineController.add(input);
   }
 
-  void onPanEnd(BuildContext context, DragEndDetails details,
+  void onPointerUp(BuildContext context, PointerUpEvent details,
       CorrectionOverlayDocument document) {
     // Registering the line with the business logic
     BlocProvider.of<CorrectionOverlayCubit>(context)
         .addDrawing(document: document, lines: [line!], size: widget.size);
+    widget.lineController.add(const CorrectionOverlayAbsoluteInput(
+        color: Colors.transparent, points: []));
   }
 
   @override
@@ -76,20 +85,10 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
           builder: (context, state) {
         final document = state.getCurrent(widget.initial);
 
-        return RawGestureDetector(
-          gestures: {
-            DrawingGestureRecognizer:
-                GestureRecognizerFactoryWithHandlers<DrawingGestureRecognizer>(
-                    () => DrawingGestureRecognizer(),
-                    (DrawingGestureRecognizer instance) {
-              instance.onStart = (DragStartDetails details) =>
-                  onPanStart(context, details, document);
-              instance.onUpdate = (DragUpdateDetails details) =>
-                  onPanUpdate(context, details, document);
-              instance.onEnd = (DragEndDetails details) =>
-                  onPanEnd(context, details, document);
-            })
-          },
+        return Listener(
+          onPointerDown: (details) => onPointerDown(details),
+          onPointerMove: (details) => onPointerMove(details),
+          onPointerUp: (details) => onPointerUp(context, details, document),
           child: Container(
             width: widget.size.width,
             height: widget.size.height,

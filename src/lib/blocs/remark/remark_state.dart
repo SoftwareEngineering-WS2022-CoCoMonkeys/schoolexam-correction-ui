@@ -84,17 +84,18 @@ class LoadedRemarksState extends RemarkState {
 
 /// Changed the remark for a submission.
 class UpdatedRemarksState extends LoadedRemarksState {
-  final Submission marked;
+  final Correction marked;
 
   UpdatedRemarksState.marked(
       {required RemarkState initial, required this.marked})
       : super._(
             exam: initial.exam,
             selectedCorrection: initial.selectedCorrection,
-            submissions: List<Submission>.from(initial.submissions)
-                .map((e) => (e.id == marked.id) ? marked : e)
-                .toList(),
-            corrections: initial.corrections);
+            submissions: initial.submissions,
+            corrections: <Correction>[
+              ...initial.corrections.map(
+                  (e) => (e.submission.id == marked.submission.id) ? marked : e)
+            ]);
 }
 
 /// Starting the overall correction for an exam. No submission can yet be actively corrected.

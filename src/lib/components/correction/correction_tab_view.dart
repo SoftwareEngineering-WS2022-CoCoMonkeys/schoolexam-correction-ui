@@ -25,19 +25,23 @@ class _CorrectionTabViewState extends State<CorrectionTabView>
         CorrectionInputHeader(
           initial: widget.initial,
         ),
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                CorrectionPageView(
-                  initial: widget.initial,
-                ),
-                CorrectionPageNavigation(
-                  initial: widget.initial,
-                )
-              ],
-            )),
+        Expanded(
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              child: Stack(
+                children: [
+                  CorrectionPageView(
+                    initial: widget.initial,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: CorrectionPageNavigation(
+                      initial: widget.initial,
+                    ),
+                  ),
+                ],
+              )),
+        ),
       ],
     );
   }

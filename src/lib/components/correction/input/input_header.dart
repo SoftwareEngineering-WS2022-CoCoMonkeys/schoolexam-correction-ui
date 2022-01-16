@@ -35,9 +35,6 @@ class InputHeader extends StatelessWidget {
                     color: Colors.black,
                     icon: const Icon(Icons.redo)),
                 const _InputIconButton(
-                    icon: Icon(CustomIcons.font),
-                    tool: CorrectionInputTool.text),
-                const _InputIconButton(
                     icon: Icon(CustomIcons.pencil_alt),
                     tool: CorrectionInputTool.pencil),
                 const _InputIconButton(
