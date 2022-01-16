@@ -346,6 +346,16 @@ class LocalExamsRepository extends ExamsRepository {
         .update('tasks', dTask.toMap(), where: 'id = ?', whereArgs: [dTask.id]);
   }
 
+  /// Adds the update of the local persistence layer to include [lowerBound] nto the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addGradingTableLowerBoundInsertion(
+      {required Batch batch, required GradingTableLowerBound lowerBound, required Exam exam}) {
+    final dLb = GradingTableLowerBoundData.fromModel(lowerBound, exam);
+    // Ensure that a task with that ID exists
+    batch.insert('gt_lower_bounds', dLb.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
   /// Adds the update of the local persistence layer to include [exam] into the [batch].
   /// The changes are only made effective, if the [batch] successfully commits.
   void _addExamInsertion({required Batch batch, required Exam exam}) {
@@ -373,6 +383,15 @@ class LocalExamsRepository extends ExamsRepository {
     // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
     for (final participant in exam.participants) {
       _addParticipantInsertion(batch: batch, participant: participant);
+    }
+
+    // 4. Delete existing grading table
+    // The grading table is only used and edited by one part of the application
+    batch.delete('gt_lower_bounds', where: 'examId = ?', whereArgs: [dExam.id]);
+
+    // 4a. Insert new grading table
+    for (final lowerBound in exam.gradingTable.lowerBounds) {
+      _addGradingTableLowerBoundInsertion(batch: batch, lowerBound: lowerBound, exam: exam);
     }
   }
 
