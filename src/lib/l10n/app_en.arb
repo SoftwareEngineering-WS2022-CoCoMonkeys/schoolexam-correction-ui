@@ -44,5 +44,7 @@
   },
   "correction": "correction",
   "taskRemarkEvaluate": "evaluate",
-  "taskRemarkPoints": "points"
+  "taskRemarkPoints": "points",
+  "errorTitle": "Error",
+  "authenticationError": "The authentication failed."
 }
