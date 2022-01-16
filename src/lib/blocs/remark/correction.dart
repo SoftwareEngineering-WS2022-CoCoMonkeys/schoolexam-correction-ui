@@ -1,12 +1,7 @@
-import 'dart:developer';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:tuple/tuple.dart';
 
 /// This class contains all necessary data for an ongoing correction of a single submission instance
 class Correction extends Equatable {

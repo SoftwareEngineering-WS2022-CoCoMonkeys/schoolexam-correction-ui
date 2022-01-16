@@ -1,9 +1,5 @@
-import 'dart:developer';
-import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/models/correction_overlay_document.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 abstract class CorrectionOverlayRepository {
   /// Retrieves the [CorrectionOverlayDocument] currently stored for the corresponding submission [submissionId].

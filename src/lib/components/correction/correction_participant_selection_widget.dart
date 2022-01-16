@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 
 class CorrectionParticipantSelectionWidget extends StatelessWidget {
@@ -29,18 +30,20 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
                           context: context,
                           builder: (BuildContext context) =>
                               CupertinoAlertDialog(
-                            title: const Text('Korrektur'),
-                            content: Text(
-                                'Möchten sie die Korrektur von ${state.submissions[index].student.displayName} öffnen?'),
+                            title:
+                                Text(AppLocalizations.of(context)!.correction),
+                            content: Text(AppLocalizations.of(context)!
+                                .correctionSelectionConfirmWithName(state
+                                    .submissions[index].student.displayName)),
                             actions: <CupertinoDialogAction>[
                               CupertinoDialogAction(
-                                child: const Text('Nein'),
+                                child: Text(AppLocalizations.of(context)!.no),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
                               ),
                               CupertinoDialogAction(
-                                child: const Text('Ja'),
+                                child: Text(AppLocalizations.of(context)!.yes),
                                 isDefaultAction: true,
                                 onPressed: () {
                                   BlocProvider.of<RemarkCubit>(context)
