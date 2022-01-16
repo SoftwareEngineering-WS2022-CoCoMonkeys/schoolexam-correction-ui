@@ -37,13 +37,16 @@ class _CorrectionPageViewState extends State<CorrectionPageView> {
       {required BoxConstraints constraints,
       required CorrectionOverlayPage page}) {
     // Take up 85% of the allowed space
-    final parentWidth = constraints.maxWidth * 0.85;
+    final pdfWidth = constraints.maxWidth * 0.85;
+    final pdfHeight = constraints.maxHeight * 0.85;
 
-    final size = Size(parentWidth,
-        parentWidth * (page.pageSize.height / page.pageSize.width));
+    final byWidth =
+        Size(pdfWidth, pdfWidth * (page.pageSize.height / page.pageSize.width));
+    final byHeight = Size(
+        pdfHeight * (page.pageSize.width / page.pageSize.height), pdfHeight);
 
+    final size = (byWidth.height > constraints.maxHeight) ? byHeight : byWidth;
     log("Determined size ${size.width} ${size.height} from ${page.pageSize.height} ${page.pageSize.width}");
-
     return size;
   }
 

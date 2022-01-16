@@ -19,25 +19,25 @@ class CorrectionInputHeader extends StatefulWidget {
 
 class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
-      // Only update, when the navigation changed (task dropdown)
-      buildWhen: (old, current) => current is NavigatedRemarkState,
-      builder: (context, state) {
-        final current = state.getCurrent(widget.initial);
-        return Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 3,
-                offset: const Offset(2, 0), // changes position of shadow
-              ),
-            ],
-          ),
-          child: Row(
+  Widget build(BuildContext context) => Container(
+    height: 44,
+    decoration: BoxDecoration(
+      color: Theme.of(context).cardColor,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 3,
+          blurRadius: 3,
+          offset: const Offset(2, 0), // changes position of shadow
+        ),
+      ],
+    ),
+    child: BlocBuilder<RemarkCubit, RemarkState>(
+        // Only update, when the navigation changed (task dropdown)
+        buildWhen: (old, current) => current is NavigatedRemarkState,
+        builder: (context, state) {
+          final current = state.getCurrent(widget.initial);
+          return Row(
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 16.0),
@@ -62,7 +62,7 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
                 child: InputHeader(),
               )
             ],
-          ),
-        );
-      });
+          );
+        }),
+  );
 }

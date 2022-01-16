@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
@@ -130,13 +132,23 @@ class AddedCorrectionOverlayState extends LoadedOverlayState {
 class RemovedCorrectionOverlayState extends LoadedOverlayState {
   final CorrectionOverlayDocument removed;
 
-  RemovedCorrectionOverlayState.remove(
-      {required CorrectionOverlayState initial, required this.removed})
-      : super._(
-            overlays: List<CorrectionOverlayDocument>.from(initial.overlays)
-              ..removeWhere(
-                  (element) => element.submissionId == removed.submissionId),
-            documentNumber: initial.overlays.length);
+  const RemovedCorrectionOverlayState._(
+      {required this.removed,
+      required int documentNumber,
+      required List<CorrectionOverlayDocument> overlays})
+      : super._(documentNumber: documentNumber, overlays: overlays);
+
+  factory RemovedCorrectionOverlayState.remove(
+      {required CorrectionOverlayState initial,
+      required CorrectionOverlayDocument removed}) {
+    final overlays = List<CorrectionOverlayDocument>.from(initial.overlays)
+      ..removeWhere((element) => element.submissionId == removed.submissionId);
+
+    return RemovedCorrectionOverlayState._(
+        removed: removed,
+        documentNumber: min(overlays.length - 1, initial.documentNumber),
+        overlays: overlays);
+  }
 }
 
 /// The user navigated to a new page, loaded e.g. a new document ...
