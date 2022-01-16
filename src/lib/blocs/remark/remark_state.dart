@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 
 import 'correction.dart';
 
@@ -162,4 +163,17 @@ class NavigatedRemarkState extends LoadedRemarksState {
               ...initial.corrections.map((e) =>
                   (e.submission.id == navigated.submission.id) ? navigated : e)
             ]);
+}
+
+/// Updated the grading table
+class GradingTabledUpdatedState extends RemarkState {
+  final GradingTable gradingTable;
+
+  GradingTabledUpdatedState.updated(
+      {required RemarkState initial, required this.gradingTable})
+      : super._(
+            exam: initial.exam,
+            selectedCorrection: initial.selectedCorrection,
+            submissions: initial.submissions,
+            corrections: initial.corrections);
 }

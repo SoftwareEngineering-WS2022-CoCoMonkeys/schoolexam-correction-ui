@@ -9,6 +9,7 @@ import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
@@ -208,6 +209,11 @@ class RemarkCubit extends Cubit<RemarkState> {
                     ? answer.copyWith(achievedPoints: achievedPoints)
                     : e)
                 .toList())));
+  }
+
+  void updateGradingTable() {
+    // validate grading table
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: GradingTable.empty));
   }
 
   @override
