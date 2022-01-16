@@ -345,6 +345,7 @@ class RemarkCubit extends Cubit<RemarkState> {
   /// The two standard german grading schemes are available as presets
   void getDefaultGradingTable(int low, int high) {
     List<String> grades = [];
+    List<double> points = [];
     if (low == 1 && high == 6) {
       grades = [
         "sehr gut",
@@ -353,6 +354,14 @@ class RemarkCubit extends Cubit<RemarkState> {
         "ausreichend",
         "mangelhaft",
         "ungenügend"
+      ];
+      points = [
+        0.85,
+        0.70,
+        0.55,
+        0.4,
+        0.20,
+        0.0
       ];
     } else if (low == 0 && high == 15) {
       grades = [
@@ -373,14 +382,31 @@ class RemarkCubit extends Cubit<RemarkState> {
         "mangelhaft (5-)",
         "ungenügend (6)"
       ];
+      points = [
+        0.95,
+        0.90,
+        0.85,
+        0.80,
+        0.75,
+        0.70,
+        0.65,
+        0.60,
+        0.55,
+        0.50,
+        0.45,
+        0.39,
+        0.33,
+        0.27,
+        0.20,
+        0.0
+      ];
     }
     final maxPoints =
         state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
     final lowerBounds = grades.mapIndexed((i, grade) {
       return GradingTableLowerBound(
-          // assume equal distribution for now
-          points: (maxPoints * (grades.length - i - 1) / grades.length)
-              .roundToDouble(),
+          // round down to nearest half point
+          points: (2 * (points[i] * maxPoints).floor().toDouble()) / 2,
           grade: grade);
     }).toList();
 
