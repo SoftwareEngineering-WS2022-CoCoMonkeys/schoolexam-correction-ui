@@ -195,7 +195,14 @@ class RemarkCubit extends Cubit<RemarkState> {
     correction.submission.answers
         .sort((a1, a2) => a1.segments[0].compareTo(a2.segments[0]));
 
-    print(correction.submission.answers);
+
+    /// Sort tasks by answers
+    submission.exam.tasks.sort((t1,t2) =>
+        correction.submission.answers.indexWhere((element) => element.task.id == t1.id)
+          .compareTo(
+            correction.submission.answers.indexWhere((element) => element.task.id == t2.id)
+        )
+    );
     var newState = AddedCorrectionState.add(initial: state, added: correction);
 
     emit(newState);
