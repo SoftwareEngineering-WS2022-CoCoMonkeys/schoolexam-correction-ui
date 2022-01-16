@@ -1,4 +1,12 @@
 {
+  "newGradingIntervalButton": "new interval",
+  "standardGradingIntervalsButton": "default intervals",
+  "gradeColumnHeader": "grade",
+  "pointsColumnHeader": "points",
+  "saveButton": "save",
+  "gradingIntervalStart": "from (exclusive)",
+  "gradingIntervalEnd": "to (inclusive)",
+  "gradingTableTitle": "Grading Table",
   "appTitle": "SchoolExam",
   "welcomeText": "Welcome!",
   "pleaseLogin": "Please login to start correcting exams!",

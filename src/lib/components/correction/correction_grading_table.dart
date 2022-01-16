@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 
@@ -25,16 +26,18 @@ class CorrectionGradingTable extends StatelessWidget {
           final lowerBounds = state.exam.gradingTable.lowerBounds;
           const headerTextStyle = TextStyle(fontWeight: FontWeight.bold);
 
-          const columnFormatText =
-              Text("% | Punkte", style: TextStyle(color: Colors.grey));
+          final columnFormatText = Text(
+              "% | ${AppLocalizations.of(context)!.pointsColumnHeader}",
+              style: TextStyle(color: Colors.grey));
           final tableHeader = TableRow(children: [
             const Text(""),
             Center(
                 child: Padding(
               padding: EdgeInsets.all(20.0),
               child: Column(
-                children: const [
-                  Text("Von (exklusive)", style: headerTextStyle),
+                children: [
+                  Text(AppLocalizations.of(context)!.gradingIntervalStart,
+                      style: headerTextStyle),
                   columnFormatText
                 ],
               ),
@@ -46,9 +49,10 @@ class CorrectionGradingTable extends StatelessWidget {
                 children: [
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        Text("Bis (inklusive)", style: headerTextStyle),
-                        Icon(Icons.edit_outlined)
+                      children: [
+                        Text(AppLocalizations.of(context)!.gradingIntervalEnd,
+                            style: headerTextStyle),
+                        const Icon(Icons.edit_outlined)
                       ]),
                   columnFormatText
                 ],
@@ -123,8 +127,9 @@ class CorrectionGradingTable extends StatelessWidget {
                                           maxPoints);
                             },
                             style: const TextStyle(fontSize: 36),
-                            decoration:
-                                const InputDecoration(labelText: "Punkte (%)"),
+                            decoration: InputDecoration(
+                                labelText:
+                                    "${AppLocalizations.of(context)!.pointsColumnHeader} (%)"),
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
@@ -152,8 +157,9 @@ class CorrectionGradingTable extends StatelessWidget {
                                   .changeGradingTableBoundGrade(
                                       index, gradeInput);
                             },
-                            decoration:
-                                const InputDecoration(labelText: "Note"),
+                            decoration: InputDecoration(
+                                labelText: AppLocalizations.of(context)!
+                                    .gradeColumnHeader),
                           ),
                         ),
                         child: Center(
@@ -172,26 +178,29 @@ class CorrectionGradingTable extends StatelessWidget {
             ElevatedButton(
                 onPressed: () => BlocProvider.of<RemarkCubit>(context)
                     .addGradingTableBound(),
-                child: const Text("Neues Intervall")),
+                child: Text(
+                    AppLocalizations.of(context)!.newGradingIntervalButton)),
             ElevatedButton(
                 onPressed: () => BlocProvider.of<RemarkCubit>(context)
                     .getDefaultGradingTable(),
-                child: const Text("Standardintervalle")),
+                child: Text(AppLocalizations.of(context)!
+                    .standardGradingIntervalsButton)),
             ElevatedButton(
-                onPressed: () =>
-                    BlocProvider.of<RemarkCubit>(context).saveGradingTable(),
-                child: const Text("Speichern"),),
+              onPressed: () =>
+                  BlocProvider.of<RemarkCubit>(context).saveGradingTable(),
+              child: Text(AppLocalizations.of(context)!.saveButton),
+            ),
           ]);
           return Padding(
             padding: const EdgeInsets.all(30.0),
             child: SizedBox(
-                width: 500,
+                width: 600,
                 height: 500,
                 child: Column(children: [
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      "Notenschlüssel",
+                      AppLocalizations.of(context)!.gradingTableTitle,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
                     ),

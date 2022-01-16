@@ -1,4 +1,12 @@
 {
+  "newGradingIntervalButton": "Neues Interval",
+  "standardGradingIntervalsButton": "Standardintervalle",
+  "gradeColumnHeader": "Note",
+  "pointsColumnHeader": "Punkte",
+  "gradingIntervalStart": "Von (exklusive)",
+  "gradingIntervalEnd": "Bis (inklusive)",
+  "saveButton": "Speichern",
+  "gradingTableTitle": "Notenschlüssel",
   "appTitle": "SchoolExam",
   "welcomeText": "Willkommen!",
   "pleaseLogin": "Bitte melden Sie sich an, um mit der Korrektur von Prüfungen zu beginnen.",
