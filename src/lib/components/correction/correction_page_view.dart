@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/eraser_input_overlay.dart';
+import 'package:schoolexam_correction_ui/components/correction/input/paths_absolute_widget.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/paths_widget.dart';
 import 'package:schoolexam_correction_ui/components/correction/remarks/task_remark_widget.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
@@ -25,11 +26,14 @@ class CorrectionPageView extends StatefulWidget {
 
 class _CorrectionPageViewState extends State<CorrectionPageView> {
   StreamController<List<CorrectionOverlayInput>>? linesController;
+  StreamController<CorrectionOverlayAbsoluteInput>? lineController;
 
   @override
   void initState() {
     linesController =
         StreamController<List<CorrectionOverlayInput>>.broadcast();
+    lineController =
+        StreamController<CorrectionOverlayAbsoluteInput>.broadcast();
     super.initState();
   }
 
@@ -98,11 +102,17 @@ class _CorrectionPageViewState extends State<CorrectionPageView> {
                               size: size,
                               controller: linesController!),
                           if (state.inputTool == CorrectionInputTool.pencil ||
-                              state.inputTool == CorrectionInputTool.marker)
+                              state.inputTool ==
+                                  CorrectionInputTool.marker) ...{
+                            PathsAbsoluteWidget(
+                              controller: lineController!,
+                              size: size,
+                            ),
                             DrawingInputOverlay(
                                 size: size,
-                                linesController: linesController!,
+                                lineController: lineController!,
                                 initial: widget.initial),
+                          },
                           if (state.inputTool == CorrectionInputTool.eraser)
                             EraserInputOverlay(
                                 size: size,

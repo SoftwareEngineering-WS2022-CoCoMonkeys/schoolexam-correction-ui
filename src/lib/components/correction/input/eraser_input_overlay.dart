@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
@@ -67,38 +68,46 @@ class _EraserInputOverlayState extends State<EraserInputOverlay> {
     }
   }
 
-  Future<void> onPanStart(
+  void onPointerDown(
       {required InputOptions options,
       required BuildContext context,
       required CorrectionOverlayDocument document,
       required List<CorrectionOverlayInput> inputs,
-      required DragStartDetails details}) async {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
+      required PointerDownEvent details}) async {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    final offset = details.localPosition;
     final point = Offset(offset.dx, offset.dy);
 
     await _erase(
         options: options, document: document, point: point, inputs: inputs);
   }
 
-  Future<void> onPanUpdate(
+  void onPointerMove(
       {required InputOptions options,
       required BuildContext context,
       required CorrectionOverlayDocument document,
       required List<CorrectionOverlayInput> inputs,
-      required DragUpdateDetails details}) async {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
+      required PointerMoveEvent details}) async {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    final offset = details.localPosition;
     final point = Offset(offset.dx, offset.dy);
 
     await _erase(
         options: options, document: document, point: point, inputs: inputs);
   }
 
-  Future<void> onPanEnd(
+  void onPointerUp(
       {required BuildContext context,
       required CorrectionOverlayDocument document,
-      required List<CorrectionOverlayInput> inputs}) async {
+      required List<CorrectionOverlayInput> inputs}) {
     BlocProvider.of<CorrectionOverlayCubit>(context)
         .replaceDrawings(document: document, inputs: inputs);
   }
@@ -115,34 +124,23 @@ class _EraserInputOverlayState extends State<EraserInputOverlay> {
             builder: (context, snapshot) =>
                 BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
                     builder: (context, state) {
-                  return RawGestureDetector(
-                    gestures: {
-                      DrawingGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                                  DrawingGestureRecognizer>(
-                              () => DrawingGestureRecognizer(),
-                              (DrawingGestureRecognizer instance) {
-                        instance.onStart = (DragStartDetails details) async =>
-                            await onPanStart(
-                                options: state.eraserOptions,
-                                context: context,
-                                document: document,
-                                details: details,
-                                inputs: snapshot.requireData);
-                        instance.onUpdate = (DragUpdateDetails details) async =>
-                            await onPanUpdate(
-                                options: state.eraserOptions,
-                                context: context,
-                                document: document,
-                                details: details,
-                                inputs: snapshot.requireData);
-                        instance.onEnd = (DragEndDetails details) async =>
-                            await onPanEnd(
-                                context: context,
-                                document: document,
-                                inputs: snapshot.requireData);
-                      })
-                    },
+                  return Listener(
+                    onPointerDown: (details) => onPointerDown(
+                        options: state.eraserOptions,
+                        context: context,
+                        document: document,
+                        details: details,
+                        inputs: snapshot.requireData),
+                    onPointerMove: (details) => onPointerMove(
+                        options: state.eraserOptions,
+                        context: context,
+                        document: document,
+                        details: details,
+                        inputs: snapshot.requireData),
+                    onPointerUp: (details) => onPointerUp(
+                        context: context,
+                        document: document,
+                        inputs: snapshot.requireData),
                     child: Container(
                       width: widget.size.width,
                       height: widget.size.height,
