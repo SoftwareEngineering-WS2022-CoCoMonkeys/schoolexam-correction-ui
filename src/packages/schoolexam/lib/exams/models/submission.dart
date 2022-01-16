@@ -11,7 +11,6 @@ class SubmissionOverview extends Correctable {
   final Exam exam;
 
   /// Meta information about the status
-  final DateTime updatedAt;
   final bool isCompleted;
   final bool isMatchedToStudent;
 
@@ -19,12 +18,15 @@ class SubmissionOverview extends Correctable {
     required this.id,
     required this.exam,
     required this.student,
-    required this.updatedAt,
     required this.isCompleted,
     required this.isMatchedToStudent,
+    required DateTime updatedAt,
     required double achievedPoints,
     required CorrectableStatus status,
-  }) : super(achievedPoints: achievedPoints, status: status);
+  }) : super(
+            achievedPoints: achievedPoints,
+            status: status,
+            updatedAt: updatedAt);
 
   @override
   String toString() {
@@ -90,7 +92,6 @@ class Submission extends SubmissionOverview {
   final List<Answer> answers;
 
   /// Meta information about the status
-  final DateTime updatedAt;
   final bool isCompleted;
   final bool isMatchedToStudent;
 
@@ -100,9 +101,9 @@ class Submission extends SubmissionOverview {
     required this.student,
     required this.data,
     required this.answers,
-    required this.updatedAt,
     required this.isCompleted,
     required this.isMatchedToStudent,
+    required DateTime updatedAt,
     required double achievedPoints,
     required CorrectableStatus status,
   }) : super(

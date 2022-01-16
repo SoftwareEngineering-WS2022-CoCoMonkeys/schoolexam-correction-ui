@@ -7,12 +7,12 @@ import 'package:schoolexam/utils/api_helper.dart';
 import 'answer_dto.dart';
 
 class SubmissionDetailsDTO extends Equatable {
+  final String updatedAt;
   final String status;
   final double achievedPoints;
 
   final String id;
   final ParticipantDTO student;
-  final String updatedAt;
   final bool isCompleted;
   final bool isMatchedToStudent;
 
@@ -76,10 +76,10 @@ class SubmissionDetailsDTO extends Equatable {
       answers: answers.map((e) => e.toModel()).toList(),
       isCompleted: isCompleted,
       isMatchedToStudent: isMatchedToStudent,
-      updatedAt: DateTime.parse(updatedAt),
+      updatedAt: DateTime.parse(updatedAt).toUtc(),
       achievedPoints: achievedPoints,
       status: CorrectableStatus.values.firstWhere(
-          (element) => element.name == status,
+          (element) => element.name.toLowerCase() == status.toLowerCase(),
           orElse: () => CorrectableStatus.unknown));
 
   @override

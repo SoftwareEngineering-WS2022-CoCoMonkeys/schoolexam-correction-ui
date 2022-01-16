@@ -4,6 +4,7 @@ import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
 class AnswerDTO extends Equatable {
+  final String updatedAt;
   final String status;
   final double achievedPoints;
 
@@ -11,13 +12,15 @@ class AnswerDTO extends Equatable {
   final List<AnswerSegmentDTO> segments;
 
   const AnswerDTO(
-      {required this.status,
+      {required this.updatedAt,
+      required this.status,
       required this.achievedPoints,
       required this.task,
       required this.segments});
 
   Map<String, dynamic> toJson() {
     return {
+      'updatedAt': this.updatedAt,
       'status': this.status,
       'achievedPoints': this.achievedPoints,
       'task': this.task.toJson(),
@@ -27,6 +30,7 @@ class AnswerDTO extends Equatable {
 
   factory AnswerDTO.fromJson(Map<String, dynamic> map) {
     return AnswerDTO(
+      updatedAt: ApiHelper.getValue(map: map, keys: ['updatedAt'], value: ""),
       status: ApiHelper.getValue(map: map, keys: ["status"], value: ""),
       achievedPoints:
           ApiHelper.getValue(map: map, keys: ["achievedPoints"], value: 0.0),
@@ -42,9 +46,10 @@ class AnswerDTO extends Equatable {
   Answer toModel() => Answer(
       task: task.toModel(),
       segments: segments.map((e) => e.toModel()).toList(),
+      updatedAt: (DateTime.tryParse(updatedAt) ?? DateTime.utc(0)).toUtc(),
       achievedPoints: achievedPoints,
       status: CorrectableStatus.values.firstWhere(
-          (element) => element.name == status,
+          (element) => element.name.toLowerCase() == status.toLowerCase(),
           orElse: () => CorrectableStatus.unknown));
 
   @override
@@ -100,7 +105,9 @@ class SegmentPositionDTO extends Equatable {
     );
   }
 
-  SegmentPosition toModel() => SegmentPosition(page: page, y: y);
+  /// Converts this instance to its model [SegmentPosition] representation.
+  /// Importantly, the internal model starts counting pages from 0 while the DTO starts from 1.
+  SegmentPosition toModel() => SegmentPosition(page: page - 1, y: y);
 
   @override
   List<Object?> get props => [page, y];

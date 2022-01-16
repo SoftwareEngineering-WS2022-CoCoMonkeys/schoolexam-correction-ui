@@ -82,7 +82,6 @@ class OnlineExamsRepository extends ExamsRepository {
       {required String examId, required List<String> submissionIds}) async {
     final exam = await getExam(examId);
 
-    // TODO : 16.01
     var res = await provider.query(
         path: "/submission/byidswithdetails",
         method: HTTPMethod.POST,
@@ -90,6 +89,7 @@ class OnlineExamsRepository extends ExamsRepository {
         key: await authenticationRepository.getKey());
 
     var submissions = List<Map<String, dynamic>>.from(res);
+
     return submissions
         .map((e) => SubmissionDetailsDTO.fromJson(e).toModel(exam: exam))
         .toList();

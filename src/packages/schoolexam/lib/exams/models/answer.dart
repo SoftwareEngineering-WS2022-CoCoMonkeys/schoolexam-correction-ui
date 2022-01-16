@@ -10,14 +10,19 @@ class Answer extends Correctable {
   const Answer(
       {required this.task,
       required this.segments,
+      required DateTime updatedAt,
       required double achievedPoints,
       required CorrectableStatus status})
-      : super(achievedPoints: achievedPoints, status: status);
+      : super(
+            achievedPoints: achievedPoints,
+            status: status,
+            updatedAt: updatedAt);
 
-  static const empty = const Answer(
+  static final empty = Answer(
       task: Task.empty,
       segments: [],
       achievedPoints: 0.0,
+      updatedAt: DateTime(0),
       status: CorrectableStatus.unknown);
 
   bool get isEmpty => this == Answer.empty;
@@ -27,15 +32,16 @@ class Answer extends Correctable {
   @override
   List<Object?> get props => [status, achievedPoints, segments, task];
 
-  Answer copyWith({
-    Task? task,
-    List<AnswerSegment>? segments,
-    double? achievedPoints,
-    CorrectableStatus? status,
-  }) {
+  Answer copyWith(
+      {Task? task,
+      List<AnswerSegment>? segments,
+      double? achievedPoints,
+      CorrectableStatus? status,
+      DateTime? updatedAt}) {
     return Answer(
         task: task ?? this.task,
         segments: segments ?? this.segments,
+        updatedAt: updatedAt ?? this.updatedAt,
         achievedPoints: achievedPoints ?? this.achievedPoints,
         status: status ?? this.status);
   }

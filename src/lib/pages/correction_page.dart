@@ -24,7 +24,6 @@ class CorrectionPage extends StatelessWidget {
               child:
                   const Material(child: SafeArea(child: CorrectionOverview())));
         } else {
-          print("REBUILD");
           return Material(
             child: CupertinoPageScaffold(
                 navigationBar: CupertinoNavigationBar(
