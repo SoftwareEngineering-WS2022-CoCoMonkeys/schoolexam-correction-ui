@@ -9,11 +9,15 @@ class ExamScreenBody extends StatelessWidget {
   const ExamScreenBody(this.exams, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 30.0,
-      runSpacing: 30.0,
-      children: [NewExamCard(), ...exams.map((e) => ExamCard(e)).toList()],
-    );
-  }
+  Widget build(BuildContext context) => SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 30.0,
+        runSpacing: 30.0,
+        children: [
+          const NewExamCard(),
+          ...exams.map((e) => ExamCard(e)).toList()
+        ],
+      ));
 }
