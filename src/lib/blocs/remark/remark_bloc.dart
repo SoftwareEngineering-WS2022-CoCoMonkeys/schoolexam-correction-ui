@@ -42,7 +42,11 @@ class RemarkCubit extends Cubit<RemarkState> {
   /// Start the correction for the [exam].
   /// This includes the retrieval of the corresponding submissions.
   Future<void> correct(Exam exam) async {
-    final submissions = await _examsRepository.getSubmissionDetails(examId: exam.id, submissionIds: (await _examsRepository.getSubmissions(examId: exam.id)).map((e) => e.id).toList());
+    final submissions = await _examsRepository.getSubmissionDetails(
+        examId: exam.id,
+        submissionIds: (await _examsRepository.getSubmissions(examId: exam.id))
+            .map((e) => e.id)
+            .toList());
 
     log("Determined submissions : $submissions");
 
@@ -133,6 +137,7 @@ class RemarkCubit extends Cubit<RemarkState> {
 
     log("Writing out correction to ${file.path}");
     await file.writeAsBytes(res);
+
     emit(MergedCorrectionState.merged(
         initial: state,
         merged: correction.copyWith(correctionData: Uint8List.fromList(res))));
