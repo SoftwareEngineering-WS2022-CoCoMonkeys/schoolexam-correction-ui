@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
+import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
 import 'package:schoolexam/exams/persistence/correctable_data.dart';
 import 'package:schoolexam/exams/persistence/exam_data.dart';
+import 'package:schoolexam/exams/persistence/grading_table_lower_bound_data.dart';
 import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
@@ -53,6 +56,10 @@ class LocalExamsRepository extends ExamsRepository {
       /// TASK
       db.execute(
           'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
+
+      /// GRADING TABLE
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS gt_lower_bounds(grade TEXT NOT NULL, points DECIMAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
 
       /// CORRECTABLE
       db.execute(
@@ -227,6 +234,17 @@ class LocalExamsRepository extends ExamsRepository {
 
           eBatch.insert(childTable, {"id": participant.id},
               conflictAlgorithm: ConflictAlgorithm.ignore);
+
+          // 4.a Delete old grading table
+
+          eBatch.delete('gt_lower_bounds',
+              where: 'examId = ?', whereArgs: [exam.id]);
+
+          // 4.b insert new grading table
+          for (final lb in exam.gradingTable.lowerBounds) {
+            final dLb = GradingTableLowerBoundData.fromModel(lb, exam);
+            eBatch.insert('gt_lower_bounds', dLb.toMap());
+          }
         }
       }
 
@@ -272,10 +290,22 @@ class LocalExamsRepository extends ExamsRepository {
     final List<CourseChildren> children =
         await getChildren(participants.map((e) => e.id).toList());
 
-    // 4. Create models
+    // 4. Get Grading table
+    final List<GradingTableLowerBoundData> lowerBounds =
+        List<Map<String, dynamic>>.from(await database!.query('gt_lower_bounds',
+                where: 'examId = ?', whereArgs: [examId]))
+            .map((lb) => GradingTableLowerBoundData.fromMap(lb))
+            .toList();
+
+    // 5. Create models
     final List<Participant> mParticipants =
         participants.map((e) => e.toModel(children)).toList();
-    final Exam mExam = exam.toModel(participants: mParticipants, tasks: mTasks);
+    final List<GradingTableLowerBound> mLowerBounds =
+        lowerBounds.map((lb) => lb.toModel()).toList();
+    final Exam mExam = exam.toModel(
+        participants: mParticipants,
+        tasks: mTasks,
+        gradingTable: GradingTable(lowerBounds: mLowerBounds));
 
     return mExam;
   }
@@ -336,6 +366,12 @@ class LocalExamsRepository extends ExamsRepository {
   @override
   Future<void> setPoints({required String submissionId,  required String taskId, required double achievedPoints}) {
     // TODO: implement setPoints
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setGradingTable({required Exam exam}) async {
+    // TODO: implement setGradingTable
     throw UnimplementedError();
   }
 }

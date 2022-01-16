@@ -3,13 +3,17 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
+import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:schoolexam/exams/models/grading_table.dart';
 
 import 'correction.dart';
 import 'remark_state.dart';
@@ -43,7 +47,7 @@ class RemarkCubit extends Cubit<RemarkState> {
   /// Start the correction for the [exam].
   /// This includes the retrieval of the corresponding submissions.
   Future<void> correct(Exam exam) async {
-    final submissions = await _examsRepository.getSubmissions(examId: exam.id);
+    final submissions = List<Submission>.empty() ; //await _examsRepository.getSubmissions(examId: exam.id);
 
     log("Determined submissions : $submissions");
 
@@ -60,6 +64,7 @@ class RemarkCubit extends Cubit<RemarkState> {
     // Switch active pdf
     var newState = AddedCorrectionState.add(
         initial: state, added: await Correction.start(submission: submission));
+
 
     emit(newState);
   }
@@ -211,9 +216,98 @@ class RemarkCubit extends Cubit<RemarkState> {
                 .toList())));
   }
 
-  void updateGradingTable() {
-    // validate grading table
-    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: GradingTable.empty));
+  /// Create an empty grading table
+  void initGradingTable() {
+    emit(GradingTabledUpdatedState.updated(
+        initial: state, gradingTable: state.exam.gradingTable));
+  }
+
+  /// Add a new lower bound to the existing grading table
+  void addGradingTableBound() {
+    final copy = state.exam.gradingTable.valueCopy();
+    // Insert empty grading table bound
+    copy.lowerBounds.add(GradingTableLowerBound.empty);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the points on a lower bound in the existing grading table
+  void changeGradingTableBoundPoints(int i, double points) {
+    final copy = state.exam.gradingTable.valueCopy();
+
+    final adjustedLowerBound = copy.lowerBounds[i].copyWith(points: points);
+    // remove old bound
+    copy.lowerBounds.removeAt(i);
+
+    final maxPoints = state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
+    points = math.min(points, maxPoints);
+
+    // insert updated bound at same index
+    copy.lowerBounds.insert(i, adjustedLowerBound);
+
+    // Ensure lower bound constraint
+    for (int j = 0; j < copy.lowerBounds.length; j++) {
+      final lb = state.exam.gradingTable.lowerBounds[j];
+      if (j < i && lb.points < points || j > i && lb.points > points) {
+        log("Adjusting lower bound in grading table");
+
+        final nextLb = lb.copyWith(points: points);
+        // remove old bound
+        copy.lowerBounds.removeAt(j);
+
+        // insert updated bound at same index
+        copy.lowerBounds.insert(j, nextLb);
+      }
+    }
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the grade descriptor on a lower bound in the existing grading table
+  void changeGradingTableBoundGrade(int i, String grade) {
+    final copy = state.exam.gradingTable.valueCopy();
+    final adjustedLowerBound = copy.lowerBounds[i].copyWith(grade: grade);
+    // remove old bound
+    copy.lowerBounds.removeAt(i);
+
+    // insert updated bound at same index
+    copy.lowerBounds.insert(i, adjustedLowerBound);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the grading table to the default layout
+  void getDefaultGradingTable() {
+    const grades = [
+      "sehr gut",
+      "gut",
+      "befriedigend",
+      "ausreichend",
+      "mangelhaft",
+      "ungenügend"
+    ];
+
+    final maxPoints =
+        state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
+    final lowerBounds = grades.mapIndexed((i, grade) {
+      return GradingTableLowerBound(
+          // assume equal distribution for now
+          points: (maxPoints * (grades.length - i - 1) / grades.length)
+              .roundToDouble(),
+          grade: grade);
+    }).toList();
+
+    emit(GradingTabledUpdatedState.updated(
+        initial: state, gradingTable: GradingTable(lowerBounds: lowerBounds)));
+  }
+
+  /// Delete a grading table interval
+  void deleteGradingTableBound(int index) {
+    final copy = state.exam.gradingTable.valueCopy();
+    copy.lowerBounds.removeAt(index);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Save grading table
+  Future<void> saveGradingTable() async {
+    _examsRepository.setGradingTable(exam: state.exam);
   }
 
   @override

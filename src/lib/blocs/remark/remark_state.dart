@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
@@ -167,13 +169,20 @@ class NavigatedRemarkState extends LoadedRemarksState {
 
 /// Updated the grading table
 class GradingTabledUpdatedState extends RemarkState {
-  final GradingTable gradingTable;
 
   GradingTabledUpdatedState.updated(
-      {required RemarkState initial, required this.gradingTable})
+      {required RemarkState initial, required GradingTable gradingTable})
       : super._(
-            exam: initial.exam,
+            exam: initial.exam.copyWith(gradingTable: gradingTable),
             selectedCorrection: initial.selectedCorrection,
             submissions: initial.submissions,
             corrections: initial.corrections);
+
+  @override
+  List<Object> get props => [
+    exam,
+    submissions,
+    selectedCorrection,
+    corrections
+  ];
 }

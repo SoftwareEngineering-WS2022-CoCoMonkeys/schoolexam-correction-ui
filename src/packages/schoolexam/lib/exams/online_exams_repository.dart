@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
@@ -55,14 +57,22 @@ class OnlineExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> setPoints(
-      {required String submissionId,
-      required String taskId,
-      required double achievedPoints}) async {
+  Future<void> setPoints({required String submissionId,
+    required String taskId,
+    required double achievedPoints}) async {
     await provider.query(
         path: "/submission/$submissionId/setpoints",
         method: HTTPMethod.POST,
         body: {"taskId": taskId, "achievedPoints": achievedPoints},
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> setGradingTable({required Exam exam}) async {
+    await provider.query(
+        path: "/Exam/${exam.id}/SetGradingTable",
+        method: HTTPMethod.POST,
+        body: exam.gradingTable.toDTO(),
         key: await authenticationRepository.getKey());
   }
 }

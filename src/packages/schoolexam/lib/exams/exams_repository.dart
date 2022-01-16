@@ -22,6 +22,9 @@ abstract class ExamsRepository {
   Future<void> uploadExam({required NewExamDTO exam});
 
   /// Update an existing exam
-  // TODO use ExamDTO
   Future<void> updateExam({required NewExamDTO exam, required String examId});
+
+  /// Set the grading table for an exam
+  Future<void> setGradingTable({required Exam exam});
+
 }

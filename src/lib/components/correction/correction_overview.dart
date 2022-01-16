@@ -15,10 +15,12 @@ class CorrectionOverview extends StatelessWidget {
       builder: (context, state) => Column(
             children: [
               const CorrectionGradingTable(),
-              Container(
-                  constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.8),
-                  child: const CorrectionParticipantSelectionWidget()),
+              Expanded(
+                child: Container(
+                    constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.8),
+                    child: const CorrectionParticipantSelectionWidget()),
+              ),
             ],
           ));
 }

@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/dto/task_dto.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
-import 'participant_dto.dart';
 import '../models/exam.dart';
+import 'grading_table_dto.dart';
+import 'participant_dto.dart';
 
 class ExamDTO extends Equatable {
   final String id;
@@ -26,6 +28,7 @@ class ExamDTO extends Equatable {
   final List<ParticipantDTO> participants;
 
   final List<TaskDTO> tasks;
+  final GradingTableDTO? gradingTable;
 
   ExamDTO.fromJson(Map<String, dynamic> json)
       : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
@@ -33,20 +36,20 @@ class ExamDTO extends Equatable {
         title = ApiHelper.getValue(map: json, keys: ["title"], value: ""),
         topic = ApiHelper.getValue(map: json, keys: ["topic"], value: ""),
         quota = ApiHelper.getValue(map: json, keys: ["quota"], value: 0.0),
-        dateOfExam =
-            ApiHelper.getValue(map: json, keys: ["date"], value: ""),
-        dueDate = ApiHelper.getValue(
-            map: json, keys: ["dueDate"], value: ""),
+        dateOfExam = ApiHelper.getValue(map: json, keys: ["date"], value: ""),
+        dueDate = ApiHelper.getValue(map: json, keys: ["dueDate"], value: ""),
         participants = List<Map<String, dynamic>>.from(ApiHelper.getValue(
             map: json,
             keys: ["participants"],
             value: [])).map((e) => ParticipantDTO.fromJson(e)).toList(),
         tasks = List<Map<String, dynamic>>.from(
-                ApiHelper.getValue(map: json, keys: ["tasks"], value: []))
+            ApiHelper.getValue(map: json, keys: ["tasks"], value: []))
             .map((e) => TaskDTO.fromJson(e))
-            .toList();
+            .toList(),
+        gradingTable = json['gradingTable'] != null ? GradingTableDTO.fromJson(json['gradingTable']) : null;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() =>
+      {
         "id": id,
         "status": status,
         "title": title,
@@ -55,7 +58,8 @@ class ExamDTO extends Equatable {
         "dateOfExam": dateOfExam,
         "dateOfDeadline": dueDate,
         "participants": participants,
-        "tasks": tasks
+        "tasks": tasks,
+        "gradingTable": gradingTable
       };
 
   @override
@@ -65,13 +69,23 @@ class ExamDTO extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, status, title, topic, quota, dateOfExam, dueDate, participants];
+      [
+        id,
+        status,
+        title,
+        topic,
+        quota,
+        dateOfExam,
+        dueDate,
+        participants,
+        gradingTable
+      ];
 
   Exam toModel() {
     return Exam(
         status: ExamStatus.values.firstWhere(
             // Unknown is not known to API
-            (element) => element.name.toLowerCase() == status.toLowerCase(),
+                (element) => element.name.toLowerCase() == status.toLowerCase(),
             orElse: () => ExamStatus.unknown),
         id: id,
         title: title,
@@ -80,7 +94,8 @@ class ExamDTO extends Equatable {
         dateOfExam: DateTime.parse(dateOfExam),
         dueDate: DateTime.parse(dueDate),
         participants:
-            participants.map((e) => e.toModel()).toList(growable: false),
-        tasks: tasks.map((e) => e.toModel()).toList(growable: false));
+        participants.map((e) => e.toModel()).toList(growable: false),
+        tasks: tasks.map((e) => e.toModel()).toList(growable: false),
+        gradingTable: gradingTable != null ? gradingTable!.toModel() : GradingTable.empty);
   }
 }
