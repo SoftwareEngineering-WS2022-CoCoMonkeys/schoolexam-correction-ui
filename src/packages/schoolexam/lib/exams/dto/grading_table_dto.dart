@@ -14,7 +14,8 @@ class GradingTableDTO extends Equatable {
       : lowerBounds = List<Map<String, dynamic>>.from(
                 ApiHelper.getValue(map: json, keys: ["lowerBounds"], value: []))
             .map((e) => GradingTableLowerBoundDTO.fromJson(e))
-            .toList();
+            .toList()
+          ..sort((a, b) => b.points.compareTo(a.points));
 
   Map<String, dynamic> toJson() => {"lowerBounds": lowerBounds};
 
