@@ -343,6 +343,7 @@ class RemarkCubit extends Cubit<RemarkState> {
 
   /// Change the grading table to the default layout
   /// The two standard german grading schemes are available as presets
+  /// Source: https://de.wikipedia.org/wiki/Vorlage:Punktesystem_der_gymnasialen_Oberstufe
   void getDefaultGradingTable(int low, int high) {
     List<String> grades = [];
     List<double> points = [];
@@ -376,7 +377,7 @@ class RemarkCubit extends Cubit<RemarkState> {
         "befriedigend (3-)",
         "ausreichend (4+)",
         "ausreichend (4)",
-        "ausreichend (4-)",
+        "schwach ausreichend (4-)",
         "mangelhaft (5+)",
         "mangelhaft (5)",
         "mangelhaft (5-)",
