@@ -25,6 +25,10 @@ abstract class ExamsRepository {
       required String taskId,
       required double achievedPoints});
 
+  /// Uploads the base64 encoded remark pdf [data] for the submission [submission].
+  Future<void> uploadRemark(
+      {required String submissionId, required String data});
+
   /// Uploads a newly created exam
   Future<void> uploadExam({required NewExamDTO exam});
 

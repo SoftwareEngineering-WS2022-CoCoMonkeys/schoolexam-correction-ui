@@ -82,20 +82,16 @@ class RemarkCubit extends Cubit<RemarkState> {
     emit(newState);
   }
 
-  /// Combines overlay documents with submission documents
-  Future<void> merge({required CorrectionOverlayDocument document}) async {
-    final remarkState = state;
-
-    final correction = remarkState.corrections.firstWhere(
-        (element) => element.submission.id == document.submissionId,
-        orElse: () => Correction.empty);
-
+  /// Merges the current correction pdf [current] using the data currently stored for the submission [submissionId].
+  /// The result are the bytes of the merged pdf file.
+  Future<Uint8List> merge(
+      {required Correction correction,
+      required CorrectionOverlayDocument document}) async {
     if (correction.isEmpty) {
-      log("There is no ongoing correction present for ${document.submissionId}");
-      return;
+      log("The correction provided is invalid.");
+      return Uint8List.fromList([]);
     }
 
-    log("Merging correction for ${document.submissionId}");
     final file = File(correction.correctionPath);
     final pdfDocument = PdfDocument(inputBytes: await file.readAsBytes());
     assert(document.pages.length == pdfDocument.pages.count);
@@ -138,9 +134,7 @@ class RemarkCubit extends Cubit<RemarkState> {
     log("Writing out correction to ${file.path}");
     await file.writeAsBytes(res);
 
-    emit(MergedCorrectionState.merged(
-        initial: state,
-        merged: correction.copyWith(correctionData: Uint8List.fromList(res))));
+    return res;
   }
 
   /// Changes the active correction to match the desired [submission].

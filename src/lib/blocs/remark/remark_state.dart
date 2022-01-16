@@ -132,22 +132,6 @@ class SwitchedCorrectionState extends LoadedRemarksState {
             corrections: initial.corrections);
 }
 
-/// Merged the submission and overlay.
-class MergedCorrectionState extends LoadedRemarksState {
-  final Correction merged;
-
-  MergedCorrectionState.merged(
-      {required RemarkState initial, required this.merged})
-      : super._(
-            exam: initial.exam,
-            selectedCorrection: initial.selectedCorrection,
-            submissions: initial.submissions,
-            corrections: <Correction>[
-              ...initial.corrections.map(
-                  (e) => (e.submission.id == merged.submission.id) ? merged : e)
-            ]);
-}
-
 /// Navigated within [navigated] to e.g. a new answer.
 class NavigatedRemarkState extends LoadedRemarksState {
   final Correction navigated;

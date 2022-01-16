@@ -9,6 +9,8 @@ import 'package:schoolexam_correction_ui/blocs/synchronization/synchronization_s
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 class SynchronizationCubit extends Cubit<SynchronizationState> {
+  final CorrectionOverlayCubit _correctionOverlayCubit;
+  final RemarkCubit _remarkCubit;
   final CorrectionOverlayRepository _correctionOverlayRepository;
   final ExamsRepository _examsRepository;
 
@@ -20,22 +22,27 @@ class SynchronizationCubit extends Cubit<SynchronizationState> {
       required ExamsRepository examsRepository,
       required RemarkCubit remarkCubit,
       required CorrectionOverlayCubit correctionOverlayCubit})
-      : _correctionOverlayRepository = correctionOverlayRepository,
+      : _remarkCubit = remarkCubit,
+        _correctionOverlayCubit = correctionOverlayCubit,
+        _correctionOverlayRepository = correctionOverlayRepository,
         _examsRepository = examsRepository,
         super(const InitSynchronizationState()) {
-    _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);
+    _remarkSubscription = _remarkCubit.stream.listen(_onRemarkStateChanged);
     _correctionSubscription =
-        correctionOverlayCubit.stream.listen(_onCorrectionChanged);
+        _correctionOverlayCubit.stream.listen(_onCorrectionChanged);
   }
 
   /// TODO : This needs to have proper logic for failures etc.
   /// TODO : Additionally, the synchronization logic should run in a separate process, with these events only adding data to a queue.
   void _onRemarkStateChanged(RemarkState state) async {
-    if (state is MergedCorrectionState) {
+    if (state is RemovedCorrectionState) {
       emit(this.state.copyWith(remarkStatus: PushStatus.ongoing));
+      final document = await _correctionOverlayRepository.getDocument(
+          submissionId: state.removed.submission.id);
+      final res = await _remarkCubit.merge(
+          correction: state.removed, document: document);
       await _examsRepository.uploadRemark(
-          submissionId: state.merged.submission.id,
-          data: base64.encode(state.merged.correctionData));
+          submissionId: state.removed.submission.id, data: base64.encode(res));
       emit(this.state.copyWith(remarkStatus: PushStatus.succeeded));
     }
   }

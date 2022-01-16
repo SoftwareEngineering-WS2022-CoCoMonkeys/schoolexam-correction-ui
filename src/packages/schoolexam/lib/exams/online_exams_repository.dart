@@ -94,4 +94,14 @@ class OnlineExamsRepository extends ExamsRepository {
         .map((e) => SubmissionDetailsDTO.fromJson(e).toModel(exam: exam))
         .toList();
   }
+
+  @override
+  Future<void> uploadRemark(
+      {required String submissionId, required String data}) async {
+    await provider.query(
+        path: "/submission/$submissionId/uploadremark",
+        method: HTTPMethod.POST,
+        body: {"remarkPdf": data},
+        key: await authenticationRepository.getKey());
+  }
 }

@@ -141,4 +141,14 @@ class HybridExamsRepository extends ExamsRepository {
         taskId: taskId,
         achievedPoints: achievedPoints);
   }
+
+  @override
+  Future<void> uploadRemark(
+      {required String submissionId, required String data}) async {
+    log("Trying to update the correction PDF for the submission $submissionId");
+    await online.uploadRemark(
+      submissionId: submissionId,
+      data: data,
+    );
+  }
 }

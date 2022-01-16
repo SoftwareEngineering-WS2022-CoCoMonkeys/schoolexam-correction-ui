@@ -468,4 +468,10 @@ class LocalExamsRepository extends ExamsRepository {
       eBatch.commit(noResult: true);
     });
   }
+
+  @override
+  Future<void> uploadRemark({required String submissionId, required String data}) {
+    // TODO: implement uploadRemark
+    throw UnimplementedError();
+  }
 }
