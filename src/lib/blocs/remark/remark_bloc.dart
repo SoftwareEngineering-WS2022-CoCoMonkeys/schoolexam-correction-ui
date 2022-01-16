@@ -35,11 +35,19 @@ class RemarkCubit extends Cubit<RemarkState> {
     if (state.context != AppNavigationContext.exams) {
       return;
     }
-    if (state.examId.isEmpty) {
-      return;
-    }
 
-    await correct(await _examsRepository.getExam(state.examId));
+    /// Remove any corrections, if still present.
+    if (state.examId.isEmpty) {
+      // TODO : Provide bulk remnoval state
+      var removalState = this.state;
+      for (final correction in this.state.corrections) {
+        removalState = RemovedCorrectionState.remove(
+            initial: removalState, removed: correction);
+        emit(removalState);
+      }
+    } else {
+      await correct(await _examsRepository.getExam(state.examId));
+    }
   }
 
   /// Loads the correction pdf from [path].
@@ -195,14 +203,11 @@ class RemarkCubit extends Cubit<RemarkState> {
     correction.submission.answers
         .sort((a1, a2) => a1.segments[0].compareTo(a2.segments[0]));
 
-
     /// Sort tasks by answers
-    submission.exam.tasks.sort((t1,t2) =>
-        correction.submission.answers.indexWhere((element) => element.task.id == t1.id)
-          .compareTo(
-            correction.submission.answers.indexWhere((element) => element.task.id == t2.id)
-        )
-    );
+    submission.exam.tasks.sort((t1, t2) => correction.submission.answers
+        .indexWhere((element) => element.task.id == t1.id)
+        .compareTo(correction.submission.answers
+            .indexWhere((element) => element.task.id == t2.id)));
     var newState = AddedCorrectionState.add(initial: state, added: correction);
 
     emit(newState);
@@ -268,9 +273,9 @@ class RemarkCubit extends Cubit<RemarkState> {
       required double achievedPoints}) async {
     log("Requested to set $task to $achievedPoints for ${submission.student.displayName}");
 
-    final examSubmission = state.submissions.firstWhere(
-        (element) => element.id == submission.id,
-        orElse: () => Submission.empty);
+    final correction = state.corrections.firstWhere(
+        (element) => element.submission.id == submission.id,
+        orElse: () => Correction.empty);
     final answer = submission.answers.firstWhere(
         (element) => element.task.id == task.id,
         orElse: () => Answer.empty);
@@ -285,15 +290,17 @@ class RemarkCubit extends Cubit<RemarkState> {
         taskId: answer.task.id,
         achievedPoints: achievedPoints);
 
-    // TODO : Not working
-    emit(UpdatedRemarksState.marked(
-        initial: state,
-        marked: examSubmission.copyWith(
-            answers: List<Answer>.from(examSubmission.answers)
+    final marked = correction.copyWith(
+        submission: correction.submission.copyWith(
+            answers: List<Answer>.from(correction.submission.answers)
                 .map((e) => (e.task.id == answer.task.id)
-                    ? answer.copyWith(achievedPoints: achievedPoints)
+                    ? answer.copyWith(
+                        achievedPoints: achievedPoints,
+                        status: CorrectableStatus.corrected)
                     : e)
-                .toList())));
+                .toList()));
+
+    emit(UpdatedRemarksState.marked(initial: state, marked: marked));
   }
 
   @override
