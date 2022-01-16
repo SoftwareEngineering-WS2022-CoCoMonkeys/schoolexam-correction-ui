@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/dto/person_dto.dart';
 import 'package:schoolexam/exams/models/user.dart';
-import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
 class UserDTO extends Equatable {
@@ -15,19 +14,19 @@ class UserDTO extends Equatable {
   User toModel() =>
       User(username: username, role: role, person: person.toModel());
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'username': this.username,
       'role': this.role,
-      'person': this.person.toMap(),
+      'person': this.person.toJson(),
     };
   }
 
-  factory UserDTO.fromMap(Map<String, dynamic> map) {
+  factory UserDTO.fromJson(Map<String, dynamic> map) {
     return UserDTO(
         username: ApiHelper.getValue(map: map, keys: ["username"], value: ""),
         role: ApiHelper.getValue(map: map, keys: ["role"], value: ""),
-        person: PersonDTO.fromMap(
+        person: PersonDTO.fromJson(
             ApiHelper.getValue(map: map, keys: ["person"], value: {})));
   }
 

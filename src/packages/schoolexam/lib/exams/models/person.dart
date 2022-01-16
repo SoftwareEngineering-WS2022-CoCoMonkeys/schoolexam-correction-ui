@@ -16,5 +16,6 @@ class Person extends Equatable {
   static const empty = Person(firstName: "", lastName: "", emailAddress: "");
 
   bool get isEmpty => this == Person.empty;
+
   bool get isNotEmpty => this != Person.empty;
 }

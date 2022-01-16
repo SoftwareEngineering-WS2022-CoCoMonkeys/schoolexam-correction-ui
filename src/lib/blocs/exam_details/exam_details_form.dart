@@ -1,5 +1,6 @@
 import 'package:formz/formz.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_form_input.dart';
+
+import 'exam_details_form_input.dart';
 
 class ExamDetailsForm with FormzMixin {
   final ExamTitle examTitle;

@@ -7,6 +7,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: const LoginForm());
+    return const CupertinoPageScaffold(child: LoginForm());
   }
 }

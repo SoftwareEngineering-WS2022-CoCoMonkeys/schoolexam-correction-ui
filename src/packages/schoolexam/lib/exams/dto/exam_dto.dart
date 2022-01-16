@@ -5,9 +5,9 @@ import 'package:schoolexam/exams/dto/task_dto.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
+import 'participant_dto.dart';
 import '../models/exam.dart';
 import 'grading_table_dto.dart';
-import 'participant_dto.dart';
 
 class ExamDTO extends Equatable {
   final String id;
@@ -81,6 +81,8 @@ class ExamDTO extends Equatable {
         gradingTable
       ];
 
+  /// Converts this instance to its model [Exam] representation.
+  /// Importantly, the internal model uses percentages as 50% instead of 0.5 like the API.
   Exam toModel() {
     return Exam(
         status: ExamStatus.values.firstWhere(
@@ -90,7 +92,7 @@ class ExamDTO extends Equatable {
         id: id,
         title: title,
         topic: topic,
-        quota: quota,
+        quota: quota * 100,
         dateOfExam: DateTime.parse(dateOfExam),
         dueDate: DateTime.parse(dueDate),
         participants:

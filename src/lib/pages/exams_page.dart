@@ -1,59 +1,78 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
+import 'package:schoolexam_correction_ui/components/error_widget.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart';
+import 'package:schoolexam_correction_ui/components/loading_widget.dart';
+import 'package:schoolexam_correction_ui/extensions/exam_status_helper.dart';
 
 class ExamsPage extends StatelessWidget {
   const ExamsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(
+          AppLocalizations.of(context)!.examPageName,
+          style: const TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            IconButton(
-              onPressed: null,
-              icon: Icon(
-                Icons.arrow_drop_down,
-                color: Theme.of(context).primaryColor,
-                size: 32,
+        leading: Material(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Theme.of(context).primaryColor,
+                  size: 32,
+                ),
               ),
-            ),
-            const Center(
-                child: Text(
-              "Lehrer XY",
-              style: TextStyle(color: Colors.black),
-            ))
-          ],
+              Center(
+                  child: Text(
+                AppLocalizations.of(context)!.teacher + " XY",
+                style: const TextStyle(color: Colors.black),
+              ))
+            ],
+          ),
         ),
-        leadingWidth: 300,
-        title: const Text(
-          "Prüfungen",
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      child: Material(
         child: BlocBuilder<ExamsCubit, ExamsState>(
           builder: (context, state) {
+            if (state is LoadingExamsState) {
+              return const LoadingWidget();
+            }
+
+            if (state is LoadingExamsErrorState) {
+              return const ErrorStateWidget();
+            }
+
             return Container(
               alignment: Alignment.topCenter,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Card(
                       child: TextField(
+                        onChanged: (search) => context
+                            .read<ExamsCubit>()
+                            .onSearchChanged(search.toLowerCase()),
+                        onSubmitted: (search) => context
+                            .read<ExamsCubit>()
+                            .onSearchChanged(search.toLowerCase()),
                         decoration: InputDecoration(
                           prefixIcon: Icon(
                             Icons.search_outlined,
@@ -62,13 +81,13 @@ class ExamsPage extends StatelessWidget {
                           ),
                           border: InputBorder.none,
                           isDense: true,
-                          labelText: 'Prüfung',
+                          labelText: AppLocalizations.of(context)!.exam,
                         ),
                       ),
                     ),
                   ),
                   const StateSelectorChips(),
-                  ExamScreenBody(state.filtered)
+                  Expanded(flex: 1, child: ExamScreenBody(state.filtered))
                 ],
               ),
             );
@@ -87,47 +106,37 @@ class StateSelectorChips extends StatefulWidget {
 }
 
 class _StateSelectorChipsState extends State<StateSelectorChips> {
-  final List<bool> selectedList;
-  final List<_ExamStatusChip> values;
+  final List<ExamStatus> selectable;
 
   _StateSelectorChipsState()
-      : values =
-            ExamStatus.values.map((e) => _ExamStatusChip(e, e.name)).toList(),
-        selectedList = List.generate(ExamStatus.values.length, (index) => true);
+      : selectable = [
+          ExamStatus.planned,
+          ExamStatus.submissionReady,
+          ExamStatus.inCorrection,
+          ExamStatus.corrected,
+          ExamStatus.published,
+        ];
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: List.generate(
-          values.length,
-          (index) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ChoiceChip(
-                  label: Text(values[index].displayName),
-                  selected: selectedList[index],
-                  onSelected: (bool choice) => setState(() {
-                    selectedList[index] = choice;
-
-                    context.read<ExamsCubit>().filterExams("", _getSelected());
-                  }),
-                ),
-              )),
-    );
+    return BlocBuilder<ExamsCubit, ExamsState>(
+        builder: (context, state) => Wrap(
+              children: List.generate(
+                  selectable.length,
+                  (index) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ChoiceChip(
+                          label: Text(ExamHelper.toValue(selectable[index],
+                              context: context)),
+                          selected: state.states.any((element) =>
+                              element.name == selectable[index].name),
+                          onSelected: (bool choice) => setState(() {
+                            BlocProvider.of<ExamsCubit>(context)
+                                .onStatusChanged(
+                                    status: selectable[index], added: choice);
+                          }),
+                        ),
+                      )),
+            ));
   }
-
-  List<ExamStatus> _getSelected() {
-    var res = <ExamStatus>[];
-    for (var i = 0; i < values.length; i++) {
-      if (selectedList[i]) res.add(values[i].status);
-    }
-
-    return res;
-  }
-}
-
-class _ExamStatusChip {
-  final ExamStatus status;
-  final String displayName;
-
-  _ExamStatusChip(this.status, this.displayName);
 }

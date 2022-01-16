@@ -46,7 +46,7 @@ class _CorrectionViewTabContainerState
   Widget build(BuildContext context) => Column(
         children: [
           SizedBox(
-            height: 44,
+            height: kToolbarHeight,
             width: double.infinity,
             child: TabBar(
                 labelPadding: EdgeInsets.zero,

@@ -1,18 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/hybrid_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
+import 'package:schoolexam_correction_ui/blocs/synchronization/synchronization.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_route_information_parser.dart';
 import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/database_correction_overlay_repository.dart';
 
-import 'blocs/exams/exam_details_bloc.dart';
+import 'blocs/exam_details/exam_details_bloc.dart';
 import 'blocs/overlay/correction_overlay.dart';
 import 'blocs/remark/remark.dart';
 
@@ -70,6 +72,18 @@ void main() {
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
                   remarkCubit: BlocProvider.of<RemarkCubit>(context))),
+          BlocProvider(
+              lazy: false,
+              create: (context) => SynchronizationCubit(
+                    examsRepository:
+                        RepositoryProvider.of<ExamsRepository>(context),
+                    correctionOverlayRepository:
+                        RepositoryProvider.of<CorrectionOverlayRepository>(
+                            context),
+                    correctionOverlayCubit:
+                        BlocProvider.of<CorrectionOverlayCubit>(context),
+                    remarkCubit: BlocProvider.of<RemarkCubit>(context),
+                  ))
         ],
         child: const SchoolExamCorrectionUI(),
       )));
@@ -81,11 +95,14 @@ class SchoolExamCorrectionUI extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return CupertinoApp.router(
         title: "SchoolExam",
         debugShowCheckedModeBanner: false,
-        theme:
-            ThemeData(brightness: Brightness.light, primaryColor: Colors.blue),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('de'),
+        theme: const CupertinoThemeData(
+            brightness: Brightness.light, primaryColor: Colors.blue),
         routeInformationParser: SchoolExamRouteInformationParser(
             navigationCubit: context.read<NavigationCubit>()),
         routerDelegate: SchoolExamRouterDelegate(

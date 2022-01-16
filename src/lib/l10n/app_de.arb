@@ -1,0 +1,48 @@
+{
+  "appTitle": "SchoolExam",
+  "welcomeText": "Willkommen!",
+  "pleaseLogin": "Bitte melden Sie sich an, um mit der Korrektur von Prüfungen zu beginnen.",
+  "userName": "Benutzername",
+  "password": "Passwort",
+  "login": "Login",
+  "teacher": "Lehrer",
+  "exam": "Prüfung",
+  "examPageName": "Prüfungen",
+  "stateUnknown": "Unbekannt",
+  "statePlanned": "Geplant",
+  "stateBuildReady": "Build bereit",
+  "stateSubmissionReady": "Einreichung bereit",
+  "stateInCorrection": "In Korrektur",
+  "stateCorrected": "Korrigiert",
+  "statePublished": "Veröffentlicht",
+  "examCardState": "Status",
+  "examCardCourse": "Kurs",
+  "examCardTopic": "Fach",
+  "examCardParticipants": "Teilnehmende",
+  "examCardQuota": "Korrigiert",
+  "examCardButtonReturn": "Rückgabe",
+  "examCardButtonCorrect": "Korrigieren",
+  "examCardButtonUpload": "Hochladen",
+  "examCardButtonEdit": "Anpassen",
+  "newExamTitle": "Titel",
+  "newExamTopic": "Thema",
+  "newExamCourse": "Kurs",
+  "newExamDate": "Prüfungsdatum",
+  "newExamButtonCreate": "Erstellen",
+  "newExamButtonEdit": "Anpassen",
+  "newExamButtonCancel": "Abbrechen",
+  "yes": "Ja",
+  "no": "Nein",
+  "correctionSelectionConfirmWithName": "Möchten sie die Korrektur von {name} öffnen?",
+  "@correctionSelectionConfirmWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jane"
+      }
+    }
+  },
+  "correction": "Korrektur",
+  "taskRemarkEvaluate": "Bewerten",
+  "taskRemarkPoints": "Punkte"
+}

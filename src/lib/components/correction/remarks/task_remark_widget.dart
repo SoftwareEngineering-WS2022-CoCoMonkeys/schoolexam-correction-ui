@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
@@ -48,7 +49,7 @@ class AnswerRemarkWidget extends StatelessWidget {
                       answer: answer,
                     ),
                     Text("${answer.achievedPoints} / ${task.maxPoints}"),
-                    const Text("Punkte"),
+                    Text(AppLocalizations.of(context)!.taskRemarkPoints),
                     ElevatedButton(
                       onPressed: () {
                         showCupertinoModalBottomSheet(
@@ -64,7 +65,8 @@ class AnswerRemarkWidget extends StatelessWidget {
                                               submission: correction.submission,
                                             ))))));
                       },
-                      child: const Text('Bewerten'),
+                      child: Text(
+                          AppLocalizations.of(context)!.taskRemarkEvaluate),
                     )
                   ],
                 ),
@@ -108,8 +110,8 @@ class _TaskRemarkSelectionWidgetState
         style: const TextStyle(
           fontSize: 36,
         ),
-        decoration: const InputDecoration(
-          labelText: "Punkte",
+        decoration: InputDecoration(
+          labelText: AppLocalizations.of(context)!.taskRemarkPoints,
         ),
         onSubmitted: (text) => BlocProvider.of<RemarkCubit>(context).mark(
             submission: widget.submission,

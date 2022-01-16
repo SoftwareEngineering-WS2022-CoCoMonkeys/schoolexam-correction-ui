@@ -19,23 +19,39 @@ class CorrectionPageNavigation extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (document.pageNumber > 0)
+            if (document.pageNumber > 0) ...{
               IconButton(
                   onPressed: () =>
                       BlocProvider.of<CorrectionOverlayCubit>(context)
                           .jumpToPage(
                               document: document,
                               pageNumber: document.pageNumber - 1),
-                  icon: const Icon(Icons.keyboard_arrow_left)),
+                  icon: const Icon(Icons.keyboard_arrow_left))
+            } else ...{
+              IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.keyboard_arrow_left,
+                    color: Colors.black26,
+                  ))
+            },
             Text("${document.pageNumber + 1} von ${document.pages.length}"),
-            if (document.pageNumber < document.pages.length - 1)
+            if (document.pageNumber < document.pages.length - 1) ...{
               IconButton(
                   onPressed: () =>
                       BlocProvider.of<CorrectionOverlayCubit>(context)
                           .jumpToPage(
                               document: document,
                               pageNumber: document.pageNumber + 1),
-                  icon: const Icon(Icons.keyboard_arrow_right)),
+                  icon: const Icon(Icons.keyboard_arrow_right))
+            } else ...{
+              IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Colors.black26,
+                  ))
+            },
           ],
         );
       });

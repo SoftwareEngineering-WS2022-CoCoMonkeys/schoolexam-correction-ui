@@ -25,12 +25,14 @@ class InputHeader extends StatelessWidget {
                       BlocProvider.of<CorrectionOverlayCubit>(context)
                           .undo(document: state.overlays[state.documentNumber]);
                     },
+                    color: Colors.black,
                     icon: const Icon(Icons.undo)),
                 IconButton(
                     onPressed: () {
                       BlocProvider.of<CorrectionOverlayCubit>(context)
                           .redo(document: state.overlays[state.documentNumber]);
                     },
+                    color: Colors.black,
                     icon: const Icon(Icons.redo)),
                 const _InputIconButton(
                     icon: Icon(CustomIcons.font),
@@ -65,8 +67,9 @@ class _InputIconButton extends StatelessWidget {
           builder: (context, state) {
         return IconButton(
           icon: icon,
-          color:
-              (tool == state.inputTool) ? Theme.of(context).primaryColor : null,
+          color: (tool == state.inputTool)
+              ? Theme.of(context).primaryColor
+              : Colors.black,
           onPressed: () async {
             if (tool == state.inputTool) {
               switch (tool) {
