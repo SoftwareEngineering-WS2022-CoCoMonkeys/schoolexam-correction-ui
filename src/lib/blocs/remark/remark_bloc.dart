@@ -184,9 +184,19 @@ class RemarkCubit extends Cubit<RemarkState> {
   Future<void> open(Submission submission) async {
     log("Requested to correct submission $submission");
 
-    // Switch active pdf
-    var newState = AddedCorrectionState.add(
-        initial: state, added: await loadCorrection(submission: submission));
+    final correction = await loadCorrection(submission: submission);
+
+    /// Sort segments by page and y
+    for (final answer in correction.submission.answers) {
+      answer.segments.sort((s1, s2) => s1.compareTo(s2));
+    }
+
+    /// Sort answers by first segment
+    correction.submission.answers
+        .sort((a1, a2) => a1.segments[0].compareTo(a2.segments[0]));
+
+    print(correction.submission.answers);
+    var newState = AddedCorrectionState.add(initial: state, added: correction);
 
     emit(newState);
   }
