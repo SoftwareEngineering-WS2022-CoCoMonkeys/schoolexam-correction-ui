@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schoolexam/exams/models/grading_table.dart';
-import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
+import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
@@ -342,16 +342,38 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   /// Change the grading table to the default layout
-  void getDefaultGradingTable() {
-    const grades = [
-      "sehr gut",
-      "gut",
-      "befriedigend",
-      "ausreichend",
-      "mangelhaft",
-      "ungenügend"
-    ];
-
+  /// The two standard german grading schemes are available as presets
+  void getDefaultGradingTable(int low, int high) {
+    List<String> grades = [];
+    if (low == 1 && high == 6) {
+      grades = [
+        "sehr gut",
+        "gut",
+        "befriedigend",
+        "ausreichend",
+        "mangelhaft",
+        "ungenügend"
+      ];
+    } else if (low == 0 && high == 15) {
+      grades = [
+        "sehr gut (1+)",
+        "sehr gut (1)",
+        "sehr gut (1-)",
+        "gut (2+)",
+        "gut (2)",
+        "gut (2-)",
+        "befriedigend (3+)",
+        "befriedigend (3)",
+        "befriedigend (3-)",
+        "ausreichend (4+)",
+        "ausreichend (4)",
+        "ausreichend (4-)",
+        "mangelhaft (5+)",
+        "mangelhaft (5)",
+        "mangelhaft (5-)",
+        "ungenügend (6)"
+      ];
+    }
     final maxPoints =
         state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
     final lowerBounds = grades.mapIndexed((i, grade) {

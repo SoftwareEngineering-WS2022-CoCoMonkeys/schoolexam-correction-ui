@@ -45,16 +45,15 @@ class CorrectionGradingTable extends StatelessWidget {
             Center(
                 child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(AppLocalizations.of(context)!.gradingIntervalEnd,
-                            style: headerTextStyle),
-                        const Icon(Icons.edit_outlined)
-                      ]),
-                  columnFormatText
+                  Column(children: [
+                    Text(AppLocalizations.of(context)!.gradingIntervalEnd,
+                        style: headerTextStyle),
+                    columnFormatText
+                  ]),
+                  const Icon(Icons.edit_outlined)
                 ],
               ),
             )),
@@ -180,11 +179,32 @@ class CorrectionGradingTable extends StatelessWidget {
                     .addGradingTableBound(),
                 child: Text(
                     AppLocalizations.of(context)!.newGradingIntervalButton)),
-            ElevatedButton(
-                onPressed: () => BlocProvider.of<RemarkCubit>(context)
-                    .getDefaultGradingTable(),
-                child: Text(AppLocalizations.of(context)!
-                    .standardGradingIntervalsButton)),
+            DropdownButton<String>(
+              icon: const Icon(Icons.arrow_downward),
+              elevation: 16,
+              onChanged: (scheme) {
+                if (scheme ==
+                    AppLocalizations.of(context)!.oneToSixGradingScheme) {
+                  BlocProvider.of<RemarkCubit>(context)
+                      .getDefaultGradingTable(1, 6);
+                } else if (scheme ==
+                    AppLocalizations.of(context)!.zeroToFifteenGradingScheme) {
+                  BlocProvider.of<RemarkCubit>(context)
+                      .getDefaultGradingTable(0, 15);
+                }
+              },
+              value: AppLocalizations.of(context)!.defaultGradingSchemeButton,
+              items: <String>[
+                AppLocalizations.of(context)!.defaultGradingSchemeButton,
+                AppLocalizations.of(context)!.oneToSixGradingScheme,
+                AppLocalizations.of(context)!.zeroToFifteenGradingScheme,
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             ElevatedButton(
               onPressed: () =>
                   BlocProvider.of<RemarkCubit>(context).saveGradingTable(),
