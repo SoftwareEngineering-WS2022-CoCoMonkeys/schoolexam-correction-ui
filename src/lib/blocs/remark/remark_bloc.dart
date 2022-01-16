@@ -306,7 +306,8 @@ class RemarkCubit extends Cubit<RemarkState> {
     // remove old bound
     copy.lowerBounds.removeAt(i);
 
-    final maxPoints = state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
+    final maxPoints =
+        state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
     points = math.min(points, maxPoints);
 
     // insert updated bound at same index
@@ -356,14 +357,7 @@ class RemarkCubit extends Cubit<RemarkState> {
         "mangelhaft",
         "ungenügend"
       ];
-      points = [
-        0.85,
-        0.70,
-        0.55,
-        0.4,
-        0.20,
-        0.0
-      ];
+      points = [0.85, 0.70, 0.55, 0.4, 0.20, 0.0];
     } else if (low == 0 && high == 15) {
       grades = [
         "sehr gut (1+)",
@@ -407,7 +401,7 @@ class RemarkCubit extends Cubit<RemarkState> {
     final lowerBounds = grades.mapIndexed((i, grade) {
       return GradingTableLowerBound(
           // round down to nearest half point
-          points: (2 * (points[i] * maxPoints).floor().toDouble()) / 2,
+          points: (2 * (points[i] * maxPoints)).floor().toDouble() / 2,
           grade: grade);
     }).toList();
 

@@ -21,6 +21,6 @@ class GradingTableLowerBoundData {
 
   static GradingTableLowerBoundData fromMap(Map<String, dynamic> data) {
     return GradingTableLowerBoundData(
-        grade: data['grade'], points: data['points'], examId: data['examId']);
+        grade: data['grade'], points: data['points'].toDouble(), examId: data['examId']);
   }
 }

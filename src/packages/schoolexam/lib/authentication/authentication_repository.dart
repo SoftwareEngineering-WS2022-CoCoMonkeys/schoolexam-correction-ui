@@ -1,11 +1,10 @@
 import 'dart:async';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:schoolexam/exams/dto/authentication_dto.dart';
 import 'package:schoolexam/exams/models/authentication.dart';
 import 'package:schoolexam/exams/models/person.dart';
-
 import 'package:schoolexam/utils/api_provider.dart';
 
 enum AuthenticationStatus { unknown, authenticated, unauthenticated }

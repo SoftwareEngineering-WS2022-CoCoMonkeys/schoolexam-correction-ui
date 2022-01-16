@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
+import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 
 import 'correction.dart';

@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';

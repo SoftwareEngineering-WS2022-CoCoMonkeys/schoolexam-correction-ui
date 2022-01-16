@@ -5,9 +5,9 @@ import 'package:schoolexam/exams/dto/task_dto.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
-import 'participant_dto.dart';
 import '../models/exam.dart';
 import 'grading_table_dto.dart';
+import 'participant_dto.dart';
 
 class ExamDTO extends Equatable {
   final String id;
