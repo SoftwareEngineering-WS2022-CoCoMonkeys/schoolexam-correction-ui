@@ -52,7 +52,7 @@ class CorrectionOverlayDocument extends Equatable {
   }) {
     return CorrectionOverlayDocument(
       submissionId: submissionId,
-      pages: pages ?? this.pages,
+      pages: pages ?? List<CorrectionOverlayPage>.from(this.pages),
       pageNumber: pageNumber ?? this.pageNumber,
     );
   }

@@ -3,7 +3,7 @@ import 'package:schoolexam/exams/exams.dart';
 class AnswerSegmentData {
   final String submissionId;
   final String taskId;
-  final int segmentId;
+  final int? segmentId;
 
   final int startPage;
   final int endPage;
@@ -14,13 +14,22 @@ class AnswerSegmentData {
   const AnswerSegmentData(
       {required this.submissionId,
       required this.taskId,
-      required this.segmentId,
+      this.segmentId,
       required this.startPage,
       required this.endPage,
       required this.startY,
       required this.endY});
 
-  static AnswerSegmentData fromMap(Map<String, dynamic> data) =>
+  Map<String, dynamic> toMap() => {
+        'submissionId': submissionId,
+        'taskId': taskId,
+        'startPage': startPage,
+        'endPage': endPage,
+        'startY': startY,
+        'endY': endY,
+      };
+
+  factory AnswerSegmentData.fromMap(Map<String, dynamic> data) =>
       AnswerSegmentData(
           submissionId: data['submissionId'],
           taskId: data['taskId'],
@@ -29,6 +38,18 @@ class AnswerSegmentData {
           endPage: data['endPage'],
           startY: data['startY'],
           endY: data['endY']);
+
+  factory AnswerSegmentData.fromModel(
+          {required Submission submission,
+          required Task task,
+          required AnswerSegment segment}) =>
+      AnswerSegmentData(
+          submissionId: submission.id,
+          taskId: task.id,
+          startPage: segment.start.page,
+          startY: segment.start.y,
+          endPage: segment.end.page,
+          endY: segment.end.y);
 
   AnswerSegment toModel() => AnswerSegment(
       start: SegmentPosition(page: startPage, y: startY),

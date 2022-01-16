@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
+import 'package:schoolexam_correction_ui/components/error_widget.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart';
+import 'package:schoolexam_correction_ui/components/loading_widget.dart';
 
 class ExamsPage extends StatelessWidget {
   const ExamsPage({Key? key}) : super(key: key);
@@ -40,40 +42,46 @@ class ExamsPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: BlocBuilder<ExamsCubit, ExamsState>(
-          builder: (context, state) {
-            return Container(
-              alignment: Alignment.topCenter,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    child: Card(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.search_outlined,
-                            size: 40,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          labelText: 'Prüfung',
+      body: BlocBuilder<ExamsCubit, ExamsState>(
+        builder: (context, state) {
+          if (state is LoadingExamsState) {
+            return const LoadingWidget();
+          }
+
+          if (state is LoadingExamsErrorState) {
+            return const ErrorStateWidget();
+          }
+
+          return Container(
+            alignment: Alignment.topCenter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Card(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.search_outlined,
+                          size: 40,
+                          color: Theme.of(context).primaryColor,
                         ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        labelText: 'Prüfung',
                       ),
                     ),
                   ),
-                  const StateSelectorChips(),
-                  ExamScreenBody(state.filtered)
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                const StateSelectorChips(),
+                Expanded(child: ExamScreenBody(state.filtered))
+              ],
+            ),
+          );
+        },
       ),
     );
   }

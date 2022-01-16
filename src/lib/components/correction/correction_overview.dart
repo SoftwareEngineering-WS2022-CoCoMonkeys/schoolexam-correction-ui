@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/components/error_widget.dart';
+import 'package:schoolexam_correction_ui/components/loading_widget.dart';
 
 import 'correction_participant_selection_widget.dart';
 
@@ -11,12 +13,10 @@ class CorrectionOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
-      builder: (context, state) => Column(
-            children: [
-              Container(
-                  constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.8),
-                  child: const CorrectionParticipantSelectionWidget()),
-            ],
-          ));
+      builder: (context, state) => Column(children: [
+            Container(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.8),
+                child: const CorrectionParticipantSelectionWidget()),
+          ]));
 }

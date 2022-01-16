@@ -15,5 +15,6 @@ class User extends Equatable {
   static const empty = User(username: "", role: "", person: Person.empty);
 
   bool get isEmpty => this == User.empty;
+
   bool get isNotEmpty => this != User.empty;
 }

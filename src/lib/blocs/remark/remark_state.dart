@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 
 import 'correction.dart';
 
 typedef CorrectionRetrievalCallback = Correction Function(Correction initial);
 
-class RemarkState extends Equatable {
+abstract class RemarkState extends Equatable {
   /// We may only provide remarks for one exam at the time. This contains information about the subject, participants etc.
   final Exam exam;
 
@@ -29,9 +30,6 @@ class RemarkState extends Equatable {
       required this.submissions,
       required this.corrections});
 
-  RemarkState.none()
-      : this._(exam: Exam.empty, submissions: [], corrections: []);
-
   @override
   List<Object> get props => [
         exam,
@@ -42,23 +40,36 @@ class RemarkState extends Equatable {
 }
 
 /// Actions are outstanding.
-abstract class LoadingRemarksState extends RemarkState {
-  const LoadingRemarksState._(
-      {required Exam exam,
-      int selectedCorrection = 0,
-      required List<Submission> submissions,
-      required List<Correction> corrections})
+/// The state holds the data that is outdated.
+class LoadingRemarksState extends RemarkState {
+  LoadingRemarksState.loading({required RemarkState old})
       : super._(
-            exam: exam,
-            selectedCorrection: selectedCorrection,
-            submissions: submissions,
-            corrections: corrections);
+            exam: old.exam,
+            selectedCorrection: old.selectedCorrection,
+            submissions: old.submissions,
+            corrections: old.corrections);
 }
 
-// TODO :
+/// An erroneous state.
+/// Could be the result of an API error.
+class LoadingRemarksErrorState extends RemarkState implements BlocException {
+  @override
+  final Exception exception;
+
+  LoadingRemarksErrorState.error(
+      {required RemarkState old, required this.exception})
+      : super._(
+            exam: old.exam,
+            selectedCorrection: old.selectedCorrection,
+            submissions: old.submissions,
+            corrections: old.corrections);
+}
 
 /// Actions are finished.
-abstract class LoadedRemarksState extends RemarkState {
+class LoadedRemarksState extends RemarkState {
+  LoadedRemarksState.none()
+      : this._(exam: Exam.empty, submissions: [], corrections: []);
+
   const LoadedRemarksState._(
       {required Exam exam,
       int selectedCorrection = 0,
@@ -130,22 +141,6 @@ class SwitchedCorrectionState extends LoadedRemarksState {
                 : initial.selectedCorrection,
             submissions: initial.submissions,
             corrections: initial.corrections);
-}
-
-/// Merged the submission and overlay.
-class MergedCorrectionState extends LoadedRemarksState {
-  final Correction merged;
-
-  MergedCorrectionState.merged(
-      {required RemarkState initial, required this.merged})
-      : super._(
-            exam: initial.exam,
-            selectedCorrection: initial.selectedCorrection,
-            submissions: initial.submissions,
-            corrections: <Correction>[
-              ...initial.corrections.map(
-                  (e) => (e.submission.id == merged.submission.id) ? merged : e)
-            ]);
 }
 
 /// Navigated within [navigated] to e.g. a new answer.

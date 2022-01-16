@@ -57,7 +57,7 @@ class CorrectionOverlayPage extends Equatable {
     return CorrectionOverlayPage(
       instanceId: instanceId,
       version: version ?? this.version,
-      inputs: inputs ?? this.inputs,
+      inputs: inputs ?? List<CorrectionOverlayInput>.from(this.inputs),
       pageSize: pageSize ?? this.pageSize,
     );
   }

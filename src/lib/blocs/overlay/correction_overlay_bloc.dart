@@ -50,7 +50,18 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       final document = await _load(
           path: state.added.submissionPath, submission: state.added.submission);
 
-      emit(LoadedOverlayState.add(initial: this.state, document: document));
+      emit(AddedCorrectionOverlayState.add(
+          initial: this.state, added: document));
+    }
+
+    /// Remove the correction from the active elements
+    else if (state is RemovedCorrectionState) {
+      log("Reacting to deletion within the remark state by removing overlay document");
+      emit(RemovedCorrectionOverlayState.remove(
+          initial: this.state,
+          removed: (this.state.overlays.firstWhere(
+              (element) => element.submissionId == state.removed.submission.id,
+              orElse: () => CorrectionOverlayDocument.empty))));
     }
 
     /// Navigated to a new answer
@@ -84,7 +95,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
   /// Listener, that updates the internal history of pages (identified by instanceId).
   void _onSelfStateChanged(CorrectionOverlayState state) {
-    if (state is! UpdatedDrawingsState) {
+    if (state is! LoadedOverlayState || state.overlays.isEmpty) {
       return;
     }
 
@@ -93,20 +104,26 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     _pageHistory.putIfAbsent(
         currentPage.instanceId, () => Queue.from(<CorrectionOverlayPage>[]));
 
-    // Constraint the history size to prevent memory blowup
     final _currentHistory = _pageHistory[currentPage.instanceId]!;
 
-    if (_currentHistory.length == _maximumHistorySize) {
-      _currentHistory.removeLast();
-    }
-
-    // Cut of history of alternate timeline
     if (_currentHistory.isNotEmpty) {
-      _currentHistory
-          .removeWhere((element) => element.version >= currentPage.version);
-    }
+      // Cut of history of alternate timeline after new user input
+      if (state is UpdatedDrawingsState) {
+        _currentHistory
+            .removeWhere((element) => element.version >= currentPage.version);
+      }
 
-    _currentHistory.addFirst(currentPage);
+      if (_currentHistory.first.version != currentPage.version) {
+        _currentHistory.addFirst(currentPage);
+
+        // Constraint the history size to prevent memory blowup
+        if (_currentHistory.length == _maximumHistorySize) {
+          _currentHistory.removeLast();
+        }
+      }
+    } else {
+      _currentHistory.addFirst(currentPage);
+    }
   }
 
   /// Using the specified [submission] and [path] pointing to the local location of the submission PDF,
@@ -251,29 +268,33 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
         inputs: inputs));
   }
 
+  /// Changing the input behavior of the pencil to [options].
   void changePencilOptions(DrawingInputOptions options) => emit(
       UpdatedInputOptionsState.update(initial: state, pencilOptions: options));
 
-  void changeMarkerOptions(DrawingInputOptions options) =>
-      emit(UpdatedInputOptionsState.update(
-          initial: state,
-          markerOptions:
-              options.copyWith(color: options.color.withOpacity(0.5))));
+  /// Changing the input behavior of the marker to [options].
+  void changeMarkerOptions(DrawingInputOptions options) => emit(
+      UpdatedInputOptionsState.update(initial: state, markerOptions: options
+          // TODO : Find pdf library with opacity support ...
+          //options.copyWith(color: options.color.withOpacity(0.5))
+          ));
 
+  /// Changing the input behavior of the text to [options].
   void changeTextOptions(ColoredInputOptions options) => emit(
       UpdatedInputOptionsState.update(initial: state, textOptions: options));
 
+  /// Changing the input behavior of the eraser to [options].
   void changeEraserOptions(InputOptions options) => emit(
       UpdatedInputOptionsState.update(initial: state, eraserOptions: options));
 
+  /// Changing the active input tool to [inputTool].
   void changeTool(CorrectionInputTool inputTool) => emit(
       UpdatedInputOptionsState.update(initial: state, inputTool: inputTool));
 
+  /// Navigates to [pageNumber] within [document].
   void jumpToPage(
       {required CorrectionOverlayDocument document, required int pageNumber}) {
-    final correctionState = state;
-    final documentNumber =
-        _getDocumentNumber(state: correctionState, document: document);
+    final documentNumber = _getDocumentNumber(state: state, document: document);
 
     if (documentNumber < 0) {
       log("Found no existing overlay document for ${document.submissionId}");
@@ -281,16 +302,17 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     if (pageNumber < 0 ||
-        pageNumber >= correctionState.overlays[documentNumber].pages.length) {
+        pageNumber >= state.overlays[documentNumber].pages.length) {
       log("Not jumping to invalid page $pageNumber");
       return;
     }
 
     log("Jumping from ${document.pageNumber} to $pageNumber within ${document.submissionId}");
-    emit(UpdatedNavigationState.jump(
-        initial: correctionState,
-        documentNumber: documentNumber,
-        page: pageNumber));
+
+    final updatedState = UpdatedNavigationState.jump(
+        initial: state, documentNumber: documentNumber, page: pageNumber);
+
+    emit(updatedState);
   }
 
   /// If possible, an undo of the last change is applied to the current page of [document].

@@ -52,69 +52,76 @@ class _CorrectionPageViewState extends State<CorrectionPageView> {
           builder: (BuildContext context, BoxConstraints constraints) {
         return BlocConsumer<CorrectionOverlayCubit, CorrectionOverlayState>(
             builder: (context, state) {
-          final document = state.getCurrent(widget.initial);
+              final document = state.getCurrent(widget.initial);
 
-          if (document.pages.isEmpty) {
-            return const CircularProgressIndicator();
-          }
+              if (document.pages.isEmpty) {
+                return const CircularProgressIndicator();
+              }
 
-          final page = document.pages[document.pageNumber];
-          final size = _getPDFSize(constraints: constraints, page: page);
+              final page = document.pages[document.pageNumber];
+              final size = _getPDFSize(constraints: constraints, page: page);
 
-          return Row(children: [
-            SizedBox(
-              width: (constraints.maxWidth - size.width),
-              height: size.height,
-              child:
-                  BlocBuilder<CorrectionOverlayCubit, CorrectionOverlayState>(
-                      builder: (context, state) {
-                final document = state.getCurrent(widget.initial);
-                return Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: widget.initial.submission.answers
-                        .where((element) => element.segments.any((element) =>
-                            document.pageNumber >= element.start.page &&
-                            document.pageNumber <= element.end.page))
-                        .map((e) => AnswerRemarkWidget(
-                            task: e.task, initial: widget.initial))
-                        .toList());
-              }),
-            ),
-            InteractiveViewer(
-              child: Stack(
-                children: [
-                  SubmissionView(
-                    initial: widget.initial,
-                    size: size,
-                  ),
-                  Stack(
+              return Row(children: [
+                SizedBox(
+                  width: (constraints.maxWidth - size.width),
+                  height: size.height,
+                  child: BlocBuilder<CorrectionOverlayCubit,
+                      CorrectionOverlayState>(builder: (context, state) {
+                    final document = state.getCurrent(widget.initial);
+                    return Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: widget.initial.submission.answers
+                            .where((element) => element.segments.any(
+                                (element) =>
+                                    document.pageNumber >= element.start.page &&
+                                    document.pageNumber <= element.end.page))
+                            .map((e) => AnswerRemarkWidget(
+                                task: e.task, initial: widget.initial))
+                            .toList());
+                  }),
+                ),
+                InteractiveViewer(
+                  child: Stack(
                     children: [
-                      PathsWidget(
-                          initialData:
-                              document.pages[document.pageNumber].inputs,
-                          size: size,
-                          controller: linesController!),
-                      if (state.inputTool == CorrectionInputTool.pencil ||
-                          state.inputTool == CorrectionInputTool.marker)
-                        DrawingInputOverlay(
-                            size: size,
-                            linesController: linesController!,
-                            initial: widget.initial),
-                      if (state.inputTool == CorrectionInputTool.eraser)
-                        EraserInputOverlay(
-                            size: size,
-                            linesController: linesController!,
-                            initial: widget.initial)
+                      SubmissionView(
+                        initial: widget.initial,
+                        size: size,
+                      ),
+                      Stack(
+                        children: [
+                          PathsWidget(
+                              initialData:
+                                  document.pages[document.pageNumber].inputs,
+                              size: size,
+                              controller: linesController!),
+                          if (state.inputTool == CorrectionInputTool.pencil ||
+                              state.inputTool == CorrectionInputTool.marker)
+                            DrawingInputOverlay(
+                                size: size,
+                                linesController: linesController!,
+                                initial: widget.initial),
+                          if (state.inputTool == CorrectionInputTool.eraser)
+                            EraserInputOverlay(
+                                size: size,
+                                linesController: linesController!,
+                                initial: widget.initial)
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
-            ),
-          ]);
-        }, listener: (context, state) {
-          final document = state.getCurrent(widget.initial);
-          linesController!.add(document.pages[document.pageNumber].inputs);
-        });
+                  ),
+                ),
+              ]);
+            },
+            listenWhen: (old, current) => current is LoadedOverlayState,
+            listener: (context, state) {
+              final document = state.getCurrent(widget.initial);
+
+              if (document.pages.isEmpty) {
+                return;
+              }
+
+              linesController!.add(document.pages[document.pageNumber].inputs);
+            });
       });
 
   @override

@@ -38,7 +38,7 @@ abstract class CorrectionOverlayState extends Equatable {
         inputTool
       ];
 
-  CorrectionOverlayState._(
+  const CorrectionOverlayState._(
       {this.documentNumber = 0,
       required this.overlays,
       this.inputTool = CorrectionInputTool.pencil,
@@ -49,8 +49,10 @@ abstract class CorrectionOverlayState extends Equatable {
       : pencilOptions = pencilOptions ??
             const DrawingInputOptions.pencil(size: 4, color: Colors.black),
         markerOptions = markerOptions ??
-            DrawingInputOptions.marker(
-                size: 4, color: Colors.yellow.withOpacity(0.5)),
+            const DrawingInputOptions.marker(size: 4, color: Colors.yellow),
+        // TODO : Find pdf library with opacity support ...
+        /*DrawingInputOptions.marker(
+                size: 4, color: Colors.yellow.withOpacity(0.5)),*/
         textOptions = textOptions ??
             const ColoredInputOptions(size: 4, color: Colors.black),
         eraserOptions = eraserOptions ?? const InputOptions(size: 4);
@@ -60,6 +62,8 @@ abstract class CorrectionOverlayState extends Equatable {
       {required CorrectionOverlayState initial,
       required int documentNumber,
       required CorrectionOverlayDocument document}) {
+    assert(documentNumber < initial.overlays.length);
+
     final updated = List<CorrectionOverlayDocument>.from(initial.overlays);
     updated[documentNumber] = document;
     return updated;
@@ -71,6 +75,9 @@ abstract class CorrectionOverlayState extends Equatable {
       required int documentNumber,
       required int pageNumber,
       required CorrectionOverlayPage page}) {
+    assert(documentNumber < initial.overlays.length);
+    assert(pageNumber < initial.overlays[documentNumber].pages.length);
+
     final updatedPages = List<CorrectionOverlayPage>.from(
         initial.overlays[documentNumber].pages);
     updatedPages[pageNumber] = page;
@@ -84,16 +91,8 @@ abstract class CorrectionOverlayState extends Equatable {
 }
 
 /// Document was nearly added
-class LoadedOverlayState extends CorrectionOverlayState {
-  LoadedOverlayState.add(
-      {required CorrectionOverlayState initial,
-      required CorrectionOverlayDocument document})
-      : super._(
-            overlays: List<CorrectionOverlayDocument>.from(initial.overlays)
-              ..add(document),
-            documentNumber: initial.overlays.length);
-
-  LoadedOverlayState._(
+abstract class LoadedOverlayState extends CorrectionOverlayState {
+  const LoadedOverlayState._(
       {required List<CorrectionOverlayDocument> overlays,
       int? documentNumber,
       CorrectionInputTool? inputTool,
@@ -113,6 +112,31 @@ class LoadedOverlayState extends CorrectionOverlayState {
 
 class InitialOverlayState extends LoadedOverlayState {
   InitialOverlayState() : super._(documentNumber: 0, overlays: []);
+}
+
+/// Added
+class AddedCorrectionOverlayState extends LoadedOverlayState {
+  final CorrectionOverlayDocument added;
+
+  AddedCorrectionOverlayState.add(
+      {required CorrectionOverlayState initial, required this.added})
+      : super._(
+            overlays: List<CorrectionOverlayDocument>.from(initial.overlays)
+              ..add(added),
+            documentNumber: initial.overlays.length);
+}
+
+/// Removed
+class RemovedCorrectionOverlayState extends LoadedOverlayState {
+  final CorrectionOverlayDocument removed;
+
+  RemovedCorrectionOverlayState.remove(
+      {required CorrectionOverlayState initial, required this.removed})
+      : super._(
+            overlays: List<CorrectionOverlayDocument>.from(initial.overlays)
+              ..removeWhere(
+                  (element) => element.submissionId == removed.submissionId),
+            documentNumber: initial.overlays.length);
 }
 
 /// The user navigated to a new page, loaded e.g. a new document ...

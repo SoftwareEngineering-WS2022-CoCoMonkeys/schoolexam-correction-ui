@@ -10,6 +10,7 @@ class Task extends Equatable {
   static const empty = const Task(id: "", title: "", maxPoints: 0.0);
 
   bool get isEmpty => this == Task.empty;
+
   bool get isNotEmpty => this != Task.empty;
 
   @override

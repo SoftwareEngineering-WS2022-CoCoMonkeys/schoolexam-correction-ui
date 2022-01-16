@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
@@ -8,30 +10,14 @@ import 'package:schoolexam/exams/persistence/correctable_data.dart';
 import 'package:schoolexam/exams/persistence/exam_data.dart';
 import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
+import 'package:schoolexam/schoolexam.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository.db');
-
-    // DEBUG PURPOSES
-    bool dbExists = await File(path).exists();
-
-    if (!dbExists) {
-      // Copy from asset
-      ByteData data =
-          await rootBundle.load(p.join("assets", "databases", "dummy.db"));
-      List<int> bytes =
-          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-      // Write and flush the bytes written
-      await File(path).writeAsBytes(bytes, flush: true);
-    }
-    //
+    final path = p.join(await getDatabasesPath(), 'exams_repository6.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
@@ -56,11 +42,11 @@ class LocalExamsRepository extends ExamsRepository {
 
       /// CORRECTABLE
       db.execute(
-          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
+          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, isMatchedToStudent INTEGER NOT NULL, isCompleted INTEGER NOT NULL, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, updatedAt INT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answer_segments(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, segmentId INT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, PRIMARY KEY(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
+          'CREATE TABLE IF NOT EXISTS answer_segments(segmentId INTEGER PRIMARY KEY NOT NULL, submissionId TEXT NOT NULL, taskId TEXT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, UNIQUE(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
       db.execute(
-          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
+          'CREATE TABLE IF NOT EXISTS answers(submissionId TEXT NOT NULL, taskId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, updatedAt INT NOT NULL, PRIMARY KEY(submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
     }, version: 1);
   }
 
@@ -102,15 +88,16 @@ class LocalExamsRepository extends ExamsRepository {
         }
       }).toList();
 
-  // TODO : Handle not existing
-  Future<Student> getStudent(String id) async => List<
-          Map<String,
-              dynamic>>.from(await database!.rawQuery(
-          'SELECT p.id, p.displayName FROM participants p INNER JOIN students s ON s.id = p.id WHERE s.id = ?',
-          [id]))
-      .map((e) => StudentData.fromMap(e))
-      .first
-      .toModel([]) as Student;
+  /// Retrieves the student with the identification [id].
+  Future<Student> getStudent(String id) async =>
+      List<Map<String, dynamic>>.from(await database!.rawQuery(
+              'SELECT p.id, p.displayName FROM participants p INNER JOIN students s ON s.id = p.id WHERE s.id = ?',
+              [
+            id
+          ]))
+          .map((e) => StudentData.fromMap(e).toModel([]))
+          .firstWhere((element) => element.id == id,
+              orElse: () => Student.empty) as Student;
 
   /// Retrieves all tasks corresponding to the exam [examId]
   Future<List<Task>> getTasks({required String examId}) async =>
@@ -165,76 +152,9 @@ class LocalExamsRepository extends ExamsRepository {
     ];
   }
 
-  /// Inserts the [exams] into the local persistence layer.
-  /// However, this may cascade into a deletion of referencing entities.
-  Future<void> insertExams({required List<Exam> exams}) async {
-    if (database == null) {
-      await init();
-    }
-
-    await database!.transaction((txn) async {
-      // 1. Insert exams
-      final eBatch = txn.batch();
-      for (final exam in exams) {
-        // Ensure that an exam with that ID exists
-        final dExam = ExamData.fromModel(exam);
-        eBatch.insert('exams', ExamData.fromModel(exam).toMap(),
-            conflictAlgorithm: ConflictAlgorithm.ignore);
-        // Update possibly old exam data
-        eBatch.update('exams', dExam.toMap(),
-            where: 'id = ?', whereArgs: [dExam.id]);
-
-        // 2. Insert tasks
-        for (final task in exam.tasks) {
-          final dTask = TaskData.fromModel(task, exam);
-          // Ensure that a task with that ID exists
-          eBatch.insert('tasks', dTask.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.ignore);
-          // Update possibly old task data
-          eBatch.update('tasks', dTask.toMap(),
-              where: 'id = ?', whereArgs: [dTask.id]);
-        }
-        // 2a. Delete tasks
-        // Scenario : Teacher creates an exam. After some initial work on the exam, it is decided to remove a task from the exam.
-        eBatch.delete('tasks',
-            where:
-                'examId = ? AND NOT id IN (${exam.tasks.map((e) => "\'${e.id}\'").join(",")})');
-
-        // 3. Insert participants
-        // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
-        for (final participant in exam.participants) {
-          late final String childTable;
-          late final ParticipantData dParticipant;
-
-          if (participant is Course) {
-            dParticipant = CourseData.fromModel(participant);
-            childTable = 'courses';
-          } else if (participant is Student) {
-            dParticipant = StudentData.fromModel(participant);
-            childTable = 'students';
-          } else {
-            // Triggers rollback of transaction
-            throw Exception(
-                "The participant type ${participant.runtimeType} is unknown.");
-          }
-
-          // Ensure that a participant with that ID exists
-          eBatch.insert('participants', dParticipant.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.ignore);
-          // Update possibly old participant data
-          eBatch.update('participants', dParticipant.toMap(),
-              where: 'id = ?', whereArgs: [dParticipant.id]);
-
-          eBatch.insert(childTable, {"id": participant.id},
-              conflictAlgorithm: ConflictAlgorithm.ignore);
-        }
-      }
-
-      eBatch.commit(noResult: true);
-    });
-  }
-
   @override
+
+  /// Returns the details of the desired exam with the identification [examId] from the local persistence layer.
   Future<Exam> getExam(String examId) async {
     if (database == null) {
       await init();
@@ -281,6 +201,8 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+
+  /// Returns all the exams a teacher is allowed to retrieve from the local persistence layer.
   Future<List<Exam>> getExams() async {
     if (database == null) {
       await init();
@@ -296,6 +218,8 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+
+  /// Returns all the submissions overviews currently uploaded for the [examId] from the local persistence layer.
   Future<List<Submission>> getSubmissions({required String examId}) async {
     if (database == null) {
       await init();
@@ -322,6 +246,19 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+
+  /// Returns the details for the requested submissions [submissionIds] belonging to the exam [examId] from the local persistence layer.
+  Future<List<Submission>> getSubmissionDetails(
+      {required String examId, required List<String> submissionIds}) async {
+    var res = await getSubmissions(examId: examId);
+
+    return res
+        .cast<Submission>()
+        .where((element) => submissionIds.contains(element.id))
+        .toList();
+  }
+
+  @override
   Future<void> uploadExam({required NewExamDTO exam}) {
     // TODO: implement uploadExam
     throw UnimplementedError();
@@ -334,8 +271,207 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> setPoints({required String submissionId,  required String taskId, required double achievedPoints}) {
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) {
     // TODO: implement setPoints
+    throw UnimplementedError();
+  }
+
+  // UPDATE LOCAL PERSISTENCE
+
+  /// Adds the update of the local persistence layer to include [participant] into the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addParticipantInsertion(
+      {required Batch batch, required Participant participant}) {
+    late final String childTable;
+    late final ParticipantData dParticipant;
+
+    if (participant is Course) {
+      dParticipant = CourseData.fromModel(participant);
+      childTable = 'courses';
+    } else if (participant is Student) {
+      dParticipant = StudentData.fromModel(participant);
+      childTable = 'students';
+    } else {
+      // Triggers rollback of transaction
+      throw Exception(
+          "The participant type ${participant.runtimeType} is unknown.");
+    }
+
+    // Ensure that a participant with that ID exists
+    batch.insert('participants', dParticipant.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+    // Update possibly old participant data
+    batch.update('participants', dParticipant.toMap(),
+        where: 'id = ?', whereArgs: [dParticipant.id]);
+
+    batch.insert(childTable, {"id": participant.id},
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  /// Adds the update of the local persistence layer to include [task] into the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addTaskInsertion(
+      {required Batch batch, required Task task, required Exam exam}) {
+    final dTask = TaskData.fromModel(task, exam);
+    // Ensure that a task with that ID exists
+    batch.insert('tasks', dTask.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+    // Update possibly old task data
+    batch
+        .update('tasks', dTask.toMap(), where: 'id = ?', whereArgs: [dTask.id]);
+  }
+
+  /// Adds the update of the local persistence layer to include [exam] into the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addExamInsertion({required Batch batch, required Exam exam}) {
+    // 1. Insert exam
+    // Ensure that an exam with that ID exists
+    final dExam = ExamData.fromModel(exam);
+    batch.insert('exams', ExamData.fromModel(exam).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+    // Update possibly old exam data
+    batch
+        .update('exams', dExam.toMap(), where: 'id = ?', whereArgs: [dExam.id]);
+
+    // 2. Insert tasks
+    for (final task in exam.tasks) {
+      _addTaskInsertion(batch: batch, task: task, exam: exam);
+    }
+
+    // 2a. Remove old data
+    // Scenario : Teacher creates an exam. After some initial work on the exam, it is decided to remove a task from the exam.
+    batch.delete('tasks',
+        where:
+            'examId = ? AND NOT id IN (${exam.tasks.map((e) => "\'${e.id}\'").join(",")})');
+
+    // 3. Insert participants
+    // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
+    for (final participant in exam.participants) {
+      _addParticipantInsertion(batch: batch, participant: participant);
+    }
+  }
+
+  /// Adds the update of the local persistence layer to include [segment] into the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addAnswerSegmentInsertion(
+      {required Batch batch,
+      required Submission submission,
+      required Task task,
+      required AnswerSegment segment}) {
+    final dSegment = AnswerSegmentData.fromModel(
+        submission: submission, task: task, segment: segment);
+
+    batch.insert('answer_segments', dSegment.toMap());
+  }
+
+  /// Adds the update of the local persistence layer to include [answer] into the [batch].
+  /// Importantly, present data is only overridden, if it is older.
+  /// The only exception are the segments, as these are first deleted and then recreated.
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addAnswerInsertion(
+      {required Batch batch,
+      required Answer answer,
+      required Submission submission}) {
+    // 1. Insert Answer
+    final dAnswer = AnswerData.fromModel(submission: submission, model: answer);
+
+    // Ensure that an answer with that ID exists
+    batch.insert('answers', dAnswer.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // Update possibly old answers data.
+    // The age is determined by the last update.
+    // We only update, if the local persistence layer lacks behind.
+    batch.update('answers', dAnswer.toMap(),
+        where: 'taskId = ? AND submissionId = ? AND updatedAt < ?',
+        whereArgs: [dAnswer.taskId, dAnswer.submissionId, dAnswer.updatedAt]);
+
+    // 2. Cleanup (pot.) old segments
+    batch.delete('answer_segments',
+        where: 'submissionId = ? AND taskId = ?',
+        whereArgs: [submission.id, answer.task.id]);
+
+    // 3. Insert segments
+    for (final segment in answer.segments) {
+      _addAnswerSegmentInsertion(
+          batch: batch,
+          submission: submission,
+          task: answer.task,
+          segment: segment);
+    }
+  }
+
+  /// Adds the update of the local persistence layer to include [submission] into the [batch].
+  /// Importantly, present data is only overridden, if it is older.
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addSubmissionInsertion(
+      {required Batch batch, required Submission submission}) {
+    // 1. Insert Exam
+    _addExamInsertion(batch: batch, exam: submission.exam);
+
+    // 2. Insert submission
+
+    // Ensure that a submission with that ID exists
+    final dSubmission = SubmissionData.fromModel(model: submission);
+    batch.insert('submissions', dSubmission.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // Update possibly old submission data.
+    // The age is determined by the last update.
+    // We only update, if the local persistence layer lacks behind.
+    batch.update('submissions', dSubmission.toMap(),
+        where: 'id = ? AND updatedAt < ?',
+        whereArgs: [dSubmission.id, dSubmission.updatedAt]);
+
+    // 3. Insert answers
+    for (final answer in submission.answers) {
+      _addAnswerInsertion(batch: batch, answer: answer, submission: submission);
+    }
+
+    // 4. Insert student
+    _addParticipantInsertion(batch: batch, participant: submission.student);
+  }
+
+  /// Inserts the [submissions] into the local persistence layer.
+  Future<void> insertSubmissions(
+      {required List<Submission> submissions}) async {
+    if (database == null) {
+      await init();
+    }
+
+    await database!.transaction((txn) async {
+      final eBatch = txn.batch();
+      for (final submission in submissions) {
+        _addSubmissionInsertion(batch: eBatch, submission: submission);
+      }
+
+      eBatch.commit(noResult: true);
+    });
+  }
+
+  /// Inserts the [exams] into the local persistence layer.
+  Future<void> insertExams({required List<Exam> exams}) async {
+    if (database == null) {
+      await init();
+    }
+
+    await database!.transaction((txn) async {
+      // 1. Insert exams
+      final eBatch = txn.batch();
+      for (final exam in exams) {
+        _addExamInsertion(batch: eBatch, exam: exam);
+      }
+
+      eBatch.commit(noResult: true);
+    });
+  }
+
+  @override
+  Future<void> uploadRemark({required String submissionId, required String data}) {
+    // TODO: implement uploadRemark
     throw UnimplementedError();
   }
 }

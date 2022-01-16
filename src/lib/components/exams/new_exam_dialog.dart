@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_event.dart';
-import 'package:schoolexam_correction_ui/blocs/exams/exam_details_state.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_form_row.dart';
 
 class NewExamDialog extends StatelessWidget {
