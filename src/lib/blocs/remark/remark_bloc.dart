@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -42,30 +41,6 @@ class RemarkCubit extends Cubit<RemarkState> {
     }
 
     await correct(await _examsRepository.getExam(state.examId));
-  }
-
-  Future<Tuple2<Uint8List, int>> _ensurePersistence(
-      {required String path, required String data}) async {
-    final file = File(path);
-
-    late final int pageCount;
-    late final Uint8List res;
-    if (await file.exists()) {
-      log("Loading file located at $path");
-      final document = PdfDocument(inputBytes: await file.readAsBytes());
-      pageCount = document.pages.count;
-      res = Uint8List.fromList(document.save());
-    } else {
-      log("Writing file to $path");
-      final document = PdfDocument.fromBase64String(data);
-      pageCount = document.pages.count;
-      res = Uint8List.fromList(document.save());
-
-      await file.create(recursive: true);
-      await file.writeAsBytes(res);
-    }
-
-    return Tuple2(res, pageCount);
   }
 
   /// Loads the correction pdf from [path].

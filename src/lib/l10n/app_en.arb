@@ -1,0 +1,48 @@
+{
+  "appTitle": "SchoolExam",
+  "welcomeText": "Welcome!",
+  "pleaseLogin": "Please login to start correcting exams!",
+  "userName": "username",
+  "password": "password",
+  "login": "login",
+  "teacher": "teacher",
+  "exam": "exam",
+  "examPageName": "exams",
+  "stateUnknown": "unknown",
+  "statePlanned": "planned",
+  "stateBuildReady": "build ready",
+  "stateSubmissionReady": "submission ready",
+  "stateInCorrection": "in correction",
+  "stateCorrected": "corrected",
+  "statePublished": "published",
+  "examCardState": "state",
+  "examCardCourse": "course",
+  "examCardTopic": "topic",
+  "examCardParticipants": "# participants",
+  "examCardQuota": "quota",
+  "examCardButtonReturn": "return",
+  "examCardButtonCorrect": "correct",
+  "examCardButtonUpload": "upload",
+  "examCardButtonEdit": "edit",
+  "newExamTitle": "title",
+  "newExamTopic": "topic",
+  "newExamCourse": "course",
+  "newExamDate": "exam date",
+  "newExamButtonCreate": "create",
+  "newExamButtonEdit": "edit",
+  "newExamButtonCancel": "cancel",
+  "yes": "yes",
+  "no": "no",
+  "correctionSelectionConfirmWithName": "Do you want to open the correction for student {name}?",
+  "@correctionSelectionConfirmWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jane"
+      }
+    }
+  },
+  "correction": "correction",
+  "taskRemarkEvaluate": "evaluate",
+  "taskRemarkPoints": "points"
+}

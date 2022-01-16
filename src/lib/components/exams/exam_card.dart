@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam/schoolexam.dart';
 
@@ -30,9 +31,7 @@ class ExamCard extends StatelessWidget {
                 ),
               ),
               Text(
-                (exam.dateOfExam != null)
-                    ? formatter.format(exam.dateOfExam)
-                    : "",
+                formatter.format(exam.dateOfExam),
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
               Padding(
@@ -40,10 +39,10 @@ class ExamCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    const Expanded(
+                    Expanded(
                         flex: 2,
                         child: Text(
-                          "Status: ",
+                          AppLocalizations.of(context)!.examCardState + ": ",
                           textAlign: TextAlign.end,
                         )),
                     const SizedBox(width: 4),
@@ -59,10 +58,10 @@ class ExamCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    const Expanded(
+                    Expanded(
                         flex: 2,
                         child: Text(
-                          "Kurs: ",
+                          AppLocalizations.of(context)!.examCardCourse + ": ",
                           textAlign: TextAlign.end,
                         )),
                     const SizedBox(width: 4),
@@ -82,10 +81,10 @@ class ExamCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                         flex: 2,
                         child: Text(
-                          "Fach: ",
+                          AppLocalizations.of(context)!.examCardTopic + ": ",
                           textAlign: TextAlign.end,
                         )),
                     const SizedBox(width: 4),
@@ -102,10 +101,11 @@ class ExamCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                         flex: 2,
                         child: Text(
-                          "Teilnehmende: ",
+                          AppLocalizations.of(context)!.examCardParticipants +
+                              ": ",
                           textAlign: TextAlign.end,
                         )),
                     const SizedBox(width: 4),
@@ -123,16 +123,16 @@ class ExamCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Expanded(
+                      Expanded(
                           flex: 2,
                           child: Text(
-                            "Korrigiert: ",
+                            AppLocalizations.of(context)!.examCardQuota + ": ",
                             textAlign: TextAlign.end,
                           )),
                       const SizedBox(width: 4),
                       Expanded(
                         flex: 4,
-                        child: Text(exam.quota.toString() + " %"),
+                        child: Text(exam.quota.toStringAsFixed(3) + " %"),
                       )
                     ],
                   ),

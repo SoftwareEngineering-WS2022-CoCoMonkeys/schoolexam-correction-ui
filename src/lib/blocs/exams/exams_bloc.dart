@@ -26,7 +26,6 @@ class ExamsCubit extends Cubit<ExamsState> {
     _authenticationSubscription =
         authenticationBloc.stream.listen(_onAuthenticationStateChanged);
   }
-
   void _onExamDetailsStateChanged(ExamDetailsState state) async {
     switch (state.status) {
       case FormzStatus.submissionSuccess:
@@ -50,16 +49,14 @@ class ExamsCubit extends Cubit<ExamsState> {
     }
   }
 
-  Future<void> loadExams() async {
-    emit(LoadingExamsState.loading(old: state));
-    final exams = await _examsRepository.getExams();
-    emit(LoadedExamsState.unfiltered(exams: exams));
-  }
+  Future<void> _searchExams({String? search, List<ExamStatus>? states}) async {
+    final fSearch = search ?? state.search;
+    final fStates = states ?? state.states;
 
-  Future<void> filterExams(String title, List<ExamStatus> states) async {
     late final List<Exam> exams;
     if (state.exams.isEmpty) {
-      emit(LoadingExamsState.loading(old: state));
+      emit(LoadingExamsState.loading(
+          old: state, search: fSearch, states: fStates));
       exams = await _examsRepository.getExams();
     } else {
       exams = state.exams;
@@ -67,11 +64,32 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     final filtered = exams
         .where((element) =>
-            element.title.startsWith(title) && states.contains(element.status))
+            element.title.toLowerCase().startsWith(fSearch) &&
+            fStates.contains(element.status))
         .toList(growable: false);
-
-    emit(LoadedExamsState.filtered(exams: exams, filtered: filtered));
+    emit(LoadedExamsState.loaded(
+        exams: exams, filtered: filtered, search: fSearch, states: fStates));
   }
+
+  /// The user changed the search word to [search].
+  Future<void> onSearchChanged(String search) async =>
+      await _searchExams(search: search);
+
+  /// The user changed the status [status] to be either desired or undesired.
+  Future<void> onStatusChanged(
+      {required ExamStatus status, required bool added}) async {
+    final states = Set<ExamStatus>.from(state.states);
+    if (added) {
+      states.add(status);
+    } else {
+      states.removeWhere((element) => element.name == status.name);
+    }
+
+    await _searchExams(states: states.toList());
+  }
+
+  /// The user requested a reload of the exams using the current search parameters.
+  Future<void> loadExams() async => _searchExams();
 
   @override
   Future<void> close() async {

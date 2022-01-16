@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
@@ -18,19 +19,19 @@ class NewExamDialog extends StatelessWidget {
 
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
-      if (state.status.isSubmissionFailure) {
-        // TODO : Improve errors
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-                content: Text(
-                    "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
-          );
-      } else if (state.status.isSubmissionSuccess) {
-        Navigator.pop(context);
-      }
-    }, builder: (context, state) {
+          if (state.status.isSubmissionFailure) {
+            // TODO : Improve errors
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                    content: Text(
+                        "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
+              );
+          } else if (state.status.isSubmissionSuccess) {
+            Navigator.pop(context);
+          }
+        }, builder: (context, state) {
       return SimpleDialog(
         children: [
           Container(
@@ -41,7 +42,7 @@ class NewExamDialog extends StatelessWidget {
                 key: formKey,
                 children: [
                   ExamFormRow(
-                    prefix: 'Titel',
+                    prefix: AppLocalizations.of(context)!.newExamTitle,
                     invalid: state.examTitle.invalid,
                     value: state.examTitle.value,
                     child: Column(
@@ -52,8 +53,9 @@ class NewExamDialog extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 36,
                             ),
-                            decoration: const InputDecoration(
-                              labelText: "Titel",
+                            decoration: InputDecoration(
+                              labelText:
+                              AppLocalizations.of(context)!.newExamTitle,
                             ),
                             onChanged: (examTitle) => context
                                 .read<ExamDetailsBloc>()
@@ -62,7 +64,7 @@ class NewExamDialog extends StatelessWidget {
                     ),
                   ),
                   ExamFormRow(
-                    prefix: 'Thema',
+                    prefix: AppLocalizations.of(context)!.newExamTopic,
                     invalid: state.examTopic.invalid,
                     value: state.examTopic.value,
                     child: Column(
@@ -73,8 +75,9 @@ class NewExamDialog extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 36,
                             ),
-                            decoration: const InputDecoration(
-                              labelText: "Thema",
+                            decoration: InputDecoration(
+                              labelText:
+                              AppLocalizations.of(context)!.newExamTopic,
                             ),
                             onChanged: (examTopic) => context
                                 .read<ExamDetailsBloc>()
@@ -83,12 +86,12 @@ class NewExamDialog extends StatelessWidget {
                     ),
                   ),
                   ExamFormRow(
-                    prefix: 'Kurs',
+                    prefix: AppLocalizations.of(context)!.newExamCourse,
                     invalid: state.examCourse.invalid,
                     value: state.examCourse.value.displayName,
                     child: Column(
                       children: [
-                        const Text("Kurs",
+                        Text(AppLocalizations.of(context)!.newExamCourse,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 36)),
                         Container(
@@ -102,21 +105,21 @@ class NewExamDialog extends StatelessWidget {
                               },
                               children: state.validCourses
                                   .map((c) => Text(c.displayName,
-                                      style: const TextStyle(
-                                        fontSize: 36,
-                                      )))
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                  )))
                                   .toList()),
                         ),
                       ],
                     ),
                   ),
                   ExamFormRow(
-                    prefix: 'Prüfungsdatum',
+                    prefix: AppLocalizations.of(context)!.newExamDate,
                     invalid: state.examDate.invalid,
                     value: formatter.format(state.examDate.value.toLocal()),
                     child: Column(
                       children: [
-                        const Text("Prüfungsdatum",
+                        Text(AppLocalizations.of(context)!.newExamDate,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 36)),
                         Container(
@@ -144,14 +147,16 @@ class NewExamDialog extends StatelessWidget {
                                     primary: Colors.blue),
                                 onPressed: state.status.isValidated
                                     ? () {
-                                        context
-                                            .read<ExamDetailsBloc>()
-                                            .add(const ExamSubmitted());
-                                      }
+                                  context
+                                      .read<ExamDetailsBloc>()
+                                      .add(const ExamSubmitted());
+                                }
                                     : null,
                                 child: Text(state.isNewExamEdit
-                                    ? "Erstellen"
-                                    : "Anpassen"),
+                                    ? AppLocalizations.of(context)!
+                                    .newExamButtonCreate
+                                    : AppLocalizations.of(context)!
+                                    .newExamButtonEdit),
                               ),
                             ),
                           ),
@@ -165,7 +170,8 @@ class NewExamDialog extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Abbrechen'),
+                                child: Text(AppLocalizations.of(context)!
+                                    .newExamButtonCancel),
                               ),
                             ),
                           ),
