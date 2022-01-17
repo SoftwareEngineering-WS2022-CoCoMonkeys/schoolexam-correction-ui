@@ -58,5 +58,6 @@
   "taskRemarkEvaluate": "Bewerten",
   "taskRemarkPoints": "Punkte",
   "errorTitle": "Fehler",
-  "authenticationError": "Die Anmeldung ist fehlgeschlagen."
+  "authenticationError": "Die Anmeldung ist fehlgeschlagen.",
+  "updateExamError": "Die Aktualisierung ist fehlgeschlagen."
 }

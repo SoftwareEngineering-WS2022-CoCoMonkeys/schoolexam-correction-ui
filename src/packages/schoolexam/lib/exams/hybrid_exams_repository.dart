@@ -108,25 +108,15 @@ class HybridExamsRepository extends ExamsRepository {
 
   @override
   Future<void> uploadExam({required NewExamDTO exam}) async {
-    try {
-      log("Trying to upload new exam to online repository");
-      return await online.uploadExam(exam: exam);
-    } on NetworkException catch (e) {
-      log("Falling back to offline repository because of error $e");
-      return await local.uploadExam(exam: exam);
-    }
+    log("Trying to upload new exam to online repository");
+    return await online.uploadExam(exam: exam);
   }
 
   @override
   Future<void> updateExam(
       {required NewExamDTO exam, required String examId}) async {
-    try {
-      log("Trying to update exam using online repository");
-      return await online.updateExam(exam: exam, examId: examId);
-    } on NetworkException catch (e) {
-      log("Falling back to offline repository because of error $e");
-      return await local.updateExam(exam: exam, examId: examId);
-    }
+    log("Trying to update exam using online repository");
+    return await online.updateExam(exam: exam, examId: examId);
   }
 
   @override
@@ -163,5 +153,10 @@ class HybridExamsRepository extends ExamsRepository {
   Future<void> publishExam(
       {required String examId, DateTime? publishDate}) async {
     await online.publishExam(examId: examId, publishDate: publishDate);
+  }
+
+  @override
+  Future<List<Course>> getCourses() async {
+    return await online.getCourses();
   }
 }

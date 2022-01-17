@@ -41,4 +41,8 @@ abstract class ExamsRepository {
   /// Finalizes the correction of the [examId] and schedules the publishing to [publishDate].
   /// If no publish date is supplied, the exam is directly published.
   Future<void> publishExam({required String examId, DateTime? publishDate});
+
+  /// Retrieves all currently known courses.
+  /// These can then be set as participants for exams.
+  Future<List<Course>> getCourses();
 }

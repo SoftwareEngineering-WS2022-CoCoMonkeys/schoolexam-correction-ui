@@ -274,18 +274,6 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> uploadExam({required NewExamDTO exam}) {
-    // TODO: implement uploadExam
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
-    // TODO: implement updateExam
-    throw UnimplementedError();
-  }
-
-  @override
   Future<void> setPoints(
       {required String submissionId,
       required String taskId,
@@ -513,6 +501,18 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+  Future<void> uploadExam({required NewExamDTO exam}) {
+    // TODO: implement uploadExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
+    // TODO: implement updateExam
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> uploadRemark(
       {required String submissionId, required String data}) {
     // TODO: implement uploadRemark
@@ -522,6 +522,12 @@ class LocalExamsRepository extends ExamsRepository {
   @override
   Future<void> publishExam({required String examId, DateTime? publishDate}) {
     // TODO: implement publishExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Course>> getCourses() {
+    // TODO: implement getCourses
     throw UnimplementedError();
   }
 }

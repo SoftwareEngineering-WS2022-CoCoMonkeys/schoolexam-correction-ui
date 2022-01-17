@@ -72,6 +72,9 @@ class ApiProvider {
         ? await _httpRequest(url, headers, method, body: body)
         : await _httpRequest(url, headers, method);
 
+    print(path);
+    print(body);
+
     switch (response.statusCode) {
       case 200:
       case 201:
@@ -79,8 +82,6 @@ class ApiProvider {
       case 204:
         return "";
       case 400:
-        print(body);
-        print (response.body);
         throw BadRequestException(response);
       case 401:
         throw UnauthorisedException(response);

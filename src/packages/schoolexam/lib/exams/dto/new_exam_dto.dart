@@ -3,8 +3,6 @@ import 'package:schoolexam/exams/models/course.dart';
 
 class NewExamDTO extends Equatable {
   final String title;
-
-  // TODO: should be topic?
   final String topic;
   final Course course;
   final DateTime dateOfExam;

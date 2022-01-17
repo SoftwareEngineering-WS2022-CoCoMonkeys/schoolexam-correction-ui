@@ -58,5 +58,6 @@
   "taskRemarkEvaluate": "evaluate",
   "taskRemarkPoints": "points",
   "errorTitle": "Error",
-  "authenticationError": "The authentication failed."
+  "authenticationError": "The authentication failed.",
+  "updateExamError": "The update failed."
 }

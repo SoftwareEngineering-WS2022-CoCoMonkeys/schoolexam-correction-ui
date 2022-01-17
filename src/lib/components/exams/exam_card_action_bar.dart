@@ -24,7 +24,8 @@ class ExamCardActionsBar extends StatelessWidget {
         child = ElevatedButton.icon(
           icon: const Icon(Icons.edit),
           onPressed: () {
-            context.read<ExamDetailsBloc>().add(AdjustExamOpened(exam));
+            BlocProvider.of<ExamDetailsBloc>(context)
+                .adjustExamOpened(exam: exam);
             showCupertinoDialog(
                 context: context, builder: (_) => const NewExamDialog());
           },
