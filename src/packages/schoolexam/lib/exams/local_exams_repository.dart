@@ -1,13 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
+import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
 import 'package:schoolexam/exams/persistence/correctable_data.dart';
 import 'package:schoolexam/exams/persistence/exam_data.dart';
+import 'package:schoolexam/exams/persistence/grading_table_lower_bound_data.dart';
 import 'package:schoolexam/exams/persistence/participant_data.dart';
 import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:schoolexam/schoolexam.dart';
@@ -39,6 +40,10 @@ class LocalExamsRepository extends ExamsRepository {
       /// TASK
       db.execute(
           'CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, title TEXT NOT NULL, maxPoints REAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
+
+      /// GRADING TABLE
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS gt_lower_bounds(grade TEXT NOT NULL, points DECIMAL NOT NULL, examId TEXT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE)');
 
       /// CORRECTABLE
       db.execute(
@@ -153,7 +158,6 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-
   /// Returns the details of the desired exam with the identification [examId] from the local persistence layer.
   Future<Exam> getExam(String examId) async {
     if (database == null) {
@@ -192,17 +196,28 @@ class LocalExamsRepository extends ExamsRepository {
     final List<CourseChildren> children =
         await getChildren(participants.map((e) => e.id).toList());
 
-    // 4. Create models
+    // 4. Get Grading table
+    final List<GradingTableLowerBoundData> lowerBounds =
+        List<Map<String, dynamic>>.from(await database!.query('gt_lower_bounds',
+                where: 'examId = ?', whereArgs: [examId]))
+            .map((lb) => GradingTableLowerBoundData.fromMap(lb))
+            .toList();
+
+    // 5. Create models
     final List<Participant> mParticipants =
         participants.map((e) => e.toModel(children)).toList();
-    final Exam mExam = exam.toModel(participants: mParticipants, tasks: mTasks);
+    final List<GradingTableLowerBound> mLowerBounds =
+        lowerBounds.map((lb) => lb.toModel()).toList();
+    final Exam mExam = exam.toModel(
+        participants: mParticipants,
+        tasks: mTasks,
+        gradingTable: GradingTable(lowerBounds: mLowerBounds));
 
     return mExam;
   }
 
-  @override
-
   /// Returns all the exams a teacher is allowed to retrieve from the local persistence layer.
+  @override
   Future<List<Exam>> getExams() async {
     if (database == null) {
       await init();
@@ -245,9 +260,8 @@ class LocalExamsRepository extends ExamsRepository {
     ];
   }
 
-  @override
-
   /// Returns the details for the requested submissions [submissionIds] belonging to the exam [examId] from the local persistence layer.
+  @override
   Future<List<Submission>> getSubmissionDetails(
       {required String examId, required List<String> submissionIds}) async {
     var res = await getSubmissions(examId: examId);
@@ -276,6 +290,12 @@ class LocalExamsRepository extends ExamsRepository {
       required String taskId,
       required double achievedPoints}) {
     // TODO: implement setPoints
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setGradingTable({required Exam exam}) async {
+    // TODO: implement setGradingTable
     throw UnimplementedError();
   }
 
@@ -324,6 +344,16 @@ class LocalExamsRepository extends ExamsRepository {
         .update('tasks', dTask.toMap(), where: 'id = ?', whereArgs: [dTask.id]);
   }
 
+  /// Adds the update of the local persistence layer to include [lowerBound] nto the [batch].
+  /// The changes are only made effective, if the [batch] successfully commits.
+  void _addGradingTableLowerBoundInsertion(
+      {required Batch batch, required GradingTableLowerBound lowerBound, required Exam exam}) {
+    final dLb = GradingTableLowerBoundData.fromModel(lowerBound, exam);
+    // Ensure that a task with that ID exists
+    batch.insert('gt_lower_bounds', dLb.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
   /// Adds the update of the local persistence layer to include [exam] into the [batch].
   /// The changes are only made effective, if the [batch] successfully commits.
   void _addExamInsertion({required Batch batch, required Exam exam}) {
@@ -351,6 +381,15 @@ class LocalExamsRepository extends ExamsRepository {
     // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.
     for (final participant in exam.participants) {
       _addParticipantInsertion(batch: batch, participant: participant);
+    }
+
+    // 4. Delete existing grading table
+    // The grading table is only used and edited by one part of the application
+    batch.delete('gt_lower_bounds', where: 'examId = ?', whereArgs: [dExam.id]);
+
+    // 4a. Insert new grading table
+    for (final lowerBound in exam.gradingTable.lowerBounds) {
+      _addGradingTableLowerBoundInsertion(batch: batch, lowerBound: lowerBound, exam: exam);
     }
   }
 

@@ -29,10 +29,13 @@ abstract class ExamsRepository {
   Future<void> uploadRemark(
       {required String submissionId, required String data});
 
-  /// Uploads a newly created exam
+  /// Upload the newly created [exam]
   Future<void> uploadExam({required NewExamDTO exam});
 
-  /// Update an existing exam
-  // TODO use ExamDTO
+  /// Update the [exam]
   Future<void> updateExam({required NewExamDTO exam, required String examId});
+
+  /// Set the grading table for the [exam]
+  Future<void> setGradingTable({required Exam exam});
+
 }

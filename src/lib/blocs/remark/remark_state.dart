@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 
@@ -158,4 +159,24 @@ class NavigatedRemarkState extends LoadedRemarksState {
               ...initial.corrections.map((e) =>
                   (e.submission.id == navigated.submission.id) ? navigated : e)
             ]);
+}
+
+/// Updated the grading table
+class GradingTabledUpdatedState extends RemarkState {
+
+  GradingTabledUpdatedState.updated(
+      {required RemarkState initial, required GradingTable gradingTable})
+      : super._(
+            exam: initial.exam.copyWith(gradingTable: gradingTable),
+            selectedCorrection: initial.selectedCorrection,
+            submissions: initial.submissions,
+            corrections: initial.corrections);
+
+  @override
+  List<Object> get props => [
+    exam,
+    submissions,
+    selectedCorrection,
+    corrections
+  ];
 }

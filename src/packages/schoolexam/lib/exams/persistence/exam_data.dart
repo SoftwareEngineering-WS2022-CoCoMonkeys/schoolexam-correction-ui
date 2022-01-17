@@ -1,4 +1,5 @@
 import 'package:schoolexam/exams/exams.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 
 class ExamData {
   final String id;
@@ -29,7 +30,7 @@ class ExamData {
       'title': title,
       'dateOfExam': dateOfExam,
       'dueDate': dueDate,
-      'topic': topic
+      'topic': topic,
     };
   }
 
@@ -42,7 +43,8 @@ class ExamData {
 
   Exam toModel(
           {required List<Participant> participants,
-          required List<Task> tasks}) =>
+          required List<Task> tasks,
+          required GradingTable gradingTable}) =>
       Exam(
           id: id,
           status: ExamStatus.values.firstWhere(
@@ -53,7 +55,8 @@ class ExamData {
           quota: 0.0,
           participants: participants,
           tasks: tasks,
-          dateOfExam: DateTime.parse(dateOfExam));
+          dateOfExam: DateTime.parse(dateOfExam),
+          gradingTable: gradingTable);
 
   static ExamData fromMap(Map<String, dynamic> data) {
     return ExamData(

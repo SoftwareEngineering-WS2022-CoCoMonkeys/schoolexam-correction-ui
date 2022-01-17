@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/dto/task_dto.dart';
+import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
 import '../models/exam.dart';
+import 'grading_table_dto.dart';
 import 'participant_dto.dart';
 
 class ExamDTO extends Equatable {
@@ -26,6 +28,7 @@ class ExamDTO extends Equatable {
   final List<ParticipantDTO> participants;
 
   final List<TaskDTO> tasks;
+  final GradingTableDTO? gradingTable;
 
   ExamDTO.fromJson(Map<String, dynamic> json)
       : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
@@ -42,7 +45,11 @@ class ExamDTO extends Equatable {
         tasks = List<Map<String, dynamic>>.from(
                 ApiHelper.getValue(map: json, keys: ["tasks"], value: []))
             .map((e) => TaskDTO.fromJson(e))
-            .toList();
+            .toList(),
+        gradingTable =
+            json.containsKey('gradingTable') && json['gradingTable'] != null
+                ? GradingTableDTO.fromJson(json['gradingTable'])
+                : null;
 
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -53,7 +60,8 @@ class ExamDTO extends Equatable {
         "dateOfExam": dateOfExam,
         "dateOfDeadline": dueDate,
         "participants": participants,
-        "tasks": tasks
+        "tasks": tasks,
+        "gradingTable": gradingTable
       };
 
   @override
@@ -62,8 +70,17 @@ class ExamDTO extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, status, title, topic, quota, dateOfExam, dueDate, participants];
+  List<Object?> get props => [
+        id,
+        status,
+        title,
+        topic,
+        quota,
+        dateOfExam,
+        dueDate,
+        participants,
+        gradingTable
+      ];
 
   /// Converts this instance to its model [Exam] representation.
   /// Importantly, the internal model uses percentages as 50% instead of 0.5 like the API.
@@ -81,6 +98,9 @@ class ExamDTO extends Equatable {
         dueDate: DateTime.parse(dueDate),
         participants:
             participants.map((e) => e.toModel()).toList(growable: false),
-        tasks: tasks.map((e) => e.toModel()).toList(growable: false));
+        tasks: tasks.map((e) => e.toModel()).toList(growable: false),
+        gradingTable: gradingTable != null
+            ? gradingTable!.toModel()
+            : GradingTable.empty);
   }
 }

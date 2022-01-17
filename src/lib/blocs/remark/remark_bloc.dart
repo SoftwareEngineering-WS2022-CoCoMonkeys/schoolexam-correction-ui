@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/extensions/grading_scheme_helper.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -301,6 +305,81 @@ class RemarkCubit extends Cubit<RemarkState> {
                 .toList()));
 
     emit(UpdatedRemarksState.marked(initial: state, marked: marked));
+  }
+
+  /// Add a new lower bound to the existing grading table
+  void addGradingTableBound() {
+    final copy = state.exam.gradingTable.valueCopy();
+    // Insert empty grading table bound
+    copy.lowerBounds.add(GradingTableLowerBound.empty);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the points on a lower bound in the existing grading table
+  void changeGradingTableBoundPoints(
+      {required int index, required double points}) {
+    final copy = state.exam.gradingTable.valueCopy();
+
+    final adjustedLowerBound = copy.lowerBounds[index].copyWith(points: points);
+    // remove old bound
+    copy.lowerBounds.removeAt(index);
+
+    final maxPoints =
+        state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
+    points = math.min(points, maxPoints);
+
+    // insert updated bound at same index
+    copy.lowerBounds.insert(index, adjustedLowerBound);
+
+    // Ensure lower bound constraint
+    for (int j = 0; j < copy.lowerBounds.length; j++) {
+      final lb = state.exam.gradingTable.lowerBounds[j];
+      if (j < index && lb.points < points || j > index && lb.points > points) {
+        log("Adjusting lower bound in grading table");
+
+        final nextLb = lb.copyWith(points: points);
+        // remove old bound
+        copy.lowerBounds.removeAt(j);
+
+        // insert updated bound at same index
+        copy.lowerBounds.insert(j, nextLb);
+      }
+    }
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the grade descriptor on a lower bound in the existing grading table
+  void changeGradingTableBoundGrade(
+      {required int index, required String grade}) {
+    final copy = state.exam.gradingTable.valueCopy();
+    final adjustedLowerBound = copy.lowerBounds[index].copyWith(grade: grade);
+    // remove old bound
+    copy.lowerBounds.removeAt(index);
+
+    // insert updated bound at same index
+    copy.lowerBounds.insert(index, adjustedLowerBound);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Change the grading table to a default layout
+  /// The two standard german grading schemes are available as presets
+  void getDefaultGradingTable({required int low, required int high}) {
+    emit(GradingTabledUpdatedState.updated(
+        initial: state,
+        gradingTable: GradingSchemeHelper.getDefaultGradingScheme(
+            low: low, high: high, exam: state.exam)));
+  }
+
+  /// Delete a grading table interval
+  void deleteGradingTableBound(int index) {
+    final copy = state.exam.gradingTable.valueCopy();
+    copy.lowerBounds.removeAt(index);
+    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+  }
+
+  /// Save grading table
+  Future<void> saveGradingTable() async {
+    _examsRepository.setGradingTable(exam: state.exam);
   }
 
   @override

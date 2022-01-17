@@ -130,10 +130,9 @@ class HybridExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> setPoints(
-      {required String submissionId,
-      required String taskId,
-      required double achievedPoints}) async {
+  Future<void> setPoints({required String submissionId,
+    required String taskId,
+    required double achievedPoints}) async {
     // TODO: implement setPoints in local with synchronization after a while
     log("Trying to set $achievedPoints for the task $taskId within $submissionId");
     await online.setPoints(
@@ -151,4 +150,12 @@ class HybridExamsRepository extends ExamsRepository {
       data: data,
     );
   }
+
+  @override
+  Future<void> setGradingTable({required Exam exam}) async {
+    // TODO: implement setGradingTable in local with synchronization after a while
+    log("Trying to set grading Table for exam ${exam.id}");
+    await online.setGradingTable(exam: exam);
+  }
+
 }

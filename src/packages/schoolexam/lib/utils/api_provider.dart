@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 import 'package:schoolexam/configuration.dart';
 
