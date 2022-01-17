@@ -43,13 +43,15 @@ class ExamDTO extends Equatable {
             keys: ["participants"],
             value: [])).map((e) => ParticipantDTO.fromJson(e)).toList(),
         tasks = List<Map<String, dynamic>>.from(
-            ApiHelper.getValue(map: json, keys: ["tasks"], value: []))
+                ApiHelper.getValue(map: json, keys: ["tasks"], value: []))
             .map((e) => TaskDTO.fromJson(e))
             .toList(),
-        gradingTable = json['gradingTable'] != null ? GradingTableDTO.fromJson(json['gradingTable']) : null;
+        gradingTable =
+            json.containsKey('gradingTable') && json['gradingTable'] != null
+                ? GradingTableDTO.fromJson(json['gradingTable'])
+                : null;
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "status": status,
         "title": title,
@@ -68,8 +70,7 @@ class ExamDTO extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [
+  List<Object?> get props => [
         id,
         status,
         title,
@@ -87,7 +88,7 @@ class ExamDTO extends Equatable {
     return Exam(
         status: ExamStatus.values.firstWhere(
             // Unknown is not known to API
-                (element) => element.name.toLowerCase() == status.toLowerCase(),
+            (element) => element.name.toLowerCase() == status.toLowerCase(),
             orElse: () => ExamStatus.unknown),
         id: id,
         title: title,
@@ -96,8 +97,10 @@ class ExamDTO extends Equatable {
         dateOfExam: DateTime.parse(dateOfExam),
         dueDate: DateTime.parse(dueDate),
         participants:
-        participants.map((e) => e.toModel()).toList(growable: false),
+            participants.map((e) => e.toModel()).toList(growable: false),
         tasks: tasks.map((e) => e.toModel()).toList(growable: false),
-        gradingTable: gradingTable != null ? gradingTable!.toModel() : GradingTable.empty);
+        gradingTable: gradingTable != null
+            ? gradingTable!.toModel()
+            : GradingTable.empty);
   }
 }

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:schoolexam/exams/dto/grading_table_lower_bound_dto.dart';
 
 class GradingTableLowerBound extends Equatable {
   // TODO consider percentages, too
@@ -27,8 +26,4 @@ class GradingTableLowerBound extends Equatable {
   }
 
   static const empty = GradingTableLowerBound(points: 0.0, grade: "");
-
-  GradingTableLowerBoundDTO toDTO() {
-    return GradingTableLowerBoundDTO(grade: grade, points: points);
-  }
 }

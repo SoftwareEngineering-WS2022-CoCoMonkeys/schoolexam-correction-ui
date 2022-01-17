@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/components/correction/correction_grading_table_action_bar.dart';
+import 'package:schoolexam_correction_ui/components/correction/correction_grading_table_header.dart';
 
 /// This widget allows for editing of the grading table that should be assigned to the exam
 class CorrectionGradingTable extends StatelessWidget {
@@ -19,58 +21,13 @@ class CorrectionGradingTable extends StatelessWidget {
             current is GradingTabledUpdatedState ||
             current is StartedCorrectionState,
         builder: (context, state) {
-          const minPoints = 0.0;
           final maxPoints =
               state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
 
           final lowerBounds = state.exam.gradingTable.lowerBounds;
-          const headerTextStyle = TextStyle(fontWeight: FontWeight.bold);
 
-          final columnFormatText = Text(
-              "% | ${AppLocalizations.of(context)!.pointsColumnHeader}",
-              style: TextStyle(color: Colors.grey));
-          final tableHeader = TableRow(children: [
-            const Text(""),
-            Center(
-                child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  Text(AppLocalizations.of(context)!.gradingIntervalStart,
-                      style: headerTextStyle),
-                  columnFormatText
-                ],
-              ),
-            )),
-            Center(
-                child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(children: [
-                    Text(AppLocalizations.of(context)!.gradingIntervalEnd,
-                        style: headerTextStyle),
-                    columnFormatText
-                  ]),
-                  const Icon(Icons.edit_outlined)
-                ],
-              ),
-            )),
-            Center(
-                child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    Text("Note", style: headerTextStyle),
-                    Icon(Icons.edit_outlined)
-                  ]),
-            )),
-          ]);
-
-          const greyPlaceHolderText = Text(
-            "leer",
+          final greyPlaceHolderText = Text(
+            AppLocalizations.of(context)!.empty,
             style: TextStyle(color: Colors.grey),
           );
           final table = Table(
@@ -85,7 +42,7 @@ class CorrectionGradingTable extends StatelessWidget {
               },
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               children: [
-                tableHeader,
+                GradingTableHeader(context: context),
                 ...lowerBounds.mapIndexed((index, lb) {
                   // previous row value and conversion to percentages
                   final prevPoints =
@@ -120,15 +77,15 @@ class CorrectionGradingTable extends StatelessWidget {
                             onSubmitted: (pointsInput) {
                               BlocProvider.of<RemarkCubit>(context)
                                   .changeGradingTableBoundPoints(
-                                      index,
-                                      double.parse(pointsInput) /
+                                      index: index,
+                                      points: double.parse(pointsInput) /
                                           100 *
                                           maxPoints);
                             },
                             style: const TextStyle(fontSize: 36),
                             decoration: InputDecoration(
                                 labelText:
-                                    "${AppLocalizations.of(context)!.pointsColumnHeader} (%)"),
+                                    "${AppLocalizations.of(context)!.points} (%)"),
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
@@ -154,11 +111,10 @@ class CorrectionGradingTable extends StatelessWidget {
                             onChanged: (gradeInput) {
                               BlocProvider.of<RemarkCubit>(context)
                                   .changeGradingTableBoundGrade(
-                                      index, gradeInput);
+                                      index: index, grade: gradeInput);
                             },
                             decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!
-                                    .gradeColumnHeader),
+                                labelText: AppLocalizations.of(context)!.grade),
                           ),
                         ),
                         child: Center(
@@ -171,46 +127,6 @@ class CorrectionGradingTable extends StatelessWidget {
                   ]);
                 })
               ]);
-
-          final tableActions =
-              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            ElevatedButton(
-                onPressed: () => BlocProvider.of<RemarkCubit>(context)
-                    .addGradingTableBound(),
-                child: Text(
-                    AppLocalizations.of(context)!.newGradingIntervalButton)),
-            DropdownButton<String>(
-              icon: const Icon(Icons.arrow_downward),
-              elevation: 16,
-              onChanged: (scheme) {
-                if (scheme ==
-                    AppLocalizations.of(context)!.oneToSixGradingScheme) {
-                  BlocProvider.of<RemarkCubit>(context)
-                      .getDefaultGradingTable(1, 6);
-                } else if (scheme ==
-                    AppLocalizations.of(context)!.zeroToFifteenGradingScheme) {
-                  BlocProvider.of<RemarkCubit>(context)
-                      .getDefaultGradingTable(0, 15);
-                }
-              },
-              value: AppLocalizations.of(context)!.defaultGradingSchemeButton,
-              items: <String>[
-                AppLocalizations.of(context)!.defaultGradingSchemeButton,
-                AppLocalizations.of(context)!.oneToSixGradingScheme,
-                AppLocalizations.of(context)!.zeroToFifteenGradingScheme,
-              ].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  BlocProvider.of<RemarkCubit>(context).saveGradingTable(),
-              child: Text(AppLocalizations.of(context)!.saveButton),
-            ),
-          ]);
           return Padding(
             padding: const EdgeInsets.all(30.0),
             child: SizedBox(
@@ -220,20 +136,21 @@ class CorrectionGradingTable extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      AppLocalizations.of(context)!.gradingTableTitle,
+                      AppLocalizations.of(context)!.gradingTable,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
                     ),
                   ),
+                  // make grading table scrollable
                   Flexible(child: SingleChildScrollView(child: table)),
-                  tableActions
+                  const GradingTableActionBar()
                 ])),
           );
         });
   }
 
-// Helper function to show a single highlighted widget in a modal bottom sheet
-  _showSingleWidgetBottomSheet(
+  // Helper function to show a single highlighted widget in a modal bottom sheet
+  VoidCallback _showSingleWidgetBottomSheet(
       {required BuildContext context, required Widget content}) {
     return () => showCupertinoModalBottomSheet(
         context: context,

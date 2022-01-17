@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:schoolexam/exams/dto/grading_table_dto.dart';
 
 import 'grading_table_lower_bound.dart';
 
@@ -17,9 +16,5 @@ class GradingTable extends Equatable {
   GradingTable valueCopy() {
     return GradingTable(
         lowerBounds: lowerBounds.map((lb) => lb.valueCopy()).toList());
-  }
-
-  GradingTableDTO toDTO() {
-    return GradingTableDTO(lowerBounds: lowerBounds.map((lb) => lb.toDTO()).toList());
   }
 }

@@ -31,4 +31,9 @@ class GradingTableDTO extends Equatable {
     return GradingTable(
         lowerBounds: lowerBounds.map((e) => e.toModel()).toList());
   }
+
+  GradingTableDTO.fromModel(GradingTable model)
+      : lowerBounds = model.lowerBounds
+            .map((lb) => GradingTableLowerBoundDTO.fromModel(lb))
+            .toList();
 }

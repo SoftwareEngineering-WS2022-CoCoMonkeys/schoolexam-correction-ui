@@ -5,16 +5,15 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/extensions/grading_scheme_helper.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -284,12 +283,6 @@ class RemarkCubit extends Cubit<RemarkState> {
                 .toList())));
   }
 
-  /// Create an empty grading table
-  void initGradingTable() {
-    emit(GradingTabledUpdatedState.updated(
-        initial: state, gradingTable: state.exam.gradingTable));
-  }
-
   /// Add a new lower bound to the existing grading table
   void addGradingTableBound() {
     final copy = state.exam.gradingTable.valueCopy();
@@ -299,24 +292,25 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   /// Change the points on a lower bound in the existing grading table
-  void changeGradingTableBoundPoints(int i, double points) {
+  void changeGradingTableBoundPoints(
+      {required int index, required double points}) {
     final copy = state.exam.gradingTable.valueCopy();
 
-    final adjustedLowerBound = copy.lowerBounds[i].copyWith(points: points);
+    final adjustedLowerBound = copy.lowerBounds[index].copyWith(points: points);
     // remove old bound
-    copy.lowerBounds.removeAt(i);
+    copy.lowerBounds.removeAt(index);
 
     final maxPoints =
         state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
     points = math.min(points, maxPoints);
 
     // insert updated bound at same index
-    copy.lowerBounds.insert(i, adjustedLowerBound);
+    copy.lowerBounds.insert(index, adjustedLowerBound);
 
     // Ensure lower bound constraint
     for (int j = 0; j < copy.lowerBounds.length; j++) {
       final lb = state.exam.gradingTable.lowerBounds[j];
-      if (j < i && lb.points < points || j > i && lb.points > points) {
+      if (j < index && lb.points < points || j > index && lb.points > points) {
         log("Adjusting lower bound in grading table");
 
         final nextLb = lb.copyWith(points: points);
@@ -331,82 +325,25 @@ class RemarkCubit extends Cubit<RemarkState> {
   }
 
   /// Change the grade descriptor on a lower bound in the existing grading table
-  void changeGradingTableBoundGrade(int i, String grade) {
+  void changeGradingTableBoundGrade(
+      {required int index, required String grade}) {
     final copy = state.exam.gradingTable.valueCopy();
-    final adjustedLowerBound = copy.lowerBounds[i].copyWith(grade: grade);
+    final adjustedLowerBound = copy.lowerBounds[index].copyWith(grade: grade);
     // remove old bound
-    copy.lowerBounds.removeAt(i);
+    copy.lowerBounds.removeAt(index);
 
     // insert updated bound at same index
-    copy.lowerBounds.insert(i, adjustedLowerBound);
+    copy.lowerBounds.insert(index, adjustedLowerBound);
     emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
   }
 
-  /// Change the grading table to the default layout
+  /// Change the grading table to a default layout
   /// The two standard german grading schemes are available as presets
-  /// Source: https://de.wikipedia.org/wiki/Vorlage:Punktesystem_der_gymnasialen_Oberstufe
-  void getDefaultGradingTable(int low, int high) {
-    List<String> grades = [];
-    List<double> points = [];
-    if (low == 1 && high == 6) {
-      grades = [
-        "sehr gut",
-        "gut",
-        "befriedigend",
-        "ausreichend",
-        "mangelhaft",
-        "ungenügend"
-      ];
-      points = [0.85, 0.70, 0.55, 0.4, 0.20, 0.0];
-    } else if (low == 0 && high == 15) {
-      grades = [
-        "sehr gut (1+)",
-        "sehr gut (1)",
-        "sehr gut (1-)",
-        "gut (2+)",
-        "gut (2)",
-        "gut (2-)",
-        "befriedigend (3+)",
-        "befriedigend (3)",
-        "befriedigend (3-)",
-        "ausreichend (4+)",
-        "ausreichend (4)",
-        "schwach ausreichend (4-)",
-        "mangelhaft (5+)",
-        "mangelhaft (5)",
-        "mangelhaft (5-)",
-        "ungenügend (6)"
-      ];
-      points = [
-        0.95,
-        0.90,
-        0.85,
-        0.80,
-        0.75,
-        0.70,
-        0.65,
-        0.60,
-        0.55,
-        0.50,
-        0.45,
-        0.39,
-        0.33,
-        0.27,
-        0.20,
-        0.0
-      ];
-    }
-    final maxPoints =
-        state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
-    final lowerBounds = grades.mapIndexed((i, grade) {
-      return GradingTableLowerBound(
-          // round down to nearest half point
-          points: (2 * (points[i] * maxPoints)).floor().toDouble() / 2,
-          grade: grade);
-    }).toList();
-
+  void getDefaultGradingTable({required int low, required int high}) {
     emit(GradingTabledUpdatedState.updated(
-        initial: state, gradingTable: GradingTable(lowerBounds: lowerBounds)));
+        initial: state,
+        gradingTable: GradingSchemeHelper.getDefaultGradingScheme(
+            low: low, high: high, exam: state.exam)));
   }
 
   /// Delete a grading table interval

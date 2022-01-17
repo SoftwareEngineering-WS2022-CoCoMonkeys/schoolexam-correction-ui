@@ -32,4 +32,8 @@ class GradingTableLowerBoundDTO extends Equatable {
   GradingTableLowerBound toModel() {
     return GradingTableLowerBound(grade: grade, points: points);
   }
+
+  GradingTableLowerBoundDTO.fromModel(GradingTableLowerBound model)
+      : grade = model.grade,
+        points = model.points;
 }

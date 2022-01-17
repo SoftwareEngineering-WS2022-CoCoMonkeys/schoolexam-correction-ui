@@ -1,5 +1,6 @@
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
+import 'package:schoolexam/exams/dto/grading_table_dto.dart';
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/dto/submission_details_dto.dart';
 import 'package:schoolexam/exams/dto/submission_dto.dart';
@@ -65,7 +66,7 @@ class OnlineExamsRepository extends ExamsRepository {
     await provider.query(
         path: "/Exam/${exam.id}/SetGradingTable",
         method: HTTPMethod.POST,
-        body: exam.gradingTable.toDTO(),
+        body: GradingTableDTO.fromModel(exam.gradingTable),
         key: await authenticationRepository.getKey());
   }
 
