@@ -92,9 +92,9 @@ class NewExamDialog extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(AppLocalizations.of(context)!.newExamCourse,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 36)),
-                        Container(
+                        SizedBox(
                           height: 300,
                           child: CupertinoPicker(
                               itemExtent: 50,
@@ -120,9 +120,9 @@ class NewExamDialog extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(AppLocalizations.of(context)!.newExamDate,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 36)),
-                        Container(
+                        SizedBox(
                           height: 300,
                           child: CupertinoDatePicker(
                             minimumDate: DateTime.now(),
@@ -171,7 +171,7 @@ class NewExamDialog extends StatelessWidget {
                                   Navigator.pop(context);
                                 },
                                 child: Text(AppLocalizations.of(context)!
-                                    .newExamButtonCancel),
+                                    .cancel),
                               ),
                             ),
                           ),

@@ -79,6 +79,8 @@ class ApiProvider {
       case 204:
         return "";
       case 400:
+        print(body);
+        print (response.body);
         throw BadRequestException(response);
       case 401:
         throw UnauthorisedException(response);

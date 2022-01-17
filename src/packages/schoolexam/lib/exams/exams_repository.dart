@@ -38,4 +38,7 @@ abstract class ExamsRepository {
   /// Set the grading table for the [exam]
   Future<void> setGradingTable({required Exam exam});
 
+  /// Finalizes the correction of the [examId] and schedules the publishing to [publishDate].
+  /// If no publish date is supplied, the exam is directly published.
+  Future<void> publishExam({required String examId, DateTime? publishDate});
 }

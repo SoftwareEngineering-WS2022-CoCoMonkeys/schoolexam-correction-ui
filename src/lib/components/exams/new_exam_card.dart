@@ -14,7 +14,7 @@ class NewExamCard extends StatelessWidget {
     const radius = 24.0;
 
     return SizedBox(
-      height: 240,
+      height: 280,
       child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),
@@ -26,7 +26,7 @@ class NewExamCard extends StatelessWidget {
             borderType: BorderType.RRect,
             radius: const Radius.circular(radius),
             child: AspectRatio(
-                aspectRatio: 1.4,
+                aspectRatio: 1.3,
                 child: InkWell(
                     onTap: () {
                       context

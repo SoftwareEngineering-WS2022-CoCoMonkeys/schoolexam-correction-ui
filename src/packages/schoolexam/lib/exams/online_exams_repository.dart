@@ -51,9 +51,10 @@ class OnlineExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> setPoints({required String submissionId,
-    required String taskId,
-    required double achievedPoints}) async {
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) async {
     await provider.query(
         path: "/submission/$submissionId/setpoints",
         method: HTTPMethod.POST,
@@ -111,6 +112,19 @@ class OnlineExamsRepository extends ExamsRepository {
         path: "/submission/$submissionId/uploadremark",
         method: HTTPMethod.POST,
         body: {"remarkPdf": data},
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> publishExam(
+      {required String examId, DateTime? publishDate}) async {
+    await provider.query(
+        path: "/exam/$examId/publish",
+        method: HTTPMethod.POST,
+        body: {
+          "publishingDateTime":
+              publishDate != null ? publishDate.toUtc().toString() : null
+        },
         key: await authenticationRepository.getKey());
   }
 }

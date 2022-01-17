@@ -17,10 +17,10 @@ class ExamCard extends StatelessWidget {
     final DateFormat formatter = DateFormat('dd.MM.yyyy');
 
     return SizedBox(
-      height: 240,
+      height: 280,
       child: Card(
         child: AspectRatio(
-          aspectRatio: 1.4,
+          aspectRatio: 1.3,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
