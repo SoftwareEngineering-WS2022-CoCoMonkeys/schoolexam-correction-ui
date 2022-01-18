@@ -163,7 +163,6 @@ class NavigatedRemarkState extends LoadedRemarksState {
 
 /// Updated the grading table
 class GradingTabledUpdatedState extends RemarkState {
-
   GradingTabledUpdatedState.updated(
       {required RemarkState initial, required GradingTable gradingTable})
       : super._(
@@ -173,10 +172,6 @@ class GradingTabledUpdatedState extends RemarkState {
             corrections: initial.corrections);
 
   @override
-  List<Object> get props => [
-    exam,
-    submissions,
-    selectedCorrection,
-    corrections
-  ];
+  List<Object> get props =>
+      [exam, submissions, selectedCorrection, corrections];
 }

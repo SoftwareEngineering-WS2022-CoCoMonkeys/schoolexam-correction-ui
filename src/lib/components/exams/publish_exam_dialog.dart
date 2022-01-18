@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_form_row.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PublishExamDialog extends StatefulWidget {
   final Exam exam;

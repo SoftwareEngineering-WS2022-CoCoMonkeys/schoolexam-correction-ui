@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/drawing_gesture_recognizer.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 

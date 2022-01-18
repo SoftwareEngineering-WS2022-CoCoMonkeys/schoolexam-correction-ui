@@ -7,7 +7,6 @@ import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/components/exams/new_exam_dialog.dart';
 import 'package:schoolexam_correction_ui/components/exams/publish_exam_dialog.dart';
 
