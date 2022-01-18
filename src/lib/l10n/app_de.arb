@@ -42,9 +42,12 @@
   "newExamDate": "Prüfungsdatum",
   "newExamButtonCreate": "Erstellen",
   "newExamButtonEdit": "Anpassen",
+  "newExamCardTitle": "Prüfung erstellen",
+  "editExamCardTitle": "Prüfung anpassen",
   "cancel": "Abbrechen",
   "yes": "Ja",
   "no": "Nein",
+  "invalidValue": "Ungültiger Wert",
   "correctionSelectionConfirmWithName": "Möchten sie die Korrektur von {name} öffnen?",
   "@correctionSelectionConfirmWithName": {
     "placeholders": {

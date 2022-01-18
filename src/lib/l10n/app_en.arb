@@ -42,9 +42,12 @@
   "newExamDate": "exam date",
   "newExamButtonCreate": "create",
   "newExamButtonEdit": "edit",
+  "newExamCardTitle": "create exam",
+  "editExamCardTitle": "udpate exam",
   "cancel": "cancel",
   "yes": "yes",
   "no": "no",
+  "invalidValue": "invalid value",
   "correctionSelectionConfirmWithName": "Do you want to open the correction for student {name}?",
   "@correctionSelectionConfirmWithName": {
     "placeholders": {
