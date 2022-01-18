@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
+import 'package:schoolexam_correction_ui/components/app_bloc_listener.dart';
 import 'package:schoolexam_correction_ui/components/error_widget.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart';
 import 'package:schoolexam_correction_ui/components/loading_widget.dart';
@@ -41,56 +42,58 @@ class ExamsPage extends StatelessWidget {
               ],
             );
           })),
-      child: Material(
-        child: BlocBuilder<ExamsCubit, ExamsState>(
-          builder: (context, state) {
-            if (state is LoadingExamsState) {
-              return const LoadingWidget();
-            }
+      child: AppBlocListener(builder: (context) {
+        return Material(
+          child: BlocBuilder<ExamsCubit, ExamsState>(
+            builder: (context, state) {
+              if (state is LoadingExamsState) {
+                return const LoadingWidget();
+              }
 
-            if (state is LoadingExamsErrorState) {
-              return const ErrorStateWidget();
-            }
+              if (state is LoadingExamsErrorState) {
+                return const ErrorStateWidget();
+              }
 
-            return Container(
-              alignment: Alignment.topCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    child: Card(
-                      child: TextField(
-                        onChanged: (search) => context
-                            .read<ExamsCubit>()
-                            .onSearchChanged(search.toLowerCase()),
-                        onSubmitted: (search) => context
-                            .read<ExamsCubit>()
-                            .onSearchChanged(search.toLowerCase()),
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.search_outlined,
-                            size: 40,
-                            color: Theme.of(context).primaryColor,
+              return Container(
+                alignment: Alignment.topCenter,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Card(
+                        child: TextField(
+                          onChanged: (search) => context
+                              .read<ExamsCubit>()
+                              .onSearchChanged(search.toLowerCase()),
+                          onSubmitted: (search) => context
+                              .read<ExamsCubit>()
+                              .onSearchChanged(search.toLowerCase()),
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.search_outlined,
+                              size: 40,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            labelText: AppLocalizations.of(context)!.exam,
                           ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          labelText: AppLocalizations.of(context)!.exam,
                         ),
                       ),
                     ),
-                  ),
-                  const StateSelectorChips(),
-                  Expanded(flex: 1, child: ExamScreenBody(state.filtered))
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+                    const StateSelectorChips(),
+                    Expanded(flex: 1, child: ExamScreenBody(state.filtered))
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 }

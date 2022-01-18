@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:schoolexam_correction_ui/components/app_bloc_listener.dart';
 import 'package:schoolexam_correction_ui/components/login/login_form.dart';
 
 class LoginPage extends StatelessWidget {
@@ -7,6 +8,8 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoPageScaffold(child: Material(child: LoginForm()));
+    return CupertinoPageScaffold(child: AppBlocListener(builder: (context) {
+      return const Material(child: LoginForm());
+    }));
   }
 }

@@ -17,7 +17,7 @@ class NewExamDialog extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final DateFormat formatter = DateFormat('dd.MM.yyyy');
 
-    return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
+    return BlocConsumer<ExamDetailsCubit, ExamDetailsState>(
         listener: (context, state) {
       if (state.status.isSubmissionFailure) {
         showCupertinoDialog<void>(
@@ -66,7 +66,7 @@ class NewExamDialog extends StatelessWidget {
                                   AppLocalizations.of(context)!.newExamTitle,
                             ),
                             onChanged: (examTitle) =>
-                                BlocProvider.of<ExamDetailsBloc>(context)
+                                BlocProvider.of<ExamDetailsCubit>(context)
                                     .changeExamTitle(title: examTitle)),
                       ],
                     ),
@@ -88,7 +88,7 @@ class NewExamDialog extends StatelessWidget {
                                   AppLocalizations.of(context)!.newExamTopic,
                             ),
                             onChanged: (examTopic) =>
-                                BlocProvider.of<ExamDetailsBloc>(context)
+                                BlocProvider.of<ExamDetailsCubit>(context)
                                     .changeExamTopic(topic: examTopic)),
                       ],
                     ),
@@ -112,7 +112,7 @@ class NewExamDialog extends StatelessWidget {
                                           state.examCourse.value.id)),
                               itemExtent: 50,
                               onSelectedItemChanged: (int index) {
-                                BlocProvider.of<ExamDetailsBloc>(context)
+                                BlocProvider.of<ExamDetailsCubit>(context)
                                     .changeExamCourse(
                                         course: state.validCourses[index]);
                               },
@@ -140,7 +140,7 @@ class NewExamDialog extends StatelessWidget {
                             minimumDate: DateTime.now(),
                             mode: CupertinoDatePickerMode.date,
                             onDateTimeChanged: (dateTime) =>
-                                BlocProvider.of<ExamDetailsBloc>(context)
+                                BlocProvider.of<ExamDetailsCubit>(context)
                                     .changeExamDate(date: dateTime)),
                       ),
                     ]),
@@ -157,12 +157,12 @@ class NewExamDialog extends StatelessWidget {
                                     primary: Colors.blue),
                                 onPressed: state.status.isValidated
                                     ? () {
-                                        BlocProvider.of<ExamDetailsBloc>(
+                                        BlocProvider.of<ExamDetailsCubit>(
                                                 context)
                                             .submitExam();
                                       }
                                     : null,
-                                child: Text(state.isNewExamEdit
+                                child: Text((state is ExamDetailsCreationState)
                                     ? AppLocalizations.of(context)!
                                         .newExamButtonCreate
                                     : AppLocalizations.of(context)!

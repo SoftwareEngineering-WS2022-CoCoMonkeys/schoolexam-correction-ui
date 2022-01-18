@@ -18,7 +18,7 @@ class ExamsCubit extends Cubit<ExamsState> {
   ExamsCubit(
       {required ExamsRepository examsRepository,
       required AuthenticationBloc authenticationBloc,
-      required ExamDetailsBloc examsDetailBloc})
+      required ExamDetailsCubit examsDetailBloc})
       : _examsRepository = examsRepository,
         super(LoadedExamsState.initial()) {
     _examSubscription =

@@ -71,6 +71,11 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
 
   void onPointerUp(BuildContext context, PointerUpEvent details,
       CorrectionOverlayDocument document) {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
     // Registering the line with the business logic
     BlocProvider.of<CorrectionOverlayCubit>(context)
         .addDrawing(document: document, lines: [line!], size: widget.size);

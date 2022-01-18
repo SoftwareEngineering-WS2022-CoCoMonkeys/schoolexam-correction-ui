@@ -20,3 +20,5 @@ class AuthenticationState extends Equatable {
   @override
   List<Object> get props => [status, person];
 }
+
+

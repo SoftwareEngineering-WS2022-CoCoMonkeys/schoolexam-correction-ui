@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/synchronization/synchronization.dart';
@@ -33,6 +34,9 @@ void main() {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
+            create: (context) => LanguageCubit(),
+          ),
+          BlocProvider(
               create: (context) => AuthenticationBloc(
                   authenticationRepository:
                       RepositoryProvider.of<AuthenticationRepository>(
@@ -40,19 +44,20 @@ void main() {
           BlocProvider(
               create: (context) => LoginBloc(
                   authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(
-                          context))),
+                      RepositoryProvider.of<AuthenticationRepository>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
           BlocProvider(
               create: (context) => NavigationCubit(
                   authenticationBloc:
                       BlocProvider.of<AuthenticationBloc>(context))),
           BlocProvider(
               lazy: false,
-              create: (context) => ExamDetailsBloc(
+              create: (context) => ExamDetailsCubit(
                   examsRepository:
                       RepositoryProvider.of<ExamsRepository>(context),
                   authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context))),
+                      BlocProvider.of<AuthenticationBloc>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => ExamsCubit(
@@ -60,7 +65,7 @@ void main() {
                       RepositoryProvider.of<ExamsRepository>(context),
                   authenticationBloc:
                       BlocProvider.of<AuthenticationBloc>(context),
-                  examsDetailBloc: BlocProvider.of<ExamDetailsBloc>(context))),
+                  examsDetailBloc: BlocProvider.of<ExamDetailsCubit>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => RemarkCubit(

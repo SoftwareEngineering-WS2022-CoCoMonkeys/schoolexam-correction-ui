@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/navigation/paths/analysis_route_path.dart';
 import 'package:schoolexam_correction_ui/navigation/paths/correction_route_path.dart';
@@ -37,16 +39,19 @@ class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
   Widget build(BuildContext context) {
     final state = _navigationCubit.state;
 
+    // Register current language within the cubit
+    BlocProvider.of<LanguageCubit>(context).loadContext(context: context);
+
     return Navigator(
       key: navigatorKey,
       pages: [
         if (state.requiresAuthentication)
-          const MaterialPage(key: ValueKey("LoginPage"), child: LoginPage())
+          const CupertinoPage(key: ValueKey("LoginPage"), child: LoginPage())
         else ...[
           if (state.context == AppNavigationContext.exams) ...[
-            const MaterialPage(key: ValueKey("ExamsPage"), child: ExamsPage()),
+            const CupertinoPage(key: ValueKey("ExamsPage"), child: ExamsPage()),
             if (state.examId.isNotEmpty)
-              const MaterialPage(
+              const CupertinoPage(
                   key: ValueKey("CorrectionPage"), child: CorrectionPage())
           ] else
             ...[]

@@ -53,12 +53,17 @@ class LoadingRemarksState extends RemarkState {
 
 /// An erroneous state.
 /// Could be the result of an API error.
-class LoadingRemarksErrorState extends RemarkState implements BlocException {
+class LoadingRemarksErrorState extends RemarkState implements BlocFailure {
   @override
   final Exception exception;
 
+  @override
+  final String description;
+
   LoadingRemarksErrorState.error(
-      {required RemarkState old, required this.exception})
+      {required RemarkState old,
+      required this.exception,
+      required this.description})
       : super._(
             exam: old.exam,
             selectedCorrection: old.selectedCorrection,

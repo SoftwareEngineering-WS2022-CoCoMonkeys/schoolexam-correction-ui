@@ -29,7 +29,7 @@ class NewExamCard extends StatelessWidget {
                 aspectRatio: 1.3,
                 child: InkWell(
                     onTap: () {
-                      BlocProvider.of<ExamDetailsBloc>(context).openNewExam();
+                      BlocProvider.of<ExamDetailsCubit>(context).openNewExam();
 
                       showDialog(
                           context: context,

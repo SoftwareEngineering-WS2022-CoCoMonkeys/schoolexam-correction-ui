@@ -72,6 +72,7 @@ class ApiProvider {
         ? await _httpRequest(url, headers, method, body: body)
         : await _httpRequest(url, headers, method);
 
+    print(response.statusCode);
     switch (response.statusCode) {
       case 200:
       case 201:
