@@ -149,15 +149,9 @@ class _TaskRemarkIconWidget extends StatelessWidget {
           size: size,
         );
       case CorrectableStatus.corrected:
-      case CorrectableStatus.published:
+      case CorrectableStatus.inProgress:
         return Icon(
           Icons.check_circle_outline,
-          color: Colors.green,
-          size: size,
-        );
-      case CorrectableStatus.archived:
-        return Icon(
-          Icons.check_circle,
           color: Colors.green,
           size: size,
         );

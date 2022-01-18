@@ -91,7 +91,7 @@ class HybridExamsRepository extends ExamsRepository {
 
     if (outdated.isNotEmpty) {
       try {
-        log("Trying to retrieve outdated submissions ${outdated} from online repository");
+        log("Trying to retrieve outdated submissions $outdated from online repository");
         final updated = await online.getSubmissionDetails(
             examId: examId, submissionIds: outdated);
         log("Inserting updated submission into local repository.");
