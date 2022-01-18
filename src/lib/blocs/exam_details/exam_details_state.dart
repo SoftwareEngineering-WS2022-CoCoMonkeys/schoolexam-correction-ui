@@ -28,39 +28,19 @@ class ExamDetailsState extends Equatable {
     required this.validCourses,
   });
 
-  ExamDetailsState.initialNewExam()
-      //TODO get initial courses from repository
+  ExamDetailsState.empty()
+      : this(examDate: ExamDate.pure(), validCourses: [], isNewExamEdit: true);
+
+  ExamDetailsState.initialNewExam({required List<Course> validCourses})
       : this(
             examDate: ExamDate.pure(),
-            validCourses: [
-              Course(
-                children: List.empty(),
-                id: "12",
-                displayName: "kek1",
-              ),
-              Course(
-                children: List.empty(),
-                id: "12",
-                displayName: "kek2",
-              )
-            ],
+            validCourses: validCourses,
             isNewExamEdit: true);
 
-  ExamDetailsState.initialAdjustExam({required Exam exam})
-      //TODO get initial courses from repository
+  ExamDetailsState.initialAdjustExam(
+      {required Exam exam, required List<Course> validCourses})
       : this(
-            validCourses: [
-              Course(
-                children: List.empty(),
-                id: "12",
-                displayName: "kek1",
-              ),
-              Course(
-                children: List.empty(),
-                id: "12",
-                displayName: "kek2",
-              )
-            ],
+            validCourses: validCourses,
             isNewExamEdit: false,
             adjustedExamId: exam.id,
             examTitle: ExamTitle.dirty(value: exam.title),

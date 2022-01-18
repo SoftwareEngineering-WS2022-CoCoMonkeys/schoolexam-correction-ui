@@ -31,7 +31,8 @@
   "examCardTopic": "Fach",
   "examCardParticipants": "Teilnehmende",
   "examCardQuota": "Korrigiert",
-  "examCardButtonReturn": "Rückgabe",
+  "examPublish": "Veröffentlichen",
+  "examPublishDate": "Datum der Veröffentlichung",
   "examCardButtonCorrect": "Korrigieren",
   "examCardButtonUpload": "Hochladen",
   "examCardButtonEdit": "Anpassen",
@@ -41,7 +42,7 @@
   "newExamDate": "Prüfungsdatum",
   "newExamButtonCreate": "Erstellen",
   "newExamButtonEdit": "Anpassen",
-  "newExamButtonCancel": "Abbrechen",
+  "cancel": "Abbrechen",
   "yes": "Ja",
   "no": "Nein",
   "correctionSelectionConfirmWithName": "Möchten sie die Korrektur von {name} öffnen?",
@@ -57,5 +58,6 @@
   "taskRemarkEvaluate": "Bewerten",
   "taskRemarkPoints": "Punkte",
   "errorTitle": "Fehler",
-  "authenticationError": "Die Anmeldung ist fehlgeschlagen."
+  "authenticationError": "Die Anmeldung ist fehlgeschlagen.",
+  "updateExamError": "Die Aktualisierung ist fehlgeschlagen."
 }

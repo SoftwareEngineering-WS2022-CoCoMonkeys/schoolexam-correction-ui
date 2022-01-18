@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
+import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 import 'package:schoolexam_correction_ui/extensions/grading_scheme_helper.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
@@ -305,6 +306,14 @@ class RemarkCubit extends Cubit<RemarkState> {
                 .toList()));
 
     emit(UpdatedRemarksState.marked(initial: state, marked: marked));
+  }
+
+  /// Using publish the user finalizes the correction of the [exam].
+  /// When no [publishDate] is supplied, the publishing is instantaneously.
+  Future<void> publish({required Exam exam, DateTime? publishDate}) async {
+    // TODO :Start by synchronizing the local submissions with the server
+    await _examsRepository.publishExam(
+        examId: exam.id, publishDate: publishDate);
   }
 
   /// Add a new lower bound to the existing grading table

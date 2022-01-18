@@ -1,6 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/src/provider.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
@@ -14,7 +15,7 @@ class NewExamCard extends StatelessWidget {
     const radius = 24.0;
 
     return SizedBox(
-      height: 240,
+      height: 280,
       child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),
@@ -26,12 +27,11 @@ class NewExamCard extends StatelessWidget {
             borderType: BorderType.RRect,
             radius: const Radius.circular(radius),
             child: AspectRatio(
-                aspectRatio: 1.4,
+                aspectRatio: 1.3,
                 child: InkWell(
                     onTap: () {
-                      context
-                          .read<ExamDetailsBloc>()
-                          .add(const NewExamOpened());
+                      BlocProvider.of<ExamDetailsBloc>(context).openNewExam();
+
                       showDialog(
                           context: context,
                           builder: (_) => const NewExamDialog());

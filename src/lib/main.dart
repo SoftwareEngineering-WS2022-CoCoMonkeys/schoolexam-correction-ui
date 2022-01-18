@@ -50,7 +50,9 @@ void main() {
               lazy: false,
               create: (context) => ExamDetailsBloc(
                   examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context))),
+                      RepositoryProvider.of<ExamsRepository>(context),
+                  authenticationBloc:
+                      BlocProvider.of<AuthenticationBloc>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => ExamsCubit(

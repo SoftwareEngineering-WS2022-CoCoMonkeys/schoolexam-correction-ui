@@ -18,7 +18,7 @@ class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository6.db');
+    final path = p.join(await getDatabasesPath(), 'exams_repository7.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT
@@ -158,6 +158,7 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
+
   /// Returns the details of the desired exam with the identification [examId] from the local persistence layer.
   Future<Exam> getExam(String examId) async {
     if (database == null) {
@@ -273,18 +274,6 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> uploadExam({required NewExamDTO exam}) {
-    // TODO: implement uploadExam
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
-    // TODO: implement updateExam
-    throw UnimplementedError();
-  }
-
-  @override
   Future<void> setPoints(
       {required String submissionId,
       required String taskId,
@@ -347,7 +336,9 @@ class LocalExamsRepository extends ExamsRepository {
   /// Adds the update of the local persistence layer to include [lowerBound] nto the [batch].
   /// The changes are only made effective, if the [batch] successfully commits.
   void _addGradingTableLowerBoundInsertion(
-      {required Batch batch, required GradingTableLowerBound lowerBound, required Exam exam}) {
+      {required Batch batch,
+      required GradingTableLowerBound lowerBound,
+      required Exam exam}) {
     final dLb = GradingTableLowerBoundData.fromModel(lowerBound, exam);
     // Ensure that a task with that ID exists
     batch.insert('gt_lower_bounds', dLb.toMap(),
@@ -389,7 +380,8 @@ class LocalExamsRepository extends ExamsRepository {
 
     // 4a. Insert new grading table
     for (final lowerBound in exam.gradingTable.lowerBounds) {
-      _addGradingTableLowerBoundInsertion(batch: batch, lowerBound: lowerBound, exam: exam);
+      _addGradingTableLowerBoundInsertion(
+          batch: batch, lowerBound: lowerBound, exam: exam);
     }
   }
 
@@ -509,8 +501,33 @@ class LocalExamsRepository extends ExamsRepository {
   }
 
   @override
-  Future<void> uploadRemark({required String submissionId, required String data}) {
+  Future<void> uploadExam({required NewExamDTO exam}) {
+    // TODO: implement uploadExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateExam({required NewExamDTO exam, required String examId}) {
+    // TODO: implement updateExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> uploadRemark(
+      {required String submissionId, required String data}) {
     // TODO: implement uploadRemark
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> publishExam({required String examId, DateTime? publishDate}) {
+    // TODO: implement publishExam
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Course>> getCourses() {
+    // TODO: implement getCourses
     throw UnimplementedError();
   }
 }

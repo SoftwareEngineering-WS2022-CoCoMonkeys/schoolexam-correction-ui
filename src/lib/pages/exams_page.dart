@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/exams.dart';
+import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/components/error_widget.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart';
@@ -16,34 +17,30 @@ class ExamsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(
-          AppLocalizations.of(context)!.examPageName,
-          style: const TextStyle(color: Colors.black),
-        ),
-        backgroundColor: Colors.white,
-        leading: Material(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  color: Theme.of(context).primaryColor,
-                  size: 32,
-                ),
-              ),
-              Center(
-                  child: Text(
-                AppLocalizations.of(context)!.teacher + " XY",
-                style: const TextStyle(color: Colors.black),
-              ))
-            ],
+          middle: Text(
+            AppLocalizations.of(context)!.examPageName,
+            style: const TextStyle(color: Colors.black),
           ),
-        ),
-      ),
+          backgroundColor: Colors.white,
+          leading: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+              builder: (context, state) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.person,
+                  color: Colors.black,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    state.person.firstName,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                )
+              ],
+            );
+          })),
       child: Material(
         child: BlocBuilder<ExamsCubit, ExamsState>(
           builder: (context, state) {

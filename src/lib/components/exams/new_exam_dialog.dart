@@ -20,14 +20,22 @@ class NewExamDialog extends StatelessWidget {
     return BlocConsumer<ExamDetailsBloc, ExamDetailsState>(
         listener: (context, state) {
       if (state.status.isSubmissionFailure) {
-        // TODO : Improve errors
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-                content: Text(
-                    "${state.isNewExamEdit ? "Erstellung" : "Anpassung"} fehlgeschlagen")),
-          );
+        showCupertinoDialog<void>(
+          context: context,
+          builder: (BuildContext context) => CupertinoAlertDialog(
+            title: Text(AppLocalizations.of(context)!.errorTitle),
+            content: Text(AppLocalizations.of(context)!.updateExamError),
+            actions: <CupertinoDialogAction>[
+              CupertinoDialogAction(
+                child: Text("Ok"),
+                isDefaultAction: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ),
+        );
       } else if (state.status.isSubmissionSuccess) {
         Navigator.pop(context);
       }
@@ -57,9 +65,9 @@ class NewExamDialog extends StatelessWidget {
                               labelText:
                                   AppLocalizations.of(context)!.newExamTitle,
                             ),
-                            onChanged: (examTitle) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamTitleChanged(examTitle))),
+                            onChanged: (examTitle) =>
+                                BlocProvider.of<ExamDetailsBloc>(context)
+                                    .changeExamTitle(title: examTitle)),
                       ],
                     ),
                   ),
@@ -79,9 +87,9 @@ class NewExamDialog extends StatelessWidget {
                               labelText:
                                   AppLocalizations.of(context)!.newExamTopic,
                             ),
-                            onChanged: (examTopic) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamTopicChanged(examTopic))),
+                            onChanged: (examTopic) =>
+                                BlocProvider.of<ExamDetailsBloc>(context)
+                                    .changeExamTopic(topic: examTopic)),
                       ],
                     ),
                   ),
@@ -92,16 +100,21 @@ class NewExamDialog extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(AppLocalizations.of(context)!.newExamCourse,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 36)),
-                        Container(
+                        SizedBox(
                           height: 300,
                           child: CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                  initialItem: state.validCourses.indexWhere(
+                                      (element) =>
+                                          element.id ==
+                                          state.examCourse.value.id)),
                               itemExtent: 50,
                               onSelectedItemChanged: (int index) {
-                                context.read<ExamDetailsBloc>().add(
-                                    ExamCourseChanged(
-                                        state.validCourses[index]));
+                                BlocProvider.of<ExamDetailsBloc>(context)
+                                    .changeExamCourse(
+                                        course: state.validCourses[index]);
                               },
                               children: state.validCourses
                                   .map((c) => Text(c.displayName,
@@ -117,23 +130,20 @@ class NewExamDialog extends StatelessWidget {
                     prefix: AppLocalizations.of(context)!.newExamDate,
                     invalid: state.examDate.invalid,
                     value: formatter.format(state.examDate.value.toLocal()),
-                    child: Column(
-                      children: [
-                        Text(AppLocalizations.of(context)!.newExamDate,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 36)),
-                        Container(
-                          height: 300,
-                          child: CupertinoDatePicker(
+                    child: Column(children: [
+                      Text(AppLocalizations.of(context)!.newExamDate,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 36)),
+                      SizedBox(
+                        height: 300,
+                        child: CupertinoDatePicker(
                             minimumDate: DateTime.now(),
                             mode: CupertinoDatePickerMode.date,
-                            onDateTimeChanged: (dateTime) => context
-                                .read<ExamDetailsBloc>()
-                                .add(ExamDateChanged(dateTime)),
-                          ),
-                        ),
-                      ],
-                    ),
+                            onDateTimeChanged: (dateTime) =>
+                                BlocProvider.of<ExamDetailsBloc>(context)
+                                    .changeExamDate(date: dateTime)),
+                      ),
+                    ]),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 30.0),
@@ -147,9 +157,9 @@ class NewExamDialog extends StatelessWidget {
                                     primary: Colors.blue),
                                 onPressed: state.status.isValidated
                                     ? () {
-                                        context
-                                            .read<ExamDetailsBloc>()
-                                            .add(const ExamSubmitted());
+                                        BlocProvider.of<ExamDetailsBloc>(
+                                                context)
+                                            .submitExam();
                                       }
                                     : null,
                                 child: Text(state.isNewExamEdit
@@ -170,8 +180,8 @@ class NewExamDialog extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: Text(AppLocalizations.of(context)!
-                                    .newExamButtonCancel),
+                                child:
+                                    Text(AppLocalizations.of(context)!.cancel),
                               ),
                             ),
                           ),

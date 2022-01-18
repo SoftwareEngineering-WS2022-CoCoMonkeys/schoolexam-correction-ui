@@ -2,6 +2,7 @@ import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
 import 'package:schoolexam/exams/dto/grading_table_dto.dart';
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
+import 'package:schoolexam/exams/dto/participant_dto.dart';
 import 'package:schoolexam/exams/dto/submission_details_dto.dart';
 import 'package:schoolexam/exams/dto/submission_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
@@ -31,13 +32,28 @@ class OnlineExamsRepository extends ExamsRepository {
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
   }
 
+  Future<void> setCourses(
+      {required String examId, required List<String> courseIds}) async {
+    await provider.query(
+        path: "/exam/$examId/setparticipants",
+        method: HTTPMethod.POST,
+        body: {
+          "participants":
+              courseIds.map((e) => {"id": e, "type": "Course"}).toList()
+        },
+        key: await authenticationRepository.getKey());
+  }
+
   @override
   Future<void> uploadExam({required NewExamDTO exam}) async {
-    await provider.query(
+    final res = await provider.query(
         path: "/exam/create",
         method: HTTPMethod.POST,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
+
+    final id = res["id"];
+    await setCourses(examId: id, courseIds: [exam.course.id]);
   }
 
   @override
@@ -48,12 +64,14 @@ class OnlineExamsRepository extends ExamsRepository {
         method: HTTPMethod.PUT,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
+    await setCourses(examId: examId, courseIds: [exam.course.id]);
   }
 
   @override
-  Future<void> setPoints({required String submissionId,
-    required String taskId,
-    required double achievedPoints}) async {
+  Future<void> setPoints(
+      {required String submissionId,
+      required String taskId,
+      required double achievedPoints}) async {
     await provider.query(
         path: "/submission/$submissionId/setpoints",
         method: HTTPMethod.POST,
@@ -112,5 +130,29 @@ class OnlineExamsRepository extends ExamsRepository {
         method: HTTPMethod.POST,
         body: {"remarkPdf": data},
         key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<void> publishExam(
+      {required String examId, DateTime? publishDate}) async {
+    await provider.query(
+        path: "/exam/$examId/publish",
+        method: HTTPMethod.POST,
+        body: {
+          "publishingDateTime":
+              publishDate != null ? publishDate.toUtc().toIso8601String() : null
+        },
+        key: await authenticationRepository.getKey());
+  }
+
+  @override
+  Future<List<Course>> getCourses() async {
+    final res = await provider.query(
+        path: "/course/byteacher",
+        key: await authenticationRepository.getKey());
+
+    var courses = List<Map<String, dynamic>>.from(res);
+
+    return courses.map((e) => CourseDTO.fromJson(e).toModel()).toList();
   }
 }

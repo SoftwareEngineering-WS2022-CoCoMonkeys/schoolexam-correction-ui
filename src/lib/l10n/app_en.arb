@@ -31,7 +31,8 @@
   "examCardTopic": "topic",
   "examCardParticipants": "# participants",
   "examCardQuota": "quota",
-  "examCardButtonReturn": "return",
+  "examPublish": "publish",
+  "examPublishDate": "publish date",
   "examCardButtonCorrect": "correct",
   "examCardButtonUpload": "upload",
   "examCardButtonEdit": "edit",
@@ -41,7 +42,7 @@
   "newExamDate": "exam date",
   "newExamButtonCreate": "create",
   "newExamButtonEdit": "edit",
-  "newExamButtonCancel": "cancel",
+  "cancel": "cancel",
   "yes": "yes",
   "no": "no",
   "correctionSelectionConfirmWithName": "Do you want to open the correction for student {name}?",
@@ -57,5 +58,6 @@
   "taskRemarkEvaluate": "evaluate",
   "taskRemarkPoints": "points",
   "errorTitle": "Error",
-  "authenticationError": "The authentication failed."
+  "authenticationError": "The authentication failed.",
+  "updateExamError": "The update failed."
 }

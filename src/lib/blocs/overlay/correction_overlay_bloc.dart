@@ -48,7 +48,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     /// Added a new correction AND switched to it.
     if (state is AddedCorrectionState) {
       log("Reacting to addition within the remark state by loading overlay document");
-      final document = await _load(
+      final document = await retrieveDocument(
           path: state.added.submissionPath, submission: state.added.submission);
 
       emit(AddedCorrectionOverlayState.add(
@@ -129,8 +129,8 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
   /// Using the specified [submission] and [path] pointing to the local location of the submission PDF,
   /// the corresponding overlay document is loaded. If no overlay document exists yet, it is created without inputs and locally persisted.
-  Future<CorrectionOverlayDocument> _load(
-      {required String path, required Submission submission}) async {
+  Future<CorrectionOverlayDocument> retrieveDocument(
+      {required String path, required SubmissionOverview submission}) async {
     final document = await _correctionOverlayRepository.getDocument(
         submissionId: submission.id);
 

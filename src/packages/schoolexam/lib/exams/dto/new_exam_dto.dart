@@ -3,8 +3,6 @@ import 'package:schoolexam/exams/models/course.dart';
 
 class NewExamDTO extends Equatable {
   final String title;
-
-  // TODO: should be topic?
   final String topic;
   final Course course;
   final DateTime dateOfExam;
@@ -16,13 +14,11 @@ class NewExamDTO extends Equatable {
       required this.dateOfExam});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [title, topic, course, dateOfExam];
 
   Map<String, dynamic> toJson() => {
         "title": title,
         "topic": topic,
-        "dateOfExam": dateOfExam.toString(),
-        "description": "",
+        "date": dateOfExam.toUtc().toIso8601String(),
       };
 }
