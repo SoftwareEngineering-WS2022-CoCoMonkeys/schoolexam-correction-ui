@@ -140,7 +140,7 @@ class OnlineExamsRepository extends ExamsRepository {
         method: HTTPMethod.POST,
         body: {
           "publishingDateTime":
-              publishDate != null ? publishDate.toUtc().toString() : null
+              publishDate != null ? publishDate.toUtc().toIso8601String() : null
         },
         key: await authenticationRepository.getKey());
   }
