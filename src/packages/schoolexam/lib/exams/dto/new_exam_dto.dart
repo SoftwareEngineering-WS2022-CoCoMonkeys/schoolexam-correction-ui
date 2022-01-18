@@ -19,6 +19,6 @@ class NewExamDTO extends Equatable {
   Map<String, dynamic> toJson() => {
         "title": title,
         "topic": topic,
-        "date": dateOfExam.toUtc().toString(),
+        "date": dateOfExam.toUtc().toIso8601String(),
       };
 }
