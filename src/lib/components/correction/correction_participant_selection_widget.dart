@@ -7,11 +7,17 @@ import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
 class CorrectionParticipantSelectionWidget extends StatelessWidget {
   const CorrectionParticipantSelectionWidget({Key? key}) : super(key: key);
 
-  bool _isSelected(RemarkState state, int index) => state.corrections
-      .any((element) => element.submission.id == state.submissions[index].id);
+  bool _isSelected(RemarksState state, int index) {
+    if (state is RemarksCorrectionInProgress) {
+      return state.corrections.any(
+          (element) => element.submission.id == state.submissions[index].id);
+    } else {
+      return false;
+    }
+  }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
+  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarksState>(
       builder: (context, state) => ListView.separated(
             padding: const EdgeInsets.all(8),
             itemCount: state.submissions.length,

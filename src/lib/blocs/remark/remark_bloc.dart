@@ -1,202 +1,97 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam/utils/network_exceptions.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
+import 'package:schoolexam_correction_ui/blocs/remark/grading_table_helper.dart';
 import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remark/remark_pdf_helper.dart';
 import 'package:schoolexam_correction_ui/extensions/grading_scheme_helper.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
-
-import 'correction.dart';
-import 'remark_state.dart';
 
 /// This cubit is responsible for managing the currently active corrections.
 /// It therefore has to provide knowledge about the underlying submissions and corresponding students.
-class RemarkCubit extends Cubit<RemarkState> {
+class RemarkCubit extends Cubit<RemarksState> {
   late final StreamSubscription _navigationSubscription;
   final ExamsRepository _examsRepository;
+
+  // Helper
+  final RemarkPdfHelper _helper;
+  final GradingTableHelper _tableHelper;
 
   RemarkCubit(
       {required ExamsRepository examsRepository,
       required NavigationCubit navigationCubit})
       : _examsRepository = examsRepository,
-        super(LoadedRemarksState.none()) {
+        _helper = const RemarkPdfHelper(),
+        _tableHelper = const GradingTableHelper(),
+        super(RemarksInitial.empty()) {
     _navigationSubscription = navigationCubit.stream.listen(_onNavigationState);
   }
 
+  /// This bloc is mainly triggered from observing the global [AppNavigationState].
+  /// Based on changes within the navigation remarks are loaded, discarded.
   void _onNavigationState(AppNavigationState state) async {
     log("Observed navigation switch : $state");
-    if (state.context != AppNavigationContext.exams) {
+    if (state.context != AppNavigationContext.exams ||
+        state.requiresAuthentication) {
       return;
     }
 
-    /// Remove any corrections, if still present.
     if (state.examId.isEmpty) {
-      // TODO : Provide bulk remnoval state
-      var removalState = this.state;
-      for (final correction in this.state.corrections) {
-        removalState = RemovedCorrectionState.remove(
-            initial: removalState, removed: correction);
-        emit(removalState);
-      }
-    } else {
-      await correct(await _examsRepository.getExam(state.examId));
-    }
-  }
+      /// Remove any corrections, if still present.
+      if (this.state is RemarksCorrectionInProgress) {
+        final base = this.state as RemarksCorrectionInProgress;
 
-  /// Loads the correction pdf from [path].
-  /// If no pdf file exists at [path] the base64 encoded [data] is written to the file
-  Future<Uint8List> _initPdfFile(
-      {required String path, required String data}) async {
-    final file = File(path);
-    late final Uint8List res;
-
-    if (await file.exists()) {
-      log("Loading file located at $path");
-      final document = PdfDocument(inputBytes: await file.readAsBytes());
-      res = Uint8List.fromList(document.save());
-    } else {
-      log("Writing file to $path");
-      final document = PdfDocument.fromBase64String(data);
-      res = Uint8List.fromList(document.save());
-
-      await file.create(recursive: true);
-      await file.writeAsBytes(res);
-    }
-
-    return res;
-  }
-
-  /// Determines the path to the correction pdf for the [submissionId].
-  Future<String> _getCorrectionPath({required String submissionId}) async {
-    final directory = (await getApplicationDocumentsDirectory()).path;
-    return p.join(directory, "corrections", submissionId, ".pdf");
-  }
-
-  /// Determines the path to the submission pdf for the [submissionId].
-  Future<String> _getSubmissionPath({required String submissionId}) async {
-    final directory = (await getApplicationDocumentsDirectory()).path;
-    return p.join(directory, "submissions", submissionId, ".pdf");
-  }
-
-  /// Retrieves an existing correction for [submission], if given.
-  /// Otherwise a correction is initialized.
-  Future<Correction> loadCorrection({required Submission submission}) async {
-    final submissionPath =
-        await _getSubmissionPath(submissionId: submission.id);
-    final correctionPath =
-        await _getCorrectionPath(submissionId: submission.id);
-
-    final sRes =
-        await _initPdfFile(path: submissionPath, data: submission.data);
-    final cRes =
-        await _initPdfFile(path: correctionPath, data: submission.data);
-
-    return Correction(
-        correctionData: cRes,
-        correctionPath: correctionPath,
-        submissionData: sRes,
-        submissionPath: submissionPath,
-        submission: submission,
-        currentAnswer: Answer.empty);
-  }
-
-  /// Merges the current correction pdf [current] using the data currently stored for the submission [submissionId].
-  /// The result are the bytes of the merged pdf file.
-  Future<Uint8List> merge({required CorrectionOverlayDocument document}) async {
-    if (document.isEmpty) {
-      log("The document provided is invalid.");
-      return Uint8List.fromList([]);
-    }
-
-    final path = await _getCorrectionPath(submissionId: document.submissionId);
-    final file = File(path);
-
-    if (!(await file.exists())) {
-      log("There exists no pdf for ${document.submissionId}");
-      return Uint8List.fromList([]);
-    }
-
-    final pdfDocument = PdfDocument(inputBytes: await file.readAsBytes());
-    assert(document.pages.length == pdfDocument.pages.count);
-
-    for (int pageNr = 0; pageNr < pdfDocument.pages.count; pageNr++) {
-      // 1. Cleanup old overlay - This is saved in a separate layer
-      pdfDocument.pages[pageNr].layers.remove(name: "correction");
-
-      // 2. Create new layer for correction inputs
-      final layer = pdfDocument.pages[pageNr].layers
-          .add(name: "correction", visible: true);
-
-      // 3. Convert correction inputs
-      for (int i = 0; i < document.pages[pageNr].inputs.length; ++i) {
-        final input = document.pages[pageNr].inputs[i];
-        final brush = PdfSolidBrush(PdfColor(input.color.red, input.color.green,
-            input.color.blue, input.color.alpha));
-
-        final points = input.points
-            .map((e) => e.toAbsolutePoint(size: pdfDocument.pages[pageNr].size))
-            .toList();
-        // Empty
-        if (points.isEmpty) {
-          continue;
+        // TODO : Provide bulk removal state
+        var removalState = base;
+        for (final correction in base.corrections) {
+          removalState = RemarksCorrectionRemoved.remove(
+              initial: removalState, removed: correction);
+          emit(removalState);
         }
-        // Dot
-        else if (points.length < 2) {
-          layer.graphics.drawEllipse(
-              Rect.fromCircle(
-                  center: Offset(points[0].x, points[0].y), radius: 1),
-              brush: brush);
-        }
-        // Path
-        else {
-          layer.graphics.drawPolygon(
-              points.map((e) => Offset(e.x, e.y)).toList(),
-              brush: brush);
-        }
+        emit(RemarksInitial.empty());
       }
     }
 
-    final res = Uint8List.fromList(pdfDocument.save());
-    pdfDocument.dispose();
-
-    log("Writing out correction to ${file.path}");
-    await file.writeAsBytes(res);
-
-    return res;
+    /// Start loading necessary data
+    else {
+      emit(RemarksLoadInProgress.loadingExam());
+      final exam = await _examsRepository.getExam(state.examId);
+      await correct(exam: exam);
+    }
   }
 
   /// Start the correction for the [exam].
   /// This includes the retrieval of the corresponding submissions.
-  Future<void> correct(Exam exam) async {
-    emit(LoadingRemarksState.loading(old: state));
+  /// At the end of the function the [RemarksCorrectionInProgress] state is emitted.
+  Future<void> correct({required Exam exam}) async {
+    emit(RemarksLoadInProgress.loadingSubmissions(exam: exam));
 
-    final submissions = await _examsRepository.getSubmissionDetails(
-        examId: exam.id,
-        submissionIds: (await _examsRepository.getSubmissions(examId: exam.id))
-            .map((e) => e.id)
-            .toList());
+    // TODO : More efficient
+    final general = await _examsRepository.getSubmissions(examId: exam.id);
+    final details = await _examsRepository.getSubmissionDetails(
+        examId: exam.id, submissionIds: general.map((e) => e.id).toList());
 
-    log("Determined submissions : $submissions");
-
-    emit(StartedCorrectionState.start(exam: exam, submissions: submissions));
+    log("Determined submissions : $details");
+    emit(RemarksLoadSuccess(exam: exam, submissions: details));
   }
 
   /// Opens the [submission] for correction
   Future<void> open(Submission submission) async {
     log("Requested to correct submission $submission");
 
-    final correction = await loadCorrection(submission: submission);
+    if (state is! RemarksCorrectionInProgress &&
+        state is! RemarksLoadSuccess &&
+        state is! RemarksGradingInProgress) {
+      log("Remark cubit is invalid state to open submission. The necessary data has to be loaded using correct beforehand.");
+      return;
+    }
+
+    final correction = await _helper.loadCorrection(submission: submission);
 
     /// Sort segments by page and y
     for (final answer in correction.submission.answers) {
@@ -212,62 +107,106 @@ class RemarkCubit extends Cubit<RemarkState> {
         .indexWhere((element) => element.task.id == t1.id)
         .compareTo(correction.submission.answers
             .indexWhere((element) => element.task.id == t2.id)));
-    var newState = AddedCorrectionState.add(initial: state, added: correction);
 
-    emit(newState);
+    if (state is! RemarksCorrectionInProgress) {
+      emit(RemarksCorrectionAdded.start(
+          selectedCorrection: 0,
+          corrections: [correction],
+          exam: state.exam,
+          submissions: state.submissions,
+          added: correction));
+    } else {
+      emit(RemarksCorrectionAdded.add(
+          initial: state as RemarksCorrectionInProgress, added: correction));
+    }
   }
 
   /// Closes the [submission].
-  Future<void> stop(Submission submission) async {
+  void stop(Submission submission) async {
     log("Requested to close submission $submission");
 
-    final correction = state.corrections.firstWhere(
+    if (state is! RemarksCorrectionInProgress) {
+      log("Remark cubit is invalid state to close submission.");
+      return;
+    }
+
+    final correctionState = state as RemarksCorrectionInProgress;
+
+    final correction = correctionState.corrections.firstWhere(
         (element) => element.submission.id == submission.id,
         orElse: () => Correction.empty);
 
-    // Switch active pdf
-    var newState =
-        RemovedCorrectionState.remove(initial: state, removed: correction);
+    final removalState = RemarksCorrectionRemoved.remove(
+        initial: correctionState, removed: correction);
 
-    emit(newState);
+    emit(removalState);
+
+    /// Traverse back to previous state
+    if (removalState.corrections.isEmpty) {
+      emit(RemarksLoadSuccess(
+          exam: removalState.exam, submissions: removalState.submissions));
+    }
   }
 
   /// Changes the active correction to match the desired [submission].
-  Future<void> changeTo({required Submission submission}) async {
+  void changeTo({required Submission submission}) async {
     log("Requested to change to $submission");
 
-    if (state.corrections.isEmpty) {
+    if (state is! RemarksCorrectionInProgress) {
+      log("Remark cubit is invalid state to change submission.");
+      return;
+    }
+
+    final correctionState = state as RemarksCorrectionInProgress;
+
+    if (correctionState.corrections.isEmpty) {
       log("No corrections currently present.");
       return;
     }
 
-    final selection = state.corrections
+    final selection = correctionState.corrections
         .indexWhere((element) => element.submission.id == submission.id, -1);
     if (selection < 0) {
       log("Found no correction for ${submission.id}");
       return;
     }
 
-    emit(SwitchedCorrectionState.change(
-        initial: state, selectedCorrection: selection));
+    emit(RemarksCorrectionSwapped.swap(
+        initial: correctionState, selectedCorrection: selection));
   }
 
   /// Moves the currently selected correction to the desired [task].
   void moveTo({required Task task}) {
     log("Requested to move to $task");
 
-    if (state.corrections.isEmpty) {
+    if (state is! RemarksCorrectionInProgress) {
+      log("Remark cubit is invalid state to change submission.");
+      return;
+    }
+
+    final correctionState = state as RemarksCorrectionInProgress;
+
+    if (correctionState.corrections.isEmpty) {
       log("No corrections currently present.");
       return;
     }
 
-    final correction = state.corrections[state.selectedCorrection].copyWith(
-        currentAnswer: state
-            .corrections[state.selectedCorrection].submission.answers
-            .firstWhere((element) => element.task.id == task.id,
-                orElse: () => Answer.empty));
+    final correction = correctionState
+        .corrections[correctionState.selectedCorrection]
+        .copyWith(
+            currentAnswer: correctionState
+                .corrections[correctionState.selectedCorrection]
+                .submission
+                .answers
+                .firstWhere((element) => element.task.id == task.id,
+                    orElse: () => Answer.empty));
 
-    emit(NavigatedRemarkState.navigated(initial: state, navigated: correction));
+    log("SELECTED 1 : ${correctionState.selectedCorrection}");
+    log("SELECTED 2 : ${RemarksCorrectionNavigated.navigate(
+        initial: correctionState, navigated: correction).selectedCorrection}");
+
+    emit(RemarksCorrectionNavigated.navigate(
+        initial: correctionState, navigated: correction));
   }
 
   /// Marks the [task] with [points].
@@ -277,9 +216,17 @@ class RemarkCubit extends Cubit<RemarkState> {
       required double achievedPoints}) async {
     log("Requested to set $task to $achievedPoints for ${submission.student.displayName}");
 
-    final correction = state.corrections.firstWhere(
+    if (state is! RemarksCorrectionInProgress) {
+      log("Remark cubit is invalid state to change submission.");
+      return;
+    }
+
+    final correctionState = state as RemarksCorrectionInProgress;
+
+    final correction = correctionState.corrections.firstWhere(
         (element) => element.submission.id == submission.id,
         orElse: () => Correction.empty);
+
     final answer = submission.answers.firstWhere(
         (element) => element.task.id == task.id,
         orElse: () => Answer.empty);
@@ -288,11 +235,6 @@ class RemarkCubit extends Cubit<RemarkState> {
       log("Found no matching task or answer in exam.");
       return;
     }
-
-    await _examsRepository.setPoints(
-        submissionId: submission.id,
-        taskId: answer.task.id,
-        achievedPoints: achievedPoints);
 
     final marked = correction.copyWith(
         submission: correction.submission.copyWith(
@@ -304,8 +246,32 @@ class RemarkCubit extends Cubit<RemarkState> {
                     : e)
                 .toList()));
 
-    emit(UpdatedRemarksState.marked(initial: state, marked: marked));
+    final loadingRemark = RemarksCorrectionRemarkLoading.mark(
+        answer: answer,
+        correction: marked,
+        selectedCorrection: correctionState.selectedCorrection,
+        corrections: correctionState.corrections,
+        submissions: correctionState.submissions,
+        exam: correctionState.exam);
+    emit(loadingRemark);
+
+    try {
+      await _examsRepository.setPoints(
+          submissionId: submission.id,
+          taskId: answer.task.id,
+          achievedPoints: achievedPoints);
+    } on NetworkException catch (e) {
+      // TODO : Look into -> Localize description etc. based on exception
+      emit(RemarksCorrectionRemarkFailure(initial: loadingRemark));
+    }
+
+    emit(RemarksCorrectionRemarkSuccess(initial: loadingRemark));
   }
+
+  /// Merges the supplied [CorrectionOverlayDocument] with the pdf stored for the associated submission into a separate pdf file.
+  Future<Uint8List> merge(
+          {required CorrectionOverlayDocument document}) async =>
+      await _helper.merge(document: document);
 
   /// Using publish the user finalizes the correction of the [exam].
   /// When no [publishDate] is supplied, the publishing is instantaneously.
@@ -317,82 +283,106 @@ class RemarkCubit extends Cubit<RemarkState> {
 
   /// Add a new lower bound to the existing grading table
   void addGradingTableBound() {
+    if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
+    }
+
     final copy = state.exam.gradingTable.valueCopy();
-    // Insert empty grading table bound
     copy.lowerBounds.add(GradingTableLowerBound.empty);
-    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+
+    emit(RemarksGradingInProgress.update(
+        table: copy, exam: state.exam, submissions: state.submissions));
   }
 
   /// Change the points on a lower bound in the existing grading table
   void changeGradingTableBoundPoints(
       {required int index, required double points}) {
-    final copy = state.exam.gradingTable.valueCopy();
-
-    final adjustedLowerBound = copy.lowerBounds[index].copyWith(points: points);
-    // remove old bound
-    copy.lowerBounds.removeAt(index);
-
-    final maxPoints =
-        state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
-    points = math.min(points, maxPoints);
-
-    // insert updated bound at same index
-    copy.lowerBounds.insert(index, adjustedLowerBound);
-
-    // Ensure lower bound constraint
-    for (int j = 0; j < copy.lowerBounds.length; j++) {
-      final lb = state.exam.gradingTable.lowerBounds[j];
-      if (j < index && lb.points < points || j > index && lb.points > points) {
-        log("Adjusting lower bound in grading table");
-
-        final nextLb = lb.copyWith(points: points);
-        // remove old bound
-        copy.lowerBounds.removeAt(j);
-
-        // insert updated bound at same index
-        copy.lowerBounds.insert(j, nextLb);
-      }
+    if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
     }
-    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+
+    final update = _tableHelper.changeGradingTableBoundPoints(
+        exam: state.exam,
+        table: state.exam.gradingTable,
+        index: index,
+        points: points);
+    emit(RemarksGradingInProgress.update(
+        table: update, exam: state.exam, submissions: state.submissions));
   }
 
   /// Change the grade descriptor on a lower bound in the existing grading table
   void changeGradingTableBoundGrade(
       {required int index, required String grade}) {
+    if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
+    }
+
     final copy = state.exam.gradingTable.valueCopy();
     final adjustedLowerBound = copy.lowerBounds[index].copyWith(grade: grade);
+
     // remove old bound
     copy.lowerBounds.removeAt(index);
 
     // insert updated bound at same index
     copy.lowerBounds.insert(index, adjustedLowerBound);
-    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+
+    emit(RemarksGradingInProgress.update(
+        table: copy, exam: state.exam, submissions: state.submissions));
   }
 
   /// Change the grading table to a default layout
   /// The two standard german grading schemes are available as presets
   void getDefaultGradingTable({required int low, required int high}) {
-    emit(GradingTabledUpdatedState.updated(
-        initial: state,
-        gradingTable: GradingSchemeHelper.getDefaultGradingScheme(
-            low: low, high: high, exam: state.exam)));
+    if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
+    }
+
+    emit(RemarksGradingInProgress.update(
+        table: GradingSchemeHelper.getDefaultGradingScheme(
+            low: low, high: high, exam: state.exam),
+        exam: state.exam,
+        submissions: state.submissions));
   }
 
   /// Delete a grading table interval
   void deleteGradingTableBound(int index) {
+    if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
+    }
+
     final copy = state.exam.gradingTable.valueCopy();
     copy.lowerBounds.removeAt(index);
-    emit(GradingTabledUpdatedState.updated(initial: state, gradingTable: copy));
+
+    emit(RemarksGradingInProgress.update(
+        table: copy, exam: state.exam, submissions: state.submissions));
   }
 
   /// Save grading table
   Future<void> saveGradingTable() async {
-    _examsRepository.setGradingTable(exam: state.exam);
+    if (state is! RemarksGradingState) {
+      log("Remark cubit is invalid state to change grading table bounds.");
+      return;
+    }
+
+    final gradingState = state as RemarksGradingState;
+    emit(RemarksGradingLoading(initial: gradingState));
+    try {
+      await _examsRepository.setGradingTable(exam: state.exam);
+    } on NetworkException catch (e) {
+      // TODO : localized error
+      emit(RemarksGradingFailure(initial: gradingState));
+    }
+    emit(RemarksGradingSuccess(initial: gradingState));
   }
 
   @override
   Future<void> close() async {
-    _navigationSubscription.cancel();
-    return super.close();
+    await super.close();
+    await _navigationSubscription.cancel();
   }
 }

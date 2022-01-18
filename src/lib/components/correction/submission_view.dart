@@ -50,10 +50,14 @@ class SubmissionViewState extends State<SubmissionView> {
       builder: (context, state) {
         final document = state.getCurrent(widget.initial);
 
-        return BlocBuilder<RemarkCubit, RemarkState>(
+        return BlocBuilder<RemarkCubit, RemarksState>(
             // We never need to rebuild
             buildWhen: (old, current) => false,
             builder: (context, state) {
+              if (state is! RemarksCorrectionInProgress) {
+                return Container();
+              }
+
               return SizedBox(
                 width: widget.size.width,
                 height: widget.size.height,

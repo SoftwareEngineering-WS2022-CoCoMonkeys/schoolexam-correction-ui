@@ -32,38 +32,38 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
             ),
           ],
         ),
-        child: BlocBuilder<RemarkCubit, RemarkState>(
-            // Only update, when the navigation changed (task dropdown)
-            buildWhen: (old, current) => current is NavigatedRemarkState,
-            builder: (context, state) {
-              final current = state.getCurrent(widget.initial);
-              return Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: DropdownButton(
-                        value: (current.currentAnswer.isNotEmpty)
-                            ? current.currentAnswer.task.id
-                            : null,
-                        items: current.submission.exam.tasks
-                            .map((e) => DropdownMenuItem(
-                                  value: e.id,
-                                  child: Text(e.title),
-                                ))
-                            .toList(),
-                        onChanged: (String? newValue) {
-                          final task = current.submission.exam.tasks.firstWhere(
-                              (element) => element.id == newValue,
-                              orElse: () => Task.empty);
-                          BlocProvider.of<RemarkCubit>(context)
-                              .moveTo(task: task);
-                        }),
-                  ),
-                  const Expanded(
-                    child: InputHeader(),
-                  )
-                ],
-              );
-            }),
+        child: BlocBuilder<RemarkCubit, RemarksState>(builder: (context, state) {
+          if (state is! RemarksCorrectionInProgress) {
+            return Container();
+          }
+
+          final current = state.getCurrent(widget.initial);
+          return Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: DropdownButton(
+                    value: (current.currentAnswer.isNotEmpty)
+                        ? current.currentAnswer.task.id
+                        : null,
+                    items: current.submission.exam.tasks
+                        .map((e) => DropdownMenuItem(
+                              value: e.id,
+                              child: Text(e.title),
+                            ))
+                        .toList(),
+                    onChanged: (String? newValue) {
+                      final task = current.submission.exam.tasks.firstWhere(
+                          (element) => element.id == newValue,
+                          orElse: () => Task.empty);
+                      BlocProvider.of<RemarkCubit>(context).moveTo(task: task);
+                    }),
+              ),
+              const Expanded(
+                child: InputHeader(),
+              )
+            ],
+          );
+        }),
       );
 }

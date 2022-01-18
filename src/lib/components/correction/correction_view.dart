@@ -12,19 +12,28 @@ class CorrectionView extends StatelessWidget {
   const CorrectionView({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
-      buildWhen: (old, current) =>
-          current is RemovedCorrectionState || current is AddedCorrectionState,
-      builder: (context, state) => _CorrectionViewTabContainer(
-            key: ValueKey<List<Correction>>(state.corrections),
-            corrections: state.corrections,
-          ));
+  Widget build(BuildContext context) =>
+      BlocBuilder<RemarkCubit, RemarksState>(builder: (context, state) {
+        if (state is! RemarksCorrectionInProgress) {
+          return Container();
+        }
+
+        return _CorrectionViewTabContainer(
+          /// Only rebuild when a change to the length occured.
+          /// This is necessary for the underlying TabController.
+          key: ValueKey<int>(state.corrections.length),
+          corrections: state.corrections,
+          selected: state.selectedCorrection,
+        );
+      });
 }
 
 class _CorrectionViewTabContainer extends StatefulWidget {
+  final int selected;
   final List<Correction> corrections;
 
-  const _CorrectionViewTabContainer({Key? key, required this.corrections})
+  const _CorrectionViewTabContainer(
+      {Key? key, required this.corrections, required this.selected})
       : super(key: key);
 
   @override
@@ -38,6 +47,7 @@ class _CorrectionViewTabContainerState
   @override
   void initState() {
     _controller = TabController(length: widget.corrections.length, vsync: this);
+    _controller!.index = widget.selected;
     _controller!.addListener(_handleTabSelection);
     super.initState();
   }

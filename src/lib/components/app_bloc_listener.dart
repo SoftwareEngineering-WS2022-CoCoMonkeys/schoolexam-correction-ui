@@ -26,8 +26,27 @@ class AppBlocListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(listeners: [
-        BlocListener<RemarkCubit, RemarkState>(listener: (context, state) {
-          if (state is LoadingRemarksErrorState) {}
+        BlocListener<RemarkCubit, RemarksState>(listener: (context, state) {
+          if (state is BlocFailure) {
+            _showErrorDialog(context: context, failure: state as BlocFailure);
+          } else if (state is BlocLoading) {
+            _showLoadingDialog(
+                context: context,
+                loading: state as BlocLoading,
+                builder: (BuildContext context, Widget child) =>
+                    BlocListener<RemarkCubit, RemarksState>(
+                      listener: (context, state) {
+                        if (state is! BlocLoading) {
+                          // If this was not already popped, pop it now.
+                          Navigator.popUntil(
+                              context,
+                              (route) =>
+                                  route.settings.name != loadingDialogPath);
+                        }
+                      },
+                      child: child,
+                    ));
+          }
         }),
         BlocListener<LoginBloc, LoginState>(listener: (context, state) {
           if (state is BlocFailure) {

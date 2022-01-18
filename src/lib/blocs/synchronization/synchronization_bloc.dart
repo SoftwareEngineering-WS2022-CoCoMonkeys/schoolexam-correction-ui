@@ -33,7 +33,7 @@ class SynchronizationCubit extends Cubit<SynchronizationState> {
         _correctionOverlayCubit.stream.listen(_onCorrectionChanged);
   }
 
-  void _onRemarkStateChanged(RemarkState state) async {
+  void _onRemarkStateChanged(RemarksState state) async {
     // -- Answers...
   }
 

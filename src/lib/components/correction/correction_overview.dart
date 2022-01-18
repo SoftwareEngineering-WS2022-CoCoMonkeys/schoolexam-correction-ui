@@ -11,7 +11,7 @@ class CorrectionOverview extends StatelessWidget {
   const CorrectionOverview({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
+  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarksState>(
       builder: (context, state) => Column(
             children: [
               const CorrectionGradingTable(),

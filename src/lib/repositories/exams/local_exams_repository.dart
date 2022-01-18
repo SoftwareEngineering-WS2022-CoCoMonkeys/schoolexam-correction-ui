@@ -11,7 +11,7 @@ class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository.db');
+    final path = p.join(await getDatabasesPath(), 'exams_repository100.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT

@@ -1,23 +1,191 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
+import 'package:schoolexam_correction_ui/blocs/bloc_loading.dart';
+import 'package:schoolexam_correction_ui/blocs/bloc_success.dart';
 
 import 'correction.dart';
 
 typedef CorrectionRetrievalCallback = Correction Function(Correction initial);
 
-abstract class RemarkState extends Equatable {
+abstract class RemarksState extends Equatable {
   /// We may only provide remarks for one exam at the time. This contains information about the subject, participants etc.
   final Exam exam;
 
   /// All submissions currently known to the system. The user may start corrections from any of these.
   final List<Submission> submissions;
 
+  const RemarksState({required this.exam, required this.submissions});
+
+  @override
+  List<Object?> get props => [exam, submissions];
+}
+
+class RemarksInitial extends RemarksState {
+  RemarksInitial.empty() : super(exam: Exam.empty, submissions: []);
+}
+
+/// State for loading necessary data into the states.
+abstract class RemarksLoadState extends RemarksState {
+  const RemarksLoadState(
+      {required Exam exam, required List<Submission> submissions})
+      : super(exam: exam, submissions: submissions);
+}
+
+/// Loading initial data.
+class RemarksLoadInProgress extends RemarksLoadState implements BlocLoading {
+  @override
+  final String description;
+
+  /// Initial loading state.
+  RemarksLoadInProgress.loadingExam({
+    this.description = "",
+  }) : super(exam: Exam.empty, submissions: []);
+
+  /// Loading submissions
+  RemarksLoadInProgress.loadingSubmissions(
+      {this.description = "", required Exam exam})
+      : super(exam: exam, submissions: []);
+}
+
+/// An erroneous state.
+/// Could be the result of an API error.
+class RemarksLoadFailure extends RemarksLoadState implements BlocFailure {
+  @override
+  final String description;
+
+  @override
+  final Exception? exception;
+
+  RemarksLoadFailure(
+      {required RemarksLoadState initial,
+      this.description = "",
+      this.exception})
+      : super(exam: initial.exam, submissions: initial.submissions);
+}
+
+class RemarksLoadSuccess extends RemarksLoadState implements BlocSuccess {
+  @override
+  final String description;
+
+  const RemarksLoadSuccess(
+      {this.description = "",
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(exam: exam, submissions: submissions);
+}
+
+/// This state contains information about the grading table.
+/// It is used for alternating the grading table.
+abstract class RemarksGradingState extends RemarksState {
+  final GradingTable table;
+
+  const RemarksGradingState(
+      {required this.table,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(exam: exam, submissions: submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([table]);
+}
+
+/// The user started the alternation of the grading table.
+class RemarksGradingInProgress extends RemarksGradingState {
+  const RemarksGradingInProgress(
+      {required GradingTable table,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(table: table, exam: exam, submissions: submissions);
+
+  RemarksGradingInProgress.update(
+      {required GradingTable table,
+      required Exam exam,
+      required List<Submission> submissions})
+      : this(
+            table: table,
+            exam: exam.copyWith(gradingTable: table),
+            submissions: submissions);
+
+  RemarksGradingInProgress copyWith({
+    Exam? exam,
+    List<Submission>? submissions,
+    GradingTable? table,
+  }) {
+    return RemarksGradingInProgress(
+      table: table ?? this.table,
+      exam: exam ?? this.exam,
+      submissions: submissions ?? this.submissions,
+    );
+  }
+}
+
+class RemarksGradingLoading extends RemarksGradingState implements BlocLoading {
+  @override
+  final String description;
+
+  RemarksGradingLoading(
+      {this.description = "", required RemarksGradingState initial})
+      : super(
+            table: initial.table,
+            exam: initial.exam,
+            submissions: initial.submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description]);
+}
+
+class RemarksGradingSuccess extends RemarksGradingState implements BlocSuccess {
+  @override
+  final String description;
+
+  RemarksGradingSuccess(
+      {this.description = "", required RemarksGradingState initial})
+      : super(
+            table: initial.table,
+            exam: initial.exam,
+            submissions: initial.submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description]);
+}
+
+class RemarksGradingFailure extends RemarksGradingState implements BlocFailure {
+  @override
+  final String description;
+
+  @override
+  final Exception? exception;
+
+  RemarksGradingFailure(
+      {this.description = "",
+      this.exception,
+      required RemarksGradingState initial})
+      : super(
+            table: initial.table,
+            exam: initial.exam,
+            submissions: initial.submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description, exception]);
+}
+
+/// This state contains information about an ongoing correction.
+abstract class RemarksCorrectionState extends RemarksState {
   /// Defines which correction is currently being worked on
   /// If corrections is empty, no correction is active
   final int selectedCorrection;
   final List<Correction> corrections;
+
+  const RemarksCorrectionState(
+      {required this.selectedCorrection,
+      required this.corrections,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(exam: exam, submissions: submissions);
 
   /// Callback to retrieve the updated correction from the state.
   /// This allows to centralize the logic, while allowing widgets to define their rebuild logic based on state changes.
@@ -25,122 +193,95 @@ abstract class RemarkState extends Equatable {
       (element) => element.submission.id == initial.submission.id,
       orElse: () => Correction.empty);
 
-  const RemarkState._(
-      {required this.exam,
-      this.selectedCorrection = 0,
-      required this.submissions,
-      required this.corrections});
-
   @override
-  List<Object> get props => [
-        exam,
-        submissions,
-        selectedCorrection,
-        corrections,
-      ];
+  List<Object?> get props =>
+      super.props..addAll([selectedCorrection, corrections]);
 }
 
-/// Actions are outstanding.
-/// The state holds the data that is outdated.
-class LoadingRemarksState extends RemarkState {
-  LoadingRemarksState.loading({required RemarkState old})
-      : super._(
-            exam: old.exam,
-            selectedCorrection: old.selectedCorrection,
-            submissions: old.submissions,
-            corrections: old.corrections);
-}
-
-/// An erroneous state.
-/// Could be the result of an API error.
-class LoadingRemarksErrorState extends RemarkState implements BlocFailure {
-  @override
-  final Exception exception;
-
-  @override
-  final String description;
-
-  LoadingRemarksErrorState.error(
-      {required RemarkState old,
-      required this.exception,
-      required this.description})
-      : super._(
-            exam: old.exam,
-            selectedCorrection: old.selectedCorrection,
-            submissions: old.submissions,
-            corrections: old.corrections);
-}
-
-/// Actions are finished.
-class LoadedRemarksState extends RemarkState {
-  LoadedRemarksState.none()
-      : this._(exam: Exam.empty, submissions: [], corrections: []);
-
-  const LoadedRemarksState._(
-      {required Exam exam,
-      int selectedCorrection = 0,
-      required List<Submission> submissions,
-      required List<Correction> corrections})
-      : super._(
-            exam: exam,
+/// An ongoing correction.
+abstract class RemarksCorrectionInProgress extends RemarksCorrectionState {
+  const RemarksCorrectionInProgress(
+      {required int selectedCorrection,
+      required List<Correction> corrections,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(
             selectedCorrection: selectedCorrection,
-            submissions: submissions,
-            corrections: corrections);
+            corrections: corrections,
+            exam: exam,
+            submissions: submissions);
 }
 
-/// Changed the remark for a submission.
-class UpdatedRemarksState extends LoadedRemarksState {
-  final Correction marked;
-
-  UpdatedRemarksState.marked(
-      {required RemarkState initial, required this.marked})
-      : super._(
-            exam: initial.exam,
-            selectedCorrection: initial.selectedCorrection,
-            submissions: initial.submissions,
-            corrections: <Correction>[
-              ...initial.corrections.map(
-                  (e) => (e.submission.id == marked.submission.id) ? marked : e)
-            ]);
-}
-
-/// Starting the overall correction for an exam. No submission can yet be actively corrected.
-class StartedCorrectionState extends LoadedRemarksState {
-  StartedCorrectionState.start(
-      {required Exam exam, required List<Submission> submissions})
-      : super._(exam: exam, submissions: submissions, corrections: []);
-}
-
-/// Added a new correction for active working.
-class AddedCorrectionState extends LoadedRemarksState {
+/// Sub-state to signal the addition of a correction to the ongoing correction process.
+class RemarksCorrectionAdded extends RemarksCorrectionInProgress {
   final Correction added;
 
-  AddedCorrectionState.add({required RemarkState initial, required this.added})
-      : super._(
+  RemarksCorrectionAdded.add(
+      {required RemarksCorrectionInProgress initial, required this.added})
+      : super(
             exam: initial.exam,
             selectedCorrection: initial.corrections.length,
             submissions: initial.submissions,
             corrections: <Correction>[...initial.corrections, added]);
+
+  const RemarksCorrectionAdded.start(
+      {required int selectedCorrection,
+      required List<Correction> corrections,
+      required Exam exam,
+      required List<Submission> submissions,
+      required this.added})
+      : super(
+            exam: exam,
+            selectedCorrection: selectedCorrection,
+            submissions: submissions,
+            corrections: corrections);
+
+  @override
+  List<Object?> get props => super.props..addAll([added]);
 }
 
-/// Removed a correction from active working.
-class RemovedCorrectionState extends LoadedRemarksState {
+/// Sub-state to signal the removal of a correction from the ongoing correction process.
+class RemarksCorrectionRemoved extends RemarksCorrectionInProgress {
   final Correction removed;
 
-  RemovedCorrectionState.remove(
-      {required RemarkState initial, required this.removed})
-      : super._(
-            exam: initial.exam,
-            selectedCorrection: initial.corrections.length,
-            submissions: initial.submissions,
-            corrections: <Correction>[...initial.corrections]..remove(removed));
+  const RemarksCorrectionRemoved(
+      {required this.removed,
+      required int selectedCorrection,
+      required List<Correction> corrections,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(
+            selectedCorrection: selectedCorrection,
+            corrections: corrections,
+            exam: exam,
+            submissions: submissions);
+
+  factory RemarksCorrectionRemoved.remove(
+      {required RemarksCorrectionInProgress initial,
+      required Correction removed}) {
+    final corrections = <Correction>[
+      ...initial.corrections
+    ]..removeWhere((element) => element.submission.id == removed.submission.id);
+
+    return RemarksCorrectionRemoved(
+        removed: removed,
+        selectedCorrection:
+            min(initial.selectedCorrection, corrections.length - 1),
+        corrections: corrections,
+        exam: initial.exam,
+        submissions: initial.submissions);
+  }
+
+  @override
+  List<Object?> get props => super.props..addAll([removed]);
 }
 
-/// Switching the active correction.
-class SwitchedCorrectionState extends LoadedRemarksState {
-  SwitchedCorrectionState.change(
-      {required RemarkState initial, required int selectedCorrection})
-      : super._(
+/// Sub-state to signal the change of the currently active submission being corrected.
+class RemarksCorrectionSwapped extends RemarksCorrectionInProgress {
+  RemarksCorrectionSwapped.swap(
+      {required RemarksCorrectionInProgress initial,
+      required int selectedCorrection})
+      : super(
             exam: initial.exam,
             selectedCorrection: (selectedCorrection >= 0 &&
                     selectedCorrection < initial.corrections.length)
@@ -150,13 +291,13 @@ class SwitchedCorrectionState extends LoadedRemarksState {
             corrections: initial.corrections);
 }
 
-/// Navigated within [navigated] to e.g. a new answer.
-class NavigatedRemarkState extends LoadedRemarksState {
+/// Sub-state to signal the navigation to a different answer within an ongoing correction,
+class RemarksCorrectionNavigated extends RemarksCorrectionInProgress {
   final Correction navigated;
 
-  NavigatedRemarkState.navigated(
-      {required RemarkState initial, required this.navigated})
-      : super._(
+  RemarksCorrectionNavigated.navigate(
+      {required RemarksCorrectionInProgress initial, required this.navigated})
+      : super(
             exam: initial.exam,
             selectedCorrection: initial.selectedCorrection,
             submissions: initial.submissions,
@@ -166,17 +307,96 @@ class NavigatedRemarkState extends LoadedRemarksState {
             ]);
 }
 
-/// Updated the grading table
-class GradingTabledUpdatedState extends RemarkState {
-  GradingTabledUpdatedState.updated(
-      {required RemarkState initial, required GradingTable gradingTable})
-      : super._(
-            exam: initial.exam.copyWith(gradingTable: gradingTable),
-            selectedCorrection: initial.selectedCorrection,
-            submissions: initial.submissions,
-            corrections: initial.corrections);
+/// A sub-state of an ongoing exam correction.
+/// Here, the different changes to tasks for a single submission can be tracked and accordingly reacted to.
+abstract class RemarksCorrectionRemarkState
+    extends RemarksCorrectionInProgress {
+  final Answer answer;
+  final Correction correction;
+
+  const RemarksCorrectionRemarkState(
+      {required this.answer,
+      required this.correction,
+      required int selectedCorrection,
+      required List<Correction> corrections,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(
+            selectedCorrection: selectedCorrection,
+            corrections: corrections,
+            exam: exam,
+            submissions: submissions);
 
   @override
-  List<Object> get props =>
-      [exam, submissions, selectedCorrection, corrections];
+  List<Object?> get props => super.props..addAll([answer, correction]);
+}
+
+/// Within an ongoing correction the remark for a task is being updated.
+/// By inheriting from [RemarksCorrectionInProgress] the data needed for displaying corrections is kept.
+class RemarksCorrectionRemarkLoading extends RemarksCorrectionRemarkState
+    implements BlocLoading {
+  @override
+  final String description;
+
+  const RemarksCorrectionRemarkLoading.mark(
+      {this.description = "",
+      required Answer answer,
+      required Correction correction,
+      required int selectedCorrection,
+      required List<Correction> corrections,
+      required Exam exam,
+      required List<Submission> submissions})
+      : super(
+            answer: answer,
+            correction: correction,
+            selectedCorrection: selectedCorrection,
+            corrections: corrections,
+            exam: exam,
+            submissions: submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description]);
+}
+
+class RemarksCorrectionRemarkSuccess extends RemarksCorrectionRemarkState
+    implements BlocSuccess {
+  @override
+  final String description;
+
+  RemarksCorrectionRemarkSuccess(
+      {this.description = "", required RemarksCorrectionRemarkState initial})
+      : super(
+            answer: initial.answer,
+            correction: initial.correction,
+            selectedCorrection: initial.selectedCorrection,
+            corrections: initial.corrections,
+            exam: initial.exam,
+            submissions: initial.submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description]);
+}
+
+class RemarksCorrectionRemarkFailure extends RemarksCorrectionRemarkState
+    implements BlocFailure {
+  @override
+  final String description;
+
+  @override
+  final Exception? exception;
+
+  RemarksCorrectionRemarkFailure(
+      {this.description = "",
+      this.exception,
+      required RemarksCorrectionRemarkState initial})
+      : super(
+            answer: initial.answer,
+            correction: initial.correction,
+            selectedCorrection: initial.selectedCorrection,
+            corrections: initial.corrections,
+            exam: initial.exam,
+            submissions: initial.submissions);
+
+  @override
+  List<Object?> get props => super.props..addAll([description, exception]);
 }

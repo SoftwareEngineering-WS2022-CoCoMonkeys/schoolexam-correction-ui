@@ -19,8 +19,13 @@ class AnswerRemarkWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) =>
-            BlocBuilder<RemarkCubit, RemarkState>(
+            BlocBuilder<RemarkCubit, RemarksState>(
           builder: (context, state) {
+            if (state is! RemarksCorrectionInProgress) {
+              // No content
+              return Container();
+            }
+
             final correction = state.getCurrent(initial);
             final answer = correction.submission.answers.firstWhere(
                 (element) => element.task.id == task.id,

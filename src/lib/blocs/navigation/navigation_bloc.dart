@@ -9,6 +9,10 @@ import 'navigation_state.dart';
 class NavigationCubit extends Cubit<AppNavigationState> {
   late final StreamSubscription _authenticationSubscription;
 
+  /// Notify business a-priori about changing navigation.
+  /// The UI is informed afterwards.
+  late final Stream<AppNavigationState> _prioriStream;
+
   NavigationCubit({required AuthenticationBloc authenticationBloc})
       : super(const AppNavigationState.initial()) {
     _authenticationSubscription =
