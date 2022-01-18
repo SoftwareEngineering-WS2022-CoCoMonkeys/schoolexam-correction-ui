@@ -65,9 +65,61 @@
   "authenticationError": "The authentication failed.",
   "updateExamError": "The update failed.",
   "offlineError": "You are offline. Please establish a working internet connection.",
+
   "loginAppError": "An internal error occurred during the registration process.",
   "loginInternalError": "An internal error occurred during the registration process. Please try the login again later.",
   "loginBadRequestError": "You have entered an invalid user name or password.",
+
+  "remarksGradingSuccess": "The grading table was successfully updated.",
+  "remarksGradingLoading": "Waiting for the update of the grading table.",
+  "remarksGradingAppError": "An internal error occurred while updating the grading table.",
+  "remarksGradingInternalError": "An internal error occurred while updating the grade table. Please try again later.",
+  "remarksGradingBadRequestError": "The grading table you specified is invalid.",
+
+   "remarksRemarkAppError": "The update of {name} to {points} was not possible, due to an internal error.",
+    "@remarksRemarkAppError": {
+      "placeholders": {
+        "name": {
+          "type": "String",
+          "example": "Aufgabe 2"
+        },
+      "points": {
+            "type": "double",
+            "format": "decimalPattern",
+            "example": "0.5"
+        }
+      }
+    },
+
+    "remarksRemarkInternalError": "The update of {name} to {points} was not possible, due to an internal error. Please retry to a later time.",
+    "@remarksRemarkInternalError": {
+      "placeholders": {
+        "name": {
+          "type": "String",
+          "example": "Aufgabe 2"
+        },
+        "points": {
+            "type": "double",
+            "format": "decimalPattern",
+            "example": "0.5"
+        }
+      }
+    },
+
+    "remarksRemarkBadRequestError": "The update of {name} to {points} is invalid.",
+    "@remarksRemarkBadRequestError": {
+      "placeholders": {
+        "name": {
+          "type": "String",
+          "example": "Aufgabe 2"
+        },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+      }
+    },
 
   "examDetailsCreationLoading": "Waiting for the creation of the exam {name}.",
   "@examDetailsCreationLoading": {

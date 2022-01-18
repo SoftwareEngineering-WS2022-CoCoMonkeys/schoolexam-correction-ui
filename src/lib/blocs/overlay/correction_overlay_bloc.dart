@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/exams/models/submission.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
@@ -27,13 +27,13 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   //
 
   final CorrectionOverlayRepository _correctionOverlayRepository;
-  final RemarkCubit _remarkCubit;
+  final RemarksCubit _remarkCubit;
   late final StreamSubscription _remarkSubscription;
   late final StreamSubscription _correctionSubscription;
 
   CorrectionOverlayCubit(
       {required CorrectionOverlayRepository correctionOverlayRepository,
-      required RemarkCubit remarkCubit})
+      required RemarksCubit remarkCubit})
       : _correctionOverlayRepository = correctionOverlayRepository,
         _remarkCubit = remarkCubit,
         _pageHistory = <String, Queue<CorrectionOverlayPage>>{},

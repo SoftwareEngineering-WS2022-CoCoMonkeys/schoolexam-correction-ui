@@ -57,7 +57,6 @@ extension ExamDetailsNetworkExtensions on NetworkException {
 }
 
 extension ExamDetailDTOExtensions on NewExamDTO {
-  // TODO : Interpolate strings in such way, that display name of exam is included.
   String getCreationDescription(LanguageCubit language) {
     return language.translate(
         callback: (dictionary) => dictionary.examDetailsCreationSuccess(title));
@@ -68,7 +67,6 @@ extension ExamDetailDTOExtensions on NewExamDTO {
         callback: (dictionary) => dictionary.examDetailsCreationLoading(title));
   }
 
-  // TODO : Interpolate strings in such way, that display name of exam is included.
   String getUpdateDescription(LanguageCubit language) {
     return language.translate(
         callback: (dictionary) => dictionary.examDetailsUpdateSuccess(title));

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_grading_table_action_bar.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_grading_table_header.dart';
 
@@ -15,7 +15,7 @@ class CorrectionGradingTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RemarkCubit, RemarksState>(builder: (context, state) {
+    return BlocBuilder<RemarksCubit, RemarksState>(builder: (context, state) {
       final maxPoints =
           state.exam.tasks.fold<double>(0.0, (p, c) => p + c.maxPoints);
 
@@ -54,7 +54,7 @@ class CorrectionGradingTable extends StatelessWidget {
                     child: IconButton(
                         padding: const EdgeInsets.all(0),
                         icon: const Icon(Icons.delete, size: 25),
-                        onPressed: () => BlocProvider.of<RemarkCubit>(context)
+                        onPressed: () => BlocProvider.of<RemarksCubit>(context)
                             .deleteGradingTableBound(index))),
                 Center(
                     child: prevPoints.isNaN
@@ -69,7 +69,7 @@ class CorrectionGradingTable extends StatelessWidget {
                             text: (lb.points / maxPoints * 100)
                                 .toStringAsFixed(1)),
                         onSubmitted: (pointsInput) {
-                          BlocProvider.of<RemarkCubit>(context)
+                          BlocProvider.of<RemarksCubit>(context)
                               .changeGradingTableBoundPoints(
                                   index: index,
                                   points: double.parse(pointsInput) /
@@ -103,7 +103,7 @@ class CorrectionGradingTable extends StatelessWidget {
                         controller: TextEditingController(text: lb.grade),
                         style: const TextStyle(fontSize: 36),
                         onChanged: (gradeInput) {
-                          BlocProvider.of<RemarkCubit>(context)
+                          BlocProvider.of<RemarksCubit>(context)
                               .changeGradingTableBoundGrade(
                                   index: index, grade: gradeInput);
                         },

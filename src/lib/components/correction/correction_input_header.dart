@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 import 'input/input_header.dart';
 
@@ -32,7 +32,8 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
             ),
           ],
         ),
-        child: BlocBuilder<RemarkCubit, RemarksState>(builder: (context, state) {
+        child:
+            BlocBuilder<RemarksCubit, RemarksState>(builder: (context, state) {
           if (state is! RemarksCorrectionInProgress) {
             return Container();
           }
@@ -56,7 +57,7 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
                       final task = current.submission.exam.tasks.firstWhere(
                           (element) => element.id == newValue,
                           orElse: () => Task.empty);
-                      BlocProvider.of<RemarkCubit>(context).moveTo(task: task);
+                      BlocProvider.of<RemarksCubit>(context).moveTo(task: task);
                     }),
               ),
               const Expanded(

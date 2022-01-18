@@ -70,6 +70,58 @@
   "loginInternalError": "Während der Anmeldung ist es zu einem internen Fehler gekommen. Bitte versuchen Sie die Anmeldung später erneut.",
   "loginBadRequestError": "Sie haben einen ungültigen Benutzernamen oder ein ungültiges Passwort eingegeben.",
 
+  "remarksGradingSuccess": "Der Notenschlüssel wurde erfolgreich aktualisiert.",
+  "remarksGradingLoading": "Warte auf die Aktualisierung des Notenschlüssels.",
+  "remarksGradingAppError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen.",
+  "remarksGradingInternalError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen. Bitte versuchen Sie es später erneut.",
+  "remarksGradingBadRequestError": "Der von Ihnen spezifizierte Notenschlüssel ist ungültig.",
+
+  "remarksRemarkAppError": "Die Aktualisierung von {name} auf {points} ist durch einen internen Fehler nicht erfolgt.",
+  "@remarksRemarkAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+  "remarksRemarkInternalError": "Die Aktualisierung von {name} auf {points} ist durch einen internen Fehler nicht erfolgt. Bitte versuchen Sie es später erneut.",
+  "@remarksRemarkInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+  "remarksRemarkBadRequestError": "Die Aktualisierung von {name} auf {points} ist ungültig.",
+  "@remarksRemarkBadRequestError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+
   "examDetailsCreationLoading": "Warte auf die Erstellung der Klausur {name}.",
   "@examDetailsCreationLoading": {
     "placeholders": {

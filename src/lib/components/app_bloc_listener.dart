@@ -1,15 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:formz/formz.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_loading.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_success.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:schoolexam_correction_ui/components/loading_widget.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 const String dialogPath = "/internal/dialogs";
 const String loadingDialogPath = "$dialogPath/loading";
@@ -26,15 +24,17 @@ class AppBlocListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(listeners: [
-        BlocListener<RemarkCubit, RemarksState>(listener: (context, state) {
+        BlocListener<RemarksCubit, RemarksState>(listener: (context, state) {
           if (state is BlocFailure) {
             _showErrorDialog(context: context, failure: state as BlocFailure);
+          } else if (state is BlocSuccess) {
+            _showSuccessDialog(context: context, success: state as BlocSuccess);
           } else if (state is BlocLoading) {
             _showLoadingDialog(
                 context: context,
                 loading: state as BlocLoading,
                 builder: (BuildContext context, Widget child) =>
-                    BlocListener<RemarkCubit, RemarksState>(
+                    BlocListener<RemarksCubit, RemarksState>(
                       listener: (context, state) {
                         if (state is! BlocLoading) {
                           // If this was not already popped, pop it now.
@@ -93,6 +93,7 @@ _popInternalDialogs(BuildContext context) {
 
 typedef ChildWidgetBuilder = Widget Function(
     BuildContext context, Widget child);
+
 _showLoadingDialog(
     {required BuildContext context,
     required BlocLoading loading,
@@ -149,6 +150,7 @@ class _LoadingDialog extends StatelessWidget {
   final WidgetBuilder builder;
 
   const _LoadingDialog({Key? key, required this.builder}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => CupertinoAlertDialog(
           content: Column(

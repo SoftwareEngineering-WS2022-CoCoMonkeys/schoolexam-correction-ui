@@ -5,27 +5,32 @@ import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam/utils/network_exceptions.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/grading_table_helper.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark_pdf_helper.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/grading_table_helper.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks_error_extensions.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks_pdf_helper.dart';
 import 'package:schoolexam_correction_ui/extensions/grading_scheme_helper.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 /// This cubit is responsible for managing the currently active corrections.
 /// It therefore has to provide knowledge about the underlying submissions and corresponding students.
-class RemarkCubit extends Cubit<RemarksState> {
+class RemarksCubit extends Cubit<RemarksState> {
   late final StreamSubscription _navigationSubscription;
   final ExamsRepository _examsRepository;
+  final LanguageCubit _languageCubit;
 
   // Helper
   final RemarkPdfHelper _helper;
   final GradingTableHelper _tableHelper;
 
-  RemarkCubit(
+  RemarksCubit(
       {required ExamsRepository examsRepository,
-      required NavigationCubit navigationCubit})
+      required NavigationCubit navigationCubit,
+      required LanguageCubit languageCubit})
       : _examsRepository = examsRepository,
+        _languageCubit = languageCubit,
         _helper = const RemarkPdfHelper(),
         _tableHelper = const GradingTableHelper(),
         super(RemarksInitial.empty()) {
@@ -59,6 +64,8 @@ class RemarkCubit extends Cubit<RemarksState> {
 
     /// Start loading necessary data
     else {
+      log("Starting to lad remark data due to observed navigational switch.");
+
       emit(RemarksLoadInProgress.loadingExam());
       final exam = await _examsRepository.getExam(state.examId);
       await correct(exam: exam);
@@ -86,7 +93,7 @@ class RemarkCubit extends Cubit<RemarksState> {
 
     if (state is! RemarksCorrectionInProgress &&
         state is! RemarksLoadSuccess &&
-        state is! RemarksGradingInProgress) {
+        state is! RemarksGradingState) {
       log("Remark cubit is invalid state to open submission. The necessary data has to be loaded using correct beforehand.");
       return;
     }
@@ -201,10 +208,6 @@ class RemarkCubit extends Cubit<RemarksState> {
                 .firstWhere((element) => element.task.id == task.id,
                     orElse: () => Answer.empty));
 
-    log("SELECTED 1 : ${correctionState.selectedCorrection}");
-    log("SELECTED 2 : ${RemarksCorrectionNavigated.navigate(
-        initial: correctionState, navigated: correction).selectedCorrection}");
-
     emit(RemarksCorrectionNavigated.navigate(
         initial: correctionState, navigated: correction));
   }
@@ -236,36 +239,39 @@ class RemarkCubit extends Cubit<RemarksState> {
       return;
     }
 
+    final markedAnswer = answer.copyWith(
+        achievedPoints: achievedPoints, status: CorrectableStatus.corrected);
+
     final marked = correction.copyWith(
         submission: correction.submission.copyWith(
             answers: List<Answer>.from(correction.submission.answers)
-                .map((e) => (e.task.id == answer.task.id)
-                    ? answer.copyWith(
-                        achievedPoints: achievedPoints,
-                        status: CorrectableStatus.corrected)
-                    : e)
+                .map((e) => (e.task.id == answer.task.id) ? markedAnswer : e)
                 .toList()));
 
     final loadingRemark = RemarksCorrectionRemarkLoading.mark(
-        answer: answer,
+        answer: markedAnswer,
         correction: marked,
         selectedCorrection: correctionState.selectedCorrection,
         corrections: correctionState.corrections,
         submissions: correctionState.submissions,
         exam: correctionState.exam);
+
     emit(loadingRemark);
 
     try {
       await _examsRepository.setPoints(
           submissionId: submission.id,
-          taskId: answer.task.id,
+          taskId: markedAnswer.task.id,
           achievedPoints: achievedPoints);
+      log("Remark update was successful for ${markedAnswer.task.title} in ${submission.id}");
+
+      emit(RemarksCorrectionRemarkSuccess(initial: loadingRemark));
     } on NetworkException catch (e) {
       // TODO : Look into -> Localize description etc. based on exception
-      emit(RemarksCorrectionRemarkFailure(initial: loadingRemark));
+      emit(RemarksCorrectionRemarkFailure(
+          initial: loadingRemark,
+          description: e.getRemarkDescription(_languageCubit, markedAnswer)));
     }
-
-    emit(RemarksCorrectionRemarkSuccess(initial: loadingRemark));
   }
 
   /// Merges the supplied [CorrectionOverlayDocument] with the pdf stored for the associated submission into a separate pdf file.
@@ -279,6 +285,7 @@ class RemarkCubit extends Cubit<RemarksState> {
     // TODO :Start by synchronizing the local submissions with the server
     await _examsRepository.publishExam(
         examId: exam.id, publishDate: publishDate);
+    log("Publishing was successful for ${exam.title}");
   }
 
   /// Add a new lower bound to the existing grading table
@@ -308,6 +315,7 @@ class RemarkCubit extends Cubit<RemarksState> {
         table: state.exam.gradingTable,
         index: index,
         points: points);
+
     emit(RemarksGradingInProgress.update(
         table: update, exam: state.exam, submissions: state.submissions));
   }
@@ -370,14 +378,23 @@ class RemarkCubit extends Cubit<RemarksState> {
     }
 
     final gradingState = state as RemarksGradingState;
-    emit(RemarksGradingLoading(initial: gradingState));
+    emit(RemarksGradingLoading(
+        initial: gradingState,
+        description:
+            gradingState.table.getUpdateLoadingDescription(_languageCubit)));
     try {
       await _examsRepository.setGradingTable(exam: state.exam);
+      log("Grading table update was successful for ${state.exam.title}");
+
+      emit(RemarksGradingSuccess(
+          initial: gradingState,
+          description:
+              gradingState.table.getUpdateDescription(_languageCubit)));
     } on NetworkException catch (e) {
-      // TODO : localized error
-      emit(RemarksGradingFailure(initial: gradingState));
+      emit(RemarksGradingFailure(
+          initial: gradingState,
+          description: e.getGradingDescription(_languageCubit)));
     }
-    emit(RemarksGradingSuccess(initial: gradingState));
   }
 
   @override

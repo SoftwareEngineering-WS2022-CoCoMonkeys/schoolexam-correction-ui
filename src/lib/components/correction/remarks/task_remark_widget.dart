@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:schoolexam/schoolexam.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 class AnswerRemarkWidget extends StatelessWidget {
   final Correction initial;
@@ -19,7 +19,7 @@ class AnswerRemarkWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) =>
-            BlocBuilder<RemarkCubit, RemarksState>(
+            BlocBuilder<RemarksCubit, RemarksState>(
           builder: (context, state) {
             if (state is! RemarksCorrectionInProgress) {
               // No content
@@ -118,7 +118,7 @@ class _TaskRemarkSelectionWidgetState
         decoration: InputDecoration(
           labelText: AppLocalizations.of(context)!.taskRemarkPoints,
         ),
-        onSubmitted: (text) => BlocProvider.of<RemarkCubit>(context).mark(
+        onSubmitted: (text) => BlocProvider.of<RemarksCubit>(context).mark(
             submission: widget.submission,
             task: widget.answer.task,
             achievedPoints: double.parse(text)),

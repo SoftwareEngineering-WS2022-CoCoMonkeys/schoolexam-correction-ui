@@ -6,7 +6,6 @@ import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_loading.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_success.dart';
-import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 
 import 'exam_details_form.dart';
 import 'exam_details_form_input.dart';
@@ -319,7 +318,8 @@ class ExamDetailsUpdateFailure extends ExamDetailsUpdateState
             validCourses: initial.validCourses);
 
   @override
-  List<Object?> get props => super.props..addAll([description, exception, Random()]);
+  List<Object?> get props =>
+      super.props..addAll([description, exception, Random()]);
 }
 
 /// The creation process succeeded.
@@ -360,6 +360,7 @@ class ExamDetailsUpdateSuccess extends ExamDetailsUpdateState
             examCourse: initial.examCourse,
             examDate: initial.examDate,
             validCourses: initial.validCourses);
+
   @override
   List<Object?> get props => super.props..addAll([description]);
 }

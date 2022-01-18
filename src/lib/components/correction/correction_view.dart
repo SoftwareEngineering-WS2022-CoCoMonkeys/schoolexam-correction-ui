@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 import 'correction_tab_view.dart';
 
@@ -13,7 +13,7 @@ class CorrectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<RemarkCubit, RemarksState>(builder: (context, state) {
+      BlocBuilder<RemarksCubit, RemarksState>(builder: (context, state) {
         if (state is! RemarksCorrectionInProgress) {
           return Container();
         }
@@ -83,7 +83,7 @@ class _CorrectionViewTabContainerState
       );
 
   void _handleTabSelection() {
-    BlocProvider.of<RemarkCubit>(context).changeTo(
+    BlocProvider.of<RemarksCubit>(context).changeTo(
         submission: widget.corrections[_controller!.index].submission);
   }
 }
@@ -108,7 +108,7 @@ class _CorrectionTab extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () {
-                      BlocProvider.of<RemarkCubit>(context)
+                      BlocProvider.of<RemarksCubit>(context)
                           .stop(correction.submission);
                     },
                     icon: const Icon(

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 
 typedef TranslationCallback = String Function(AppLocalizations dictionary);
 

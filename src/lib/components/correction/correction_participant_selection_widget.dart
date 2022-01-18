@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 class CorrectionParticipantSelectionWidget extends StatelessWidget {
   const CorrectionParticipantSelectionWidget({Key? key}) : super(key: key);
@@ -17,7 +17,7 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarksState>(
+  Widget build(BuildContext context) => BlocBuilder<RemarksCubit, RemarksState>(
       builder: (context, state) => ListView.separated(
             padding: const EdgeInsets.all(8),
             itemCount: state.submissions.length,
@@ -52,7 +52,7 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
                                 child: Text(AppLocalizations.of(context)!.yes),
                                 isDefaultAction: true,
                                 onPressed: () {
-                                  BlocProvider.of<RemarkCubit>(context)
+                                  BlocProvider.of<RemarksCubit>(context)
                                       .open(state.submissions[index]);
                                   Navigator.pop(context);
                                 },

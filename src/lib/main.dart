@@ -17,7 +17,7 @@ import 'package:schoolexam_correction_ui/repositories/exams/hybrid_exams_reposit
 
 import 'blocs/exam_details/exam_details_bloc.dart';
 import 'blocs/overlay/correction_overlay.dart';
-import 'blocs/remark/remark.dart';
+import 'blocs/remarks/remarks.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,8 +68,9 @@ void main() {
                   examsDetailBloc: BlocProvider.of<ExamDetailsCubit>(context))),
           BlocProvider(
               lazy: false,
-              create: (context) => RemarkCubit(
+              create: (context) => RemarksCubit(
                   navigationCubit: BlocProvider.of<NavigationCubit>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context),
                   examsRepository:
                       RepositoryProvider.of<ExamsRepository>(context))),
           BlocProvider(
@@ -78,7 +79,7 @@ void main() {
                   correctionOverlayRepository:
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
-                  remarkCubit: BlocProvider.of<RemarkCubit>(context))),
+                  remarkCubit: BlocProvider.of<RemarksCubit>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => SynchronizationCubit(
@@ -89,7 +90,7 @@ void main() {
                             context),
                     correctionOverlayCubit:
                         BlocProvider.of<CorrectionOverlayCubit>(context),
-                    remarkCubit: BlocProvider.of<RemarkCubit>(context),
+                    remarkCubit: BlocProvider.of<RemarksCubit>(context),
                   ))
         ],
         child: const SchoolExamCorrectionUI(),
