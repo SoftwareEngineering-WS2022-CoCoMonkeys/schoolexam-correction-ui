@@ -363,13 +363,19 @@ class RemarksCorrectionRemarkSuccess extends RemarksCorrectionRemarkState
   @override
   final String description;
 
+  /// The success of the remark update also indicates the allowance to update the [corrections] within this state.
   RemarksCorrectionRemarkSuccess(
       {this.description = "", required RemarksCorrectionRemarkState initial})
       : super(
             answer: initial.answer,
             correction: initial.correction,
             selectedCorrection: initial.selectedCorrection,
-            corrections: initial.corrections,
+            corrections: <Correction>[
+              ...initial.corrections.map((e) =>
+                  (e.submission.id == initial.correction.submission.id)
+                      ? initial.correction
+                      : e)
+            ],
             exam: initial.exam,
             submissions: initial.submissions);
 

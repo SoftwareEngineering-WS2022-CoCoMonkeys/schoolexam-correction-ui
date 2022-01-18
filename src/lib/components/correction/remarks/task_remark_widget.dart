@@ -22,7 +22,7 @@ class AnswerRemarkWidget extends StatelessWidget {
             BlocBuilder<RemarksCubit, RemarksState>(
           builder: (context, state) {
             if (state is! RemarksCorrectionInProgress) {
-              // No content
+              // No content - In general an exception
               return Container();
             }
 
