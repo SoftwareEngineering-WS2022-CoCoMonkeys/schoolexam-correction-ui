@@ -14,13 +14,11 @@ class NewExamDTO extends Equatable {
       required this.dateOfExam});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [title, topic, course, dateOfExam];
 
   Map<String, dynamic> toJson() => {
         "title": title,
         "topic": topic,
-        "dateOfExam": dateOfExam.toString(),
-        "description": "",
+        "date": dateOfExam.toUtc().toString(),
       };
 }

@@ -32,25 +32,28 @@ class OnlineExamsRepository extends ExamsRepository {
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
   }
 
-  Future<void> setParticipants(
-      {required String examId, required List<String> participantsId}) async {
+  Future<void> setCourses(
+      {required String examId, required List<String> courseIds}) async {
     await provider.query(
         path: "/exam/$examId/setparticipants",
         method: HTTPMethod.POST,
         body: {
-          "participants": participantsId.map((e) => {"id": e}).toList()
+          "participants":
+              courseIds.map((e) => {"id": e, "type": "Course"}).toList()
         },
         key: await authenticationRepository.getKey());
   }
 
   @override
   Future<void> uploadExam({required NewExamDTO exam}) async {
-    await provider.query(
+    final res = await provider.query(
         path: "/exam/create",
         method: HTTPMethod.POST,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
-    // TODO : We need ID of created exam to set participants
+
+    final id = res["id"];
+    await setCourses(examId: id, courseIds: [exam.course.id]);
   }
 
   @override
@@ -61,7 +64,7 @@ class OnlineExamsRepository extends ExamsRepository {
         method: HTTPMethod.PUT,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
-    await setParticipants(examId: examId, participantsId: [exam.course.id]);
+    await setCourses(examId: examId, courseIds: [exam.course.id]);
   }
 
   @override
