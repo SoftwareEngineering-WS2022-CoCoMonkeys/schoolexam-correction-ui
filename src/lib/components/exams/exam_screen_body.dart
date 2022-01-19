@@ -23,7 +23,7 @@ class _ExamScreenBodyState extends State<ExamScreenBody> {
   @override
   Widget build(BuildContext context) => BlocConsumer<ExamsCubit, ExamsState>(
         listener: (context, state) {
-          if (state is LoadedExamsState) {
+          if (state is ExamsLoadSuccess) {
             _controller.refreshCompleted();
           }
         },
@@ -32,7 +32,7 @@ class _ExamScreenBodyState extends State<ExamScreenBody> {
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: SmartRefresher(
               onRefresh: () {
-                if (state is! LoadingExamsState) {
+                if (state is! ExamsLoadInProgress) {
                   context.read<ExamsCubit>().loadExams();
                 }
               },

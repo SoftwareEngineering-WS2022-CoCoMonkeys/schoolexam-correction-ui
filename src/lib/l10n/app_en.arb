@@ -162,6 +162,44 @@
   },
   "examDetailsCreationBadRequestError": "The data you entered is invalid. Please check the data and restart the app if necessary.",
 
+  "examPublishSuccess": "{name} was successfully published.",
+  "@examPublishSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishLoading": "{name} is being published.",
+  "@examPublishLoading": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishAppError": "During the publish of {name}, an internal error occurred.",
+  "@examPublishAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishInternalError": "During the publish of {name}, an internal error occurred. Please try it again later.",
+  "@examPublishInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishBadRequestError": "The data you entered is invalid. Please check the data and restart the app if necessary.",
+
   "examDetailsUpdateLoading": "Waiting for the update of {name}.",
   "@examDetailsUpdateLoading": {
     "placeholders": {

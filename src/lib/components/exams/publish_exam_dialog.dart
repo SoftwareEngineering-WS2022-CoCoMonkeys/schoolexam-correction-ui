@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam/exams/exams.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/components/constants.dart';
 import 'package:schoolexam_correction_ui/components/was_animated_scope.dart';
@@ -50,7 +51,7 @@ class _PublishExamDialogState extends State<PublishExamDialog> {
           trailing: TextButton(
             child: Text(AppLocalizations.of(context)!.examPublish),
             onPressed: () {
-              BlocProvider.of<RemarksCubit>(context)
+              BlocProvider.of<ExamsCubit>(context)
                   .publish(exam: widget.exam, publishDate: publishDate);
               Navigator.pop(context);
             },

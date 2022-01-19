@@ -279,15 +279,6 @@ class RemarksCubit extends Cubit<RemarksState> {
           {required CorrectionOverlayDocument document}) async =>
       await _helper.merge(document: document);
 
-  /// Using publish the user finalizes the correction of the [exam].
-  /// When no [publishDate] is supplied, the publishing is instantaneously.
-  Future<void> publish({required Exam exam, DateTime? publishDate}) async {
-    // TODO :Start by synchronizing the local submissions with the server
-    await _examsRepository.publishExam(
-        examId: exam.id, publishDate: publishDate);
-    log("Publishing was successful for ${exam.title}");
-  }
-
   /// Add a new lower bound to the existing grading table
   void addGradingTableBound() {
     if (state is! RemarksLoadSuccess && state is! RemarksGradingState) {

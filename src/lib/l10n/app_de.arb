@@ -124,6 +124,44 @@
     }
   },
 
+  "examPublishSuccess": "{name} wurde erfolgreich veröffentlicht.",
+  "@examPublishSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishLoading": "{name} wird veröffentlicht.",
+  "@examPublishLoading": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishAppError": "Während der Veröffentlichung von {name} ist ein interner Fehler aufgetreten.",
+  "@examPublishAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishInternalError": "Während der Veröffentlichung von {name} ist ein interner Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+  "@examPublishInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
+      }
+    }
+  },
+  "examPublishBadRequestError": "Die von Ihnen eingegebenen Daten sind ungültig. Bitte überprüfen Sie die Daten und starten die App gegebenenfalls neu.",
+
 
   "examDetailsCreationLoading": "Warte auf die Erstellung der Klausur {name}.",
   "@examDetailsCreationLoading": {

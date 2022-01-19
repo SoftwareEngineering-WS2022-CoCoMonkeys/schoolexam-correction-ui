@@ -3,10 +3,14 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam/utils/network_exceptions.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exams_extensions.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 
 import 'exams_state.dart';
 
@@ -14,14 +18,18 @@ class ExamsCubit extends Cubit<ExamsState> {
   late final StreamSubscription _authenticationSubscription;
   late final StreamSubscription _examSubscription;
 
+  final LanguageCubit _languageCubit;
+
   final ExamsRepository _examsRepository;
 
   ExamsCubit(
       {required ExamsRepository examsRepository,
+      required LanguageCubit languageCubit,
       required AuthenticationBloc authenticationBloc,
       required ExamDetailsCubit examsDetailBloc})
-      : _examsRepository = examsRepository,
-        super(LoadedExamsState.initial()) {
+      : _languageCubit = languageCubit,
+        _examsRepository = examsRepository,
+        super(ExamsInitial.empty()) {
     _examSubscription =
         examsDetailBloc.stream.listen(_onExamDetailsStateChanged);
     _authenticationSubscription =
@@ -41,13 +49,31 @@ class ExamsCubit extends Cubit<ExamsState> {
         await loadExams();
         break;
       case AuthenticationStatus.unauthenticated:
-        emit(LoadedExamsState.initial());
+        emit(ExamsInitial.empty());
         break;
       case AuthenticationStatus.unknown:
         break;
     }
   }
 
+  /// Filters [exams] by using the word [search] and allowed states [states].
+  /// In the end, an [ExamsLoadSuccess] is emitted with the filtered data.
+  void _filterExams(
+      {required List<Exam> exams,
+      required String search,
+      required List<ExamStatus> states}) {
+    final filtered = exams
+        .where((element) =>
+            element.title.toLowerCase().startsWith(search) &&
+            states.contains(element.status))
+        .toList(growable: false);
+
+    emit(ExamsLoadSuccess(
+        states: states, filtered: filtered, search: search, exams: exams));
+  }
+
+  /// Searches for the desired exams.
+  /// If [refresh] is required, the online repository is forcefully queried.
   Future<void> _searchExams(
       {String? search, List<ExamStatus>? states, bool? refresh}) async {
     final fSearch = search ?? state.search;
@@ -55,20 +81,26 @@ class ExamsCubit extends Cubit<ExamsState> {
 
     late final List<Exam> exams;
     if (state.exams.isEmpty || (refresh != null && refresh)) {
-      emit(LoadingExamsState.loading(
-          old: state, search: fSearch, states: fStates));
-      exams = await _examsRepository.getExams();
+      /// Pass old data throug
+      final loadState = ExamsLoadInProgress(
+          states: fStates,
+          search: fSearch,
+          exams: state.exams,
+          filtered: state.filtered);
+      emit(loadState);
+      try {
+        exams = await _examsRepository.getExams();
+        _filterExams(exams: exams, search: fSearch, states: fStates);
+      } catch (e) {
+        emit(ExamsLoadFailure(
+            initial: loadState,
+            description:
+                'Es ist ein Fehler während dem Laden der Klausuren aufgetreten.'));
+      }
     } else {
       exams = state.exams;
+      _filterExams(exams: exams, search: fSearch, states: fStates);
     }
-
-    final filtered = exams
-        .where((element) =>
-            element.title.toLowerCase().startsWith(fSearch) &&
-            fStates.contains(element.status))
-        .toList(growable: false);
-    emit(LoadedExamsState.loaded(
-        exams: exams, filtered: filtered, search: fSearch, states: fStates));
   }
 
   /// The user changed the search word to [search].
@@ -92,6 +124,48 @@ class ExamsCubit extends Cubit<ExamsState> {
   Future<void> loadExams() async {
     log("Requested refresh of exams.");
     await _searchExams(refresh: true);
+  }
+
+  /// Using publish the user finalizes the correction of the [exam].
+  /// When no [publishDate] is supplied, the publishing is instantaneously.
+  Future<void> publish({required Exam exam, DateTime? publishDate}) async {
+    final publish = state.exams.firstWhere((element) => element.id == exam.id,
+        orElse: () => Exam.empty);
+
+    if (publish.isEmpty) {
+      log("Found no known exam for ${exam.id}.");
+      return;
+    }
+
+    if (state is ExamTransitionInProgress) {
+      log("Await completion of ongoing transition");
+      return;
+    }
+
+    // TODO :Start by synchronizing the local submissions with the server
+    final tState = ExamTransitionInProgress(
+        description: exam.getPublishLoading(_languageCubit),
+        transition: ExamTransition.publish,
+        exams: state.exams,
+        filtered: state.filtered,
+        search: state.search,
+        states: state.states,
+        exam: publish.copyWith());
+    emit(tState);
+
+    try {
+      await _examsRepository.publishExam(
+          examId: publish.id, publishDate: publishDate);
+      emit(ExamTransitionSuccess(
+          initial: tState,
+          description: exam.getPublishSuccess(_languageCubit)));
+      log("Publishing was successful for ${exam.title}");
+    } on NetworkException catch (e) {
+      emit(ExamTransitionFailure(
+          initial: tState,
+          description: e.getPublishDescription(_languageCubit, publish)));
+      log("Publishing failed for ${exam.title}");
+    }
   }
 
   @override

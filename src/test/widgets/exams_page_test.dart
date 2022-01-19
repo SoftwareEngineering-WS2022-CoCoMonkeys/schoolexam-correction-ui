@@ -27,7 +27,7 @@ void main() {
     /// Fake stream
     when(cubit.loadExams).thenAnswer((_) => Future(() {}));
     whenListen(cubit, Stream<ExamsState>.fromIterable([]),
-        initialState: LoadedExamsState.initial());
+        initialState: ExamsInitial.empty());
 
     await tester.pumpWidget(BlocProvider<ExamsCubit>(
       create: (_) => cubit,
@@ -52,7 +52,7 @@ void main() {
     final exams = [Exam.empty, Exam.empty, Exam.empty, Exam.empty, Exam.empty];
     final filtered = exams.sublist(0, 2);
 
-    final init = LoadedExamsState.loaded(
+    final init = ExamsLoadSuccess(
         exams: exams,
         filtered: filtered,
         search: "",
@@ -60,8 +60,15 @@ void main() {
 
     /// Fake stream
     when(cubit.loadExams).thenAnswer((_) => Future(() {}));
-    whenListen(cubit,
-        Stream<ExamsState>.fromIterable([LoadingExamsState.loading(old: init)]),
+    whenListen(
+        cubit,
+        Stream<ExamsState>.fromIterable([
+          ExamsLoadInProgress(
+              search: init.search,
+              states: init.states,
+              exams: init.exams,
+              filtered: init.filtered)
+        ]),
         initialState: init);
 
     await tester.pumpWidget(BlocProvider<ExamsCubit>(

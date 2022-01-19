@@ -6,6 +6,7 @@ import 'package:schoolexam_correction_ui/blocs/bloc_exception.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_loading.dart';
 import 'package:schoolexam_correction_ui/blocs/bloc_success.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
+import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
@@ -95,6 +96,14 @@ class _AppBlocListenerState extends State<AppBlocListener> {
   Widget build(BuildContext context) => (!ModalRoute.of(context)!.isCurrent)
       ? widget.builder(context)
       : MultiBlocListener(listeners: [
+          BlocListener<ExamsCubit, ExamsState>(listener: (context, state) {
+            if (state is BlocFailure) {
+              _showErrorDialog(context: context, failure: state as BlocFailure);
+            } else if (state is BlocSuccess) {
+              _showSuccessDialog(
+                  context: context, success: state as BlocSuccess);
+            }
+          }),
           BlocListener<RemarksCubit, RemarksState>(listener: (context, state) {
             if (state is BlocFailure) {
               _showErrorDialog(context: context, failure: state as BlocFailure);
