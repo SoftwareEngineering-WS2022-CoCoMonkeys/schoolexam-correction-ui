@@ -13,7 +13,7 @@ class SubmissionDTO extends Equatable {
   final bool isCompleted;
   final bool isMatchedToStudent;
 
-  SubmissionDTO(
+  const SubmissionDTO(
       {required this.id,
       required this.student,
       required this.status,
@@ -49,6 +49,16 @@ class SubmissionDTO extends Equatable {
           map: map, keys: ["isMatchedToStudent"], value: false),
     );
   }
+
+  factory SubmissionDTO.fromModel({required SubmissionOverview model}) =>
+      SubmissionDTO(
+          id: model.id,
+          student: ParticipantDTO.fromModel(model: model.student),
+          status: model.status.name,
+          achievedPoints: model.achievedPoints,
+          updatedAt: model.updatedAt.toUtc().toIso8601String(),
+          isCompleted: model.isCompleted,
+          isMatchedToStudent: model.isMatchedToStudent);
 
   SubmissionOverview toModel({required Exam exam}) => SubmissionOverview(
       id: id,

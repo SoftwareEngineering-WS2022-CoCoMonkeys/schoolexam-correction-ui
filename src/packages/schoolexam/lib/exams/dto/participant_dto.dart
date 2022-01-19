@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/exams/models/course.dart';
 import 'package:schoolexam/exams/models/participant.dart';
 import 'package:schoolexam/exams/models/student.dart';
@@ -38,11 +39,10 @@ class StudentDTO extends Equatable {
   final String id;
   final String displayName;
 
-  StudentDTO.fromJson(Map<String, dynamic> json)
-      : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
-        displayName = "${ApiHelper.getValue(map: json, keys: [
-              "lastName"
-            ], value: "")}, ${ApiHelper.getValue(map: json, keys: ["firstName"], value: "")}";
+  const StudentDTO({
+    required this.id,
+    required this.displayName,
+  });
 
   @override
   String toString() {
@@ -51,6 +51,15 @@ class StudentDTO extends Equatable {
 
   @override
   List<Object?> get props => [id, displayName];
+
+  factory StudentDTO.fromJson(Map<String, dynamic> json) => StudentDTO(
+      id: ApiHelper.getValue(map: json, keys: ["id"], value: ""),
+      displayName: "${ApiHelper.getValue(map: json, keys: [
+            "lastName"
+          ], value: "")}, ${ApiHelper.getValue(map: json, keys: ["firstName"], value: "")}");
+
+  factory StudentDTO.fromModel({required Student model}) =>
+      StudentDTO(id: model.id, displayName: model.displayName);
 
   Student toModel() => Student(id: id, displayName: displayName);
 }
@@ -100,16 +109,16 @@ class ParticipantDTO extends Equatable {
   @override
   List<Object?> get props => [id, type, displayName, children];
 
-  factory ParticipantDTO.fromModel({required Participant participant}) =>
+  factory ParticipantDTO.fromModel({required Participant model}) =>
       ParticipantDTO(
-          displayName: participant.displayName,
-          id: participant.id,
-          children: (participant is Course)
-              ? participant.children
-                  .map((e) => ParticipantDTO.fromModel(participant: e))
+          displayName: model.displayName,
+          id: model.id,
+          children: (model is Course)
+              ? model.children
+                  .map((e) => ParticipantDTO.fromModel(model: e))
                   .toList()
               : <ParticipantDTO>[],
-          type: participant.runtimeType.toString().toLowerCase());
+          type: model.runtimeType.toString().toLowerCase());
 
   Participant toModel() {
     if (type.toLowerCase() == "course") {

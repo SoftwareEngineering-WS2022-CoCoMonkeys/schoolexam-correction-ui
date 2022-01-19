@@ -107,7 +107,7 @@ class ExamDTO extends Equatable {
       dueDate: (model.dueDate != null) ? model.dueDate!.toIso8601String() : "",
       gradingTable: GradingTableDTO.fromModel(model.gradingTable),
       participants: model.participants
-          .map((e) => ParticipantDTO.fromModel(participant: e))
+          .map((e) => ParticipantDTO.fromModel(model: e))
           .toList(),
       tasks: model.tasks.map((e) => TaskDTO.fromModel(task: e)).toList());
 

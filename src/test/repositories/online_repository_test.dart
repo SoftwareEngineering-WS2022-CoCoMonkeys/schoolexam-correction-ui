@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/configuration.dart';
 import 'package:schoolexam/exams/dto/exam_dto.dart';
+import 'package:schoolexam/exams/dto/submission_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/utils/api_provider.dart';
@@ -26,10 +27,10 @@ void main() {
   io.HttpOverrides.global = null;
 
   group('getExams', () {
-    final authRepository = MockAuthenticationRepository();
-    when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
-
     test('getExams for valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
       final client = MockClient();
       final provider = ApiProvider(client: client);
 
@@ -76,6 +77,9 @@ void main() {
     });
 
     test('getExams for invalid valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
       final client = MockClient();
       final provider = ApiProvider(client: client);
 
@@ -91,14 +95,17 @@ void main() {
           .thenAnswer((_) async => http.Response(data, 500));
 
       expect(() async => await examsRepository.getExams(), throwsException);
+
+      /// Ensure key retrieval from auth repository
+      verify(authRepository.getKey()).called(1);
     });
   });
 
   group('getExam', () {
-    final authRepository = MockAuthenticationRepository();
-    when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
-
     test('getExam for valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
       final client = MockClient();
       final provider = ApiProvider(client: client);
 
@@ -146,6 +153,9 @@ void main() {
     });
 
     test('getExam for invalid valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
       final client = MockClient();
       final provider = ApiProvider(client: client);
 
@@ -162,6 +172,127 @@ void main() {
 
       expect(
           () async => await examsRepository.getExam("e001"), throwsException);
+
+      /// Ensure key retrieval from auth repository
+      verify(authRepository.getKey()).called(1);
+    });
+  });
+
+  group('getSubmissions', () {
+    test('getSubmissions for valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
+      final client = MockClient();
+      final provider = ApiProvider(client: client);
+
+      final examsRepository = OnlineExamsRepository(
+          authenticationRepository: authRepository, provider: provider);
+
+      final submission = json.encode([
+        {
+          "id": "s001",
+          "status": "inprogress",
+          "achievedPoints": 25.5,
+          "isComplete": true,
+          "isMatchedToStudent": true,
+          "updatedAt": DateTime.now().toUtc().toIso8601String(),
+          "dueDate": DateTime.now().toUtc().toIso8601String(),
+          "student": {
+            "type": "student",
+            "id": "st001",
+            "displayName": "Müllermann, Max"
+          }
+        }
+      ]);
+
+      /// https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam/blob/main/src/SchoolExam.Web/Models/Exam/ExamReadModelTeacher.cs
+      final exam = json.encode([
+        {
+          "id": "e001",
+          "status": "planned",
+          "title": "Mock Exam 1",
+          "date": DateTime.now().toUtc().toIso8601String(),
+          "dueDate": DateTime.now().toUtc().toIso8601String(),
+          "topic": "Politik",
+          "quota": 0.469,
+          "gradingTable": {},
+          "participants": [
+            {"type": "course", "id": "c001", "displayName": "Mathe 1"}
+          ],
+          "tasks": [
+            {"id": "t001", "displayName": "Aufgabe 1", "maxPoints": 0.5},
+            {"id": "t002", "displayName": "Aufgabe 2", "maxPoints": 1.5}
+          ]
+        }
+      ]);
+
+      final base = await getBase();
+
+      final spath = Uri.https(base, '/submission/byexam/e001');
+      when(client.get(spath, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(submission, 200));
+
+      final epath = Uri.https(base, '/exam/byteacher');
+      when(client.get(epath, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(exam, 200));
+
+      final res = await examsRepository.getSubmissions(examId: "e001");
+
+      /// Ensure key retrieval from auth repository
+      verify(authRepository.getKey()).called(2);
+
+      /// Verify minimal calls
+      verify(client.get(spath, headers: anyNamed('headers'))).called(1);
+      verify(client.get(epath, headers: anyNamed('headers'))).called(1);
+
+      /// validate result
+      expect(res.length, 1);
+    });
+
+    test('getSubmissions for invalid valid response', () async {
+      final authRepository = MockAuthenticationRepository();
+      when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
+      final client = MockClient();
+      final provider = ApiProvider(client: client);
+
+      final examsRepository = OnlineExamsRepository(
+          authenticationRepository: authRepository, provider: provider);
+
+      /// https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam/blob/main/src/SchoolExam.Web/Models/Exam/ExamReadModelTeacher.cs
+      final exam = json.encode([
+        {
+          "id": "e001",
+          "status": "planned",
+          "title": "Mock Exam 1",
+          "date": DateTime.now().toUtc().toIso8601String(),
+          "dueDate": DateTime.now().toUtc().toIso8601String(),
+          "topic": "Politik",
+          "quota": 0.469,
+          "gradingTable": {},
+          "participants": [
+            {"type": "course", "id": "c001", "displayName": "Mathe 1"}
+          ],
+          "tasks": [
+            {"id": "t001", "displayName": "Aufgabe 1", "maxPoints": 0.5},
+            {"id": "t002", "displayName": "Aufgabe 2", "maxPoints": 1.5}
+          ]
+        }
+      ]);
+
+      final base = await getBase();
+
+      final epath = Uri.https(base, '/exam/byteacher');
+      when(client.get(epath, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(exam, 200));
+
+      final spath = Uri.https(base, '/submission/byexam/e001');
+      when(client.get(spath, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response('', 500));
+
+      expect(() async => await examsRepository.getSubmissions(examId: "e001"),
+          throwsException);
     });
   });
 }

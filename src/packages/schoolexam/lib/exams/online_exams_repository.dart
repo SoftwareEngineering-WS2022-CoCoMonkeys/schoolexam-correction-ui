@@ -19,7 +19,8 @@ class OnlineExamsRepository extends ExamsRepository {
   @override
   Future<Exam> getExam(String examId) async {
     // TODO : ID based request
-    return (await getExams()).firstWhere((element) => element.id == examId,
+    final exams = await getExams();
+    return exams.firstWhere((element) => element.id == examId,
         orElse: () => Exam.empty);
   }
 
