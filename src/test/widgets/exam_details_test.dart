@@ -15,7 +15,7 @@ class MockExamDetailsCubit extends MockCubit<ExamDetailsState>
     implements ExamDetailsCubit {}
 
 void main() {
-  testWidgets('Valid Update', (WidgetTester tester) async {
+  testWidgets('All detail content.', (WidgetTester tester) async {
     final examDetailsCubit = MockExamDetailsCubit();
 
     /// Fake stream
