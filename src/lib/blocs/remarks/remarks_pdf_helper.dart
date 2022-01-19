@@ -42,13 +42,13 @@ class RemarkPdfHelper {
   /// Determines the path to the correction pdf for the [submissionId].
   Future<String> _getCorrectionPath({required String submissionId}) async {
     final directory = (await getApplicationDocumentsDirectory()).path;
-    return p.join(directory, "corrections", submissionId, ".pdf");
+    return p.join(directory, "corrections", "$submissionId.pdf");
   }
 
   /// Determines the path to the submission pdf for the [submissionId].
   Future<String> _getSubmissionPath({required String submissionId}) async {
     final directory = (await getApplicationDocumentsDirectory()).path;
-    return p.join(directory, "submissions", submissionId, ".pdf");
+    return p.join(directory, "submissions", "$submissionId.pdf");
   }
 
   /// Retrieves an existing correction for [submission], if given.

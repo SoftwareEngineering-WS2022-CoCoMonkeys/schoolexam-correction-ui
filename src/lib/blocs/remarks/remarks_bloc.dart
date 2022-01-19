@@ -83,8 +83,13 @@ class RemarksCubit extends Cubit<RemarksState> {
     final details = await _examsRepository.getSubmissionDetails(
         examId: exam.id, submissionIds: general.map((e) => e.id).toList());
 
-    log("Determined submissions : $details");
-    emit(RemarksLoadSuccess(exam: exam, submissions: details));
+    final matched = details
+        .where((element) => element.isMatchedToStudent) //&& element.isCompleted)
+        .toList();
+
+    log("Determined matched submissions : $matched");
+
+    emit(RemarksLoadSuccess(exam: exam, submissions: matched));
   }
 
   /// Opens the [submission] for correction
