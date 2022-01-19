@@ -62,6 +62,13 @@ class ParticipantDTO extends Equatable {
 
   final List<ParticipantDTO> children;
 
+  const ParticipantDTO({
+    required this.id,
+    required this.type,
+    required this.displayName,
+    required this.children,
+  });
+
   ParticipantDTO.fromJson(Map<String, dynamic> json)
       : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
         type = ApiHelper.getValue(map: json, keys: ["type"], value: ""),
@@ -92,6 +99,17 @@ class ParticipantDTO extends Equatable {
 
   @override
   List<Object?> get props => [id, type, displayName, children];
+
+  factory ParticipantDTO.fromModel({required Participant participant}) =>
+      ParticipantDTO(
+          displayName: participant.displayName,
+          id: participant.id,
+          children: (participant is Course)
+              ? participant.children
+                  .map((e) => ParticipantDTO.fromModel(participant: e))
+                  .toList()
+              : <ParticipantDTO>[],
+          type: participant.runtimeType.toString().toLowerCase());
 
   Participant toModel() {
     if (type.toLowerCase() == "course") {

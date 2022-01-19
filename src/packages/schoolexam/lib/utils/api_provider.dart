@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:schoolexam/configuration.dart';
 
 import 'network_exceptions.dart';
@@ -10,46 +11,35 @@ import 'network_exceptions.dart';
 enum HTTPMethod { GET, POST, PATCH, PUT, DELETE }
 
 class ApiProvider {
+  final Client client;
+
+  ApiProvider({Client? client}) : client = client ?? http.Client();
+
   Future<http.Response> _httpRequest(
       Uri uri, Map<String, String> headers, HTTPMethod method,
       {Object? body}) async {
-    var methodKey = '';
-    switch (method) {
-      case HTTPMethod.DELETE:
-        methodKey = 'DELETE';
-        break;
-      case HTTPMethod.POST:
-        methodKey = 'POST';
-        break;
-      case HTTPMethod.PATCH:
-        methodKey = 'PATCH';
-        break;
-      case HTTPMethod.PUT:
-        methodKey = 'PUT';
-        break;
-      default:
-        methodKey = 'GET';
-        break;
-    }
-
     // REQUEST AND INCLUDE BODY
     if (body != null) headers["Content-Type"] = "application/json";
 
-    final client = http.Client();
     try {
-      final response = (body != null)
-          ? await client.send(http.Request(methodKey, uri)
-            ..headers.addAll(headers)
-            ..body = jsonEncode(body))
-          : await client
-              .send(http.Request(methodKey, uri)..headers.addAll(headers));
-
-      final result = await http.Response.fromStream(response);
-      return result;
+      switch (method) {
+        case HTTPMethod.DELETE:
+          return await client.delete(uri,
+              headers: headers, body: (body != null) ? jsonEncode(body) : null);
+        case HTTPMethod.POST:
+          return await client.post(uri,
+              headers: headers, body: (body != null) ? jsonEncode(body) : null);
+        case HTTPMethod.PATCH:
+          return await client.patch(uri,
+              headers: headers, body: (body != null) ? jsonEncode(body) : null);
+        case HTTPMethod.PUT:
+          return await client.put(uri,
+              headers: headers, body: (body != null) ? jsonEncode(body) : null);
+        default:
+          return await client.get(uri, headers: headers);
+      }
     } on SocketException catch (e) {
       throw ConnectionException(e.toString());
-    } finally {
-      client.close();
     }
   }
 

@@ -12,8 +12,9 @@ class OnlineExamsRepository extends ExamsRepository {
   final AuthenticationRepository authenticationRepository;
   final ApiProvider provider;
 
-  OnlineExamsRepository({required this.authenticationRepository})
-      : provider = ApiProvider();
+  OnlineExamsRepository(
+      {required this.authenticationRepository, ApiProvider? provider})
+      : provider = provider ?? ApiProvider();
 
   @override
   Future<Exam> getExam(String examId) async {
