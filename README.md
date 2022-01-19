@@ -163,7 +163,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Torben Soennecken - soennecken@rootitup.de
 
 Project
-Link: [https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam-correction-ui](https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam-schoolexam-correction-ui)
+Link: [https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam-correction-ui](https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam-correction-ui)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
