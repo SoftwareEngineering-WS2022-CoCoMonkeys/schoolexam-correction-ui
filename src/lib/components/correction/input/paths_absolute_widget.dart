@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 class PathsAbsoluteWidget extends StatelessWidget {

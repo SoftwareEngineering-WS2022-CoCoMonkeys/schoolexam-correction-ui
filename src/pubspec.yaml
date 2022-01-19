@@ -84,6 +84,12 @@ dependencies:
   # Used for modal bottom sheets during exam creation
   modal_bottom_sheet: ^2.0.0
 
+  # Required for edit widgets
+  popover: ^0.2.6+3
+
+  # Smart refresh using bloc states to notify controller
+  pull_to_refresh: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

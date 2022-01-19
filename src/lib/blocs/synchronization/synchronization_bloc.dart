@@ -5,13 +5,13 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/blocs/synchronization/synchronization_state.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 class SynchronizationCubit extends Cubit<SynchronizationState> {
   final CorrectionOverlayCubit _correctionOverlayCubit;
-  final RemarkCubit _remarkCubit;
+  final RemarksCubit _remarkCubit;
   final CorrectionOverlayRepository _correctionOverlayRepository;
   final ExamsRepository _examsRepository;
 
@@ -21,7 +21,7 @@ class SynchronizationCubit extends Cubit<SynchronizationState> {
   SynchronizationCubit(
       {required CorrectionOverlayRepository correctionOverlayRepository,
       required ExamsRepository examsRepository,
-      required RemarkCubit remarkCubit,
+      required RemarksCubit remarkCubit,
       required CorrectionOverlayCubit correctionOverlayCubit})
       : _remarkCubit = remarkCubit,
         _correctionOverlayCubit = correctionOverlayCubit,
@@ -33,7 +33,7 @@ class SynchronizationCubit extends Cubit<SynchronizationState> {
         _correctionOverlayCubit.stream.listen(_onCorrectionChanged);
   }
 
-  void _onRemarkStateChanged(RemarkState state) async {
+  void _onRemarkStateChanged(RemarksState state) async {
     // -- Answers...
   }
 

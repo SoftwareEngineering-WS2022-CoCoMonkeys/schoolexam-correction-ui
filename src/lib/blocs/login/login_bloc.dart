@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam/utils/network_exceptions.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
+import 'package:schoolexam_correction_ui/blocs/login/login_error_extensions.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login_form.dart';
 import 'package:schoolexam_correction_ui/models/password.dart';
 import 'package:schoolexam_correction_ui/models/username.dart';
@@ -11,11 +14,14 @@ import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  final LanguageCubit _languageCubit;
   final AuthenticationRepository _authenticationRepository;
 
-  LoginBloc({
-    required AuthenticationRepository authenticationRepository,
-  })  : _authenticationRepository = authenticationRepository,
+  LoginBloc(
+      {required AuthenticationRepository authenticationRepository,
+      required LanguageCubit languageCubit})
+      : _authenticationRepository = authenticationRepository,
+        _languageCubit = languageCubit,
         super(const LoginState.initial()) {
     on<LoginUsernameChanged>(_onUsernameChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
@@ -61,8 +67,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: state.password.value,
       );
       emit(state.copyWith(status: FormzStatus.submissionSuccess));
-    } catch (e) {
-      emit(state.copyWith(status: FormzStatus.submissionFailure));
+    } on NetworkException catch (e) {
+      emit(LoginSubmissionFailure(
+          initial: state, description: e.getDescription(_languageCubit)));
     }
   }
 }

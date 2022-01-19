@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/correction_page_view.dart';
 
 import 'correction_input_header.dart';

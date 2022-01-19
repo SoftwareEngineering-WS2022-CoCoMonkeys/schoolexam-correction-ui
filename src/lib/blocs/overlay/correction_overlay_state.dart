@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';

@@ -14,9 +14,6 @@ dependencies:
   # Provides information about application and cache directories
   path_provider: ^2.0.8
 
-  # Used for persisting data
-  sqflite: ^2.0.1
-
   #
   http: ^0.13.4
 

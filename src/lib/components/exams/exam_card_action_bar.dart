@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:popover/popover.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
-import 'package:schoolexam_correction_ui/components/exams/new_exam_dialog.dart';
+import 'package:schoolexam_correction_ui/components/exams/exam_details_dialog.dart';
 import 'package:schoolexam_correction_ui/components/exams/publish_exam_dialog.dart';
 
 class ExamCardActionsBar extends StatelessWidget {
@@ -16,51 +16,53 @@ class ExamCardActionsBar extends StatelessWidget {
 
   const ExamCardActionsBar(this.exam, {Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    late final Widget child;
+  Widget _getChild({required BuildContext context}) {
     switch (exam.status) {
       case ExamStatus.planned:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.edit),
           onPressed: () {
-            BlocProvider.of<ExamDetailsBloc>(context)
+            BlocProvider.of<ExamDetailsCubit>(context)
                 .adjustExamOpened(exam: exam);
-            showCupertinoDialog(
-                context: context, builder: (_) => const NewExamDialog());
+            showPopover(
+                direction: PopoverDirection.top,
+                context: context,
+                bodyBuilder: (_) => const ExamDetailsDialog());
           },
           label: Text(AppLocalizations.of(context)!.examCardButtonEdit),
         );
-        break;
       case ExamStatus.inCorrection:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.fact_check_outlined),
           onPressed: () {
             BlocProvider.of<NavigationCubit>(context).toCorrection(exam.id);
           },
           label: Text(AppLocalizations.of(context)!.examCardButtonCorrect),
         );
-        break;
       case ExamStatus.corrected:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.cloud_upload),
           onPressed: () {
-            showDialog(
+            showPopover(
+                direction: PopoverDirection.top,
                 context: context,
-                builder: (_) => PublishExamDialog(exam: exam));
+                bodyBuilder: (_) => PublishExamDialog(
+                      exam: exam,
+                    ));
           },
           label: Text(AppLocalizations.of(context)!.examPublish),
         );
-        break;
       default:
-        child = Container();
-        break;
+        return Container();
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
         width: constraints.maxWidth * 0.5,
-        child: child,
+        child: _getChild(context: context),
       );
     });
   }

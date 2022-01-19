@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/eraser_input_overlay.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/paths_absolute_widget.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/paths_widget.dart';
@@ -87,40 +88,55 @@ class _CorrectionPageViewState extends State<CorrectionPageView> {
                             .toList());
                   }),
                 ),
-                InteractiveViewer(
-                  child: Stack(
-                    children: [
-                      SubmissionView(
-                        initial: widget.initial,
-                        size: size,
-                      ),
-                      Stack(
-                        children: [
-                          PathsWidget(
-                              initialData:
-                                  document.pages[document.pageNumber].inputs,
-                              size: size,
-                              controller: linesController!),
-                          if (state.inputTool == CorrectionInputTool.pencil ||
-                              state.inputTool ==
-                                  CorrectionInputTool.marker) ...{
-                            PathsAbsoluteWidget(
-                              controller: lineController!,
-                              size: size,
-                            ),
-                            DrawingInputOverlay(
+
+                /// The [EagerGestureRecognizer] prevents the [InteractiveViewer] of reacting to unwanted device kinds.
+                RawGestureDetector(
+                  gestures: <Type, GestureRecognizerFactory>{
+                    EagerGestureRecognizer:
+                        GestureRecognizerFactoryWithHandlers<
+                            EagerGestureRecognizer>(
+                      () => EagerGestureRecognizer(supportedDevices: {
+                        PointerDeviceKind.stylus,
+                        PointerDeviceKind.mouse
+                      }),
+                      (EagerGestureRecognizer instance) {},
+                    ),
+                  },
+                  child: InteractiveViewer(
+                    child: Stack(
+                      children: [
+                        SubmissionView(
+                          initial: widget.initial,
+                          size: size,
+                        ),
+                        Stack(
+                          children: [
+                            PathsWidget(
+                                initialData:
+                                    document.pages[document.pageNumber].inputs,
                                 size: size,
-                                lineController: lineController!,
-                                initial: widget.initial),
-                          },
-                          if (state.inputTool == CorrectionInputTool.eraser)
-                            EraserInputOverlay(
+                                controller: linesController!),
+                            if (state.inputTool == CorrectionInputTool.pencil ||
+                                state.inputTool ==
+                                    CorrectionInputTool.marker) ...{
+                              PathsAbsoluteWidget(
+                                controller: lineController!,
                                 size: size,
-                                linesController: linesController!,
-                                initial: widget.initial)
-                        ],
-                      )
-                    ],
+                              ),
+                              DrawingInputOverlay(
+                                  size: size,
+                                  lineController: lineController!,
+                                  initial: widget.initial),
+                            },
+                            if (state.inputTool == CorrectionInputTool.eraser)
+                              EraserInputOverlay(
+                                  size: size,
+                                  linesController: linesController!,
+                                  initial: widget.initial)
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ]);

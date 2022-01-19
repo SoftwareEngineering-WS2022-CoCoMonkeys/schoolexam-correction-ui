@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam/exams/models/submission.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/drawing_input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
@@ -27,13 +27,13 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   //
 
   final CorrectionOverlayRepository _correctionOverlayRepository;
-  final RemarkCubit _remarkCubit;
+  final RemarksCubit _remarkCubit;
   late final StreamSubscription _remarkSubscription;
   late final StreamSubscription _correctionSubscription;
 
   CorrectionOverlayCubit(
       {required CorrectionOverlayRepository correctionOverlayRepository,
-      required RemarkCubit remarkCubit})
+      required RemarksCubit remarkCubit})
       : _correctionOverlayRepository = correctionOverlayRepository,
         _remarkCubit = remarkCubit,
         _pageHistory = <String, Queue<CorrectionOverlayPage>>{},
@@ -44,9 +44,9 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
 
   /// Listener enacting necessary changes to the correction state, given the remark state changes.
   /// This may include the inclusion or exclusion of submissions in the correcting process.
-  void _onRemarkStateChanged(RemarkState state) async {
+  void _onRemarkStateChanged(RemarksState state) async {
     /// Added a new correction AND switched to it.
-    if (state is AddedCorrectionState) {
+    if (state is RemarksCorrectionAdded) {
       log("Reacting to addition within the remark state by loading overlay document");
       final document = await retrieveDocument(
           path: state.added.submissionPath, submission: state.added.submission);
@@ -56,7 +56,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     /// Remove the correction from the active elements
-    else if (state is RemovedCorrectionState) {
+    else if (state is RemarksCorrectionRemoved) {
       log("Reacting to deletion within the remark state by removing overlay document");
       emit(RemovedCorrectionOverlayState.remove(
           initial: this.state,
@@ -66,7 +66,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
     }
 
     /// Navigated to a new answer
-    else if (state is NavigatedRemarkState) {
+    else if (state is RemarksCorrectionNavigated) {
       log("Analyzing navigational change within remark state");
 
       final document = this.state.overlays.firstWhere(

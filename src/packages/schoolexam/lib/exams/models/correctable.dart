@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum CorrectableStatus { unknown, pending, corrected, published, archived }
+enum CorrectableStatus { unknown, pending, inProgress, corrected }
 
 abstract class Correctable extends Equatable {
   final double achievedPoints;

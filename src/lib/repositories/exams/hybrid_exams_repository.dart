@@ -3,9 +3,9 @@ import 'dart:developer';
 import 'package:schoolexam/authentication/authentication_repository.dart';
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam/exams/local_exams_repository.dart';
 import 'package:schoolexam/exams/online_exams_repository.dart';
 import 'package:schoolexam/utils/network_exceptions.dart';
+import 'package:schoolexam_correction_ui/repositories/exams/local_exams_repository.dart';
 import 'package:tuple/tuple.dart';
 
 class HybridExamsRepository extends ExamsRepository {
@@ -18,7 +18,7 @@ class HybridExamsRepository extends ExamsRepository {
 
   @override
   Future<Exam> getExam(String examId) async {
-    late final exam;
+    late final Exam exam;
     try {
       exam = await online.getExam(examId);
       await local.insertExams(exams: [exam]);
@@ -32,7 +32,7 @@ class HybridExamsRepository extends ExamsRepository {
 
   @override
   Future<List<Exam>> getExams() async {
-    late final exams;
+    late final List<Exam> exams;
     try {
       exams = await online.getExams();
       await local.insertExams(exams: exams);
@@ -47,7 +47,7 @@ class HybridExamsRepository extends ExamsRepository {
   @override
   Future<List<SubmissionOverview>> getSubmissions(
       {required String examId}) async {
-    late final submissions;
+    late final List<SubmissionOverview> submissions;
     try {
       log("Trying to retrieve submissions from online repository");
       submissions = await online.getSubmissions(examId: examId);
@@ -91,7 +91,7 @@ class HybridExamsRepository extends ExamsRepository {
 
     if (outdated.isNotEmpty) {
       try {
-        log("Trying to retrieve outdated submissions ${outdated} from online repository");
+        log("Trying to retrieve outdated submissions $outdated from online repository");
         final updated = await online.getSubmissionDetails(
             examId: examId, submissionIds: outdated);
         log("Inserting updated submission into local repository.");

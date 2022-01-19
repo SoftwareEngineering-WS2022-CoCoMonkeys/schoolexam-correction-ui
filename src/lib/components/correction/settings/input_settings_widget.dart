@@ -63,11 +63,15 @@ class _InputSettingsWidgetState extends State<InputSettingsWidget> {
                       ],
                     )),
           Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
                   onPressed: () {
                     setState(() {
                       value = max((value ?? widget.options.size * 1.0) - 1, 0);
+                      widget.callback(
+                          widget.options.copyWith(size: value!.toInt()));
                     });
                   },
                   icon: const Icon(Icons.remove)),
@@ -91,6 +95,8 @@ class _InputSettingsWidgetState extends State<InputSettingsWidget> {
                   onPressed: () {
                     setState(() {
                       value = min((value ?? widget.options.size * 1.0) + 1, 20);
+                      widget.callback(
+                          widget.options.copyWith(size: value!.toInt()));
                     });
                   },
                   icon: const Icon(Icons.add)),

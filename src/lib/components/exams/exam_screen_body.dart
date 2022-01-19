@@ -1,37 +1,63 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/src/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_card.dart';
 import 'package:schoolexam_correction_ui/components/exams/new_exam_card.dart';
 
-class ExamScreenBody extends StatelessWidget {
+class ExamScreenBody extends StatefulWidget {
   final List<Exam> exams;
 
   const ExamScreenBody(this.exams, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => RefreshIndicator(
-          onRefresh: () async {
-            await context.read<ExamsCubit>().loadExams();
-          },
-          child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Wrap(
-                  direction: Axis.horizontal,
-                  spacing: 30.0,
-                  runSpacing: 30.0,
-                  children: [
-                    const NewExamCard(),
-                    ...exams.map((e) => ExamCard(e)).toList()
-                  ],
-                ),
-              )),
+  State<ExamScreenBody> createState() => _ExamScreenBodyState();
+}
+
+class _ExamScreenBodyState extends State<ExamScreenBody> {
+  final RefreshController _controller = RefreshController(initialRefresh: true);
+
+  @override
+  Widget build(BuildContext context) => BlocConsumer<ExamsCubit, ExamsState>(
+        listener: (context, state) {
+          if (state is LoadedExamsState) {
+            _controller.refreshCompleted();
+          }
+        },
+        builder: (context, state) => LayoutBuilder(
+          builder: (context, constraints) => ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: SmartRefresher(
+              onRefresh: () {
+                if (state is! LoadingExamsState) {
+                  context.read<ExamsCubit>().loadExams();
+                }
+              },
+              controller: _controller,
+              child: SingleChildScrollView(
+                child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Wrap(
+                      direction: Axis.horizontal,
+                      spacing: 30.0,
+                      runSpacing: 30.0,
+                      children: [
+                        const NewExamCard(),
+                        ...widget.exams.map((e) => ExamCard(e)).toList()
+                      ],
+                    )),
+              ),
+            ),
+          ),
         ),
       );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }

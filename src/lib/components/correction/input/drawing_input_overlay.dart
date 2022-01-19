@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/components/correction/input/drawing_gesture_recognizer.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/stroke.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
@@ -61,6 +60,11 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
       return;
     }
 
+    // This should in theory never trigger.
+    if (line == null) {
+      return;
+    }
+
     final offset = details.localPosition;
     final point = Point(offset.dx, offset.dy, details.pressure);
     final points = [...line!.points, point];
@@ -72,6 +76,16 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
 
   void onPointerUp(BuildContext context, PointerUpEvent details,
       CorrectionOverlayDocument document) {
+    if (details.kind != PointerDeviceKind.stylus &&
+        details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    // This should in theory never trigger.
+    if (line == null) {
+      return;
+    }
+
     // Registering the line with the business logic
     BlocProvider.of<CorrectionOverlayCubit>(context)
         .addDrawing(document: document, lines: [line!], size: widget.size);

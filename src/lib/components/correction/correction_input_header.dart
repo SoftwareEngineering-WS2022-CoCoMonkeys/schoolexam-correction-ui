@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 import 'input/input_header.dart';
 
@@ -20,22 +20,24 @@ class CorrectionInputHeader extends StatefulWidget {
 class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
   @override
   Widget build(BuildContext context) => Container(
-    height: 44,
-    decoration: BoxDecoration(
-      color: Theme.of(context).cardColor,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
-          spreadRadius: 3,
-          blurRadius: 3,
-          offset: const Offset(2, 0), // changes position of shadow
+        height: 44,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 3,
+              offset: const Offset(2, 0), // changes position of shadow
+            ),
+          ],
         ),
-      ],
-    ),
-    child: BlocBuilder<RemarkCubit, RemarkState>(
-        // Only update, when the navigation changed (task dropdown)
-        buildWhen: (old, current) => current is NavigatedRemarkState,
-        builder: (context, state) {
+        child:
+            BlocBuilder<RemarksCubit, RemarksState>(builder: (context, state) {
+          if (state is! RemarksCorrectionInProgress) {
+            return Container();
+          }
+
           final current = state.getCurrent(widget.initial);
           return Row(
             children: [
@@ -55,7 +57,7 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
                       final task = current.submission.exam.tasks.firstWhere(
                           (element) => element.id == newValue,
                           orElse: () => Task.empty);
-                      BlocProvider.of<RemarkCubit>(context).moveTo(task: task);
+                      BlocProvider.of<RemarksCubit>(context).moveTo(task: task);
                     }),
               ),
               const Expanded(
@@ -64,5 +66,5 @@ class _CorrectionInputHeaderState extends State<CorrectionInputHeader> {
             ],
           );
         }),
-  );
+      );
 }

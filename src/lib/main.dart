@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:schoolexam/exams/hybrid_exams_repository.dart';
 import 'package:schoolexam/schoolexam.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
+import 'package:schoolexam_correction_ui/blocs/language/language.dart';
 import 'package:schoolexam_correction_ui/blocs/login/login.dart';
 import 'package:schoolexam_correction_ui/blocs/navigation/navigation.dart';
 import 'package:schoolexam_correction_ui/blocs/synchronization/synchronization.dart';
@@ -13,10 +13,11 @@ import 'package:schoolexam_correction_ui/navigation/school_exam_route_informatio
 import 'package:schoolexam_correction_ui/navigation/school_exam_router_delegate.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/database_correction_overlay_repository.dart';
+import 'package:schoolexam_correction_ui/repositories/exams/hybrid_exams_repository.dart';
 
 import 'blocs/exam_details/exam_details_bloc.dart';
 import 'blocs/overlay/correction_overlay.dart';
-import 'blocs/remark/remark.dart';
+import 'blocs/remarks/remarks.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,9 @@ void main() {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
+            create: (context) => LanguageCubit(),
+          ),
+          BlocProvider(
               create: (context) => AuthenticationBloc(
                   authenticationRepository:
                       RepositoryProvider.of<AuthenticationRepository>(
@@ -40,19 +44,20 @@ void main() {
           BlocProvider(
               create: (context) => LoginBloc(
                   authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(
-                          context))),
+                      RepositoryProvider.of<AuthenticationRepository>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
           BlocProvider(
               create: (context) => NavigationCubit(
                   authenticationBloc:
                       BlocProvider.of<AuthenticationBloc>(context))),
           BlocProvider(
               lazy: false,
-              create: (context) => ExamDetailsBloc(
+              create: (context) => ExamDetailsCubit(
                   examsRepository:
                       RepositoryProvider.of<ExamsRepository>(context),
                   authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context))),
+                      BlocProvider.of<AuthenticationBloc>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => ExamsCubit(
@@ -60,11 +65,12 @@ void main() {
                       RepositoryProvider.of<ExamsRepository>(context),
                   authenticationBloc:
                       BlocProvider.of<AuthenticationBloc>(context),
-                  examsDetailBloc: BlocProvider.of<ExamDetailsBloc>(context))),
+                  examsDetailBloc: BlocProvider.of<ExamDetailsCubit>(context))),
           BlocProvider(
               lazy: false,
-              create: (context) => RemarkCubit(
+              create: (context) => RemarksCubit(
                   navigationCubit: BlocProvider.of<NavigationCubit>(context),
+                  languageCubit: BlocProvider.of<LanguageCubit>(context),
                   examsRepository:
                       RepositoryProvider.of<ExamsRepository>(context))),
           BlocProvider(
@@ -73,7 +79,7 @@ void main() {
                   correctionOverlayRepository:
                       RepositoryProvider.of<CorrectionOverlayRepository>(
                           context),
-                  remarkCubit: BlocProvider.of<RemarkCubit>(context))),
+                  remarkCubit: BlocProvider.of<RemarksCubit>(context))),
           BlocProvider(
               lazy: false,
               create: (context) => SynchronizationCubit(
@@ -84,7 +90,7 @@ void main() {
                             context),
                     correctionOverlayCubit:
                         BlocProvider.of<CorrectionOverlayCubit>(context),
-                    remarkCubit: BlocProvider.of<RemarkCubit>(context),
+                    remarkCubit: BlocProvider.of<RemarksCubit>(context),
                   ))
         ],
         child: const SchoolExamCorrectionUI(),

@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 import 'correction_tab_view.dart';
 
@@ -12,19 +12,28 @@ class CorrectionView extends StatelessWidget {
   const CorrectionView({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
-      buildWhen: (old, current) =>
-          current is RemovedCorrectionState || current is AddedCorrectionState,
-      builder: (context, state) => _CorrectionViewTabContainer(
-            key: ValueKey<List<Correction>>(state.corrections),
-            corrections: state.corrections,
-          ));
+  Widget build(BuildContext context) =>
+      BlocBuilder<RemarksCubit, RemarksState>(builder: (context, state) {
+        if (state is! RemarksCorrectionInProgress) {
+          return Container();
+        }
+
+        return _CorrectionViewTabContainer(
+          /// Only rebuild when a change to the length occured.
+          /// This is necessary for the underlying TabController.
+          key: ValueKey<int>(state.corrections.length),
+          corrections: state.corrections,
+          selected: state.selectedCorrection,
+        );
+      });
 }
 
 class _CorrectionViewTabContainer extends StatefulWidget {
+  final int selected;
   final List<Correction> corrections;
 
-  const _CorrectionViewTabContainer({Key? key, required this.corrections})
+  const _CorrectionViewTabContainer(
+      {Key? key, required this.corrections, required this.selected})
       : super(key: key);
 
   @override
@@ -38,6 +47,7 @@ class _CorrectionViewTabContainerState
   @override
   void initState() {
     _controller = TabController(length: widget.corrections.length, vsync: this);
+    _controller!.index = widget.selected;
     _controller!.addListener(_handleTabSelection);
     super.initState();
   }
@@ -73,7 +83,7 @@ class _CorrectionViewTabContainerState
       );
 
   void _handleTabSelection() {
-    BlocProvider.of<RemarkCubit>(context).changeTo(
+    BlocProvider.of<RemarksCubit>(context).changeTo(
         submission: widget.corrections[_controller!.index].submission);
   }
 }
@@ -98,7 +108,7 @@ class _CorrectionTab extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () {
-                      BlocProvider.of<RemarkCubit>(context)
+                      BlocProvider.of<RemarksCubit>(context)
                           .stop(correction.submission);
                     },
                     icon: const Icon(

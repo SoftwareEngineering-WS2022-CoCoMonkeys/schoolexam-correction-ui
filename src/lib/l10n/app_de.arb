@@ -42,9 +42,12 @@
   "newExamDate": "Prüfungsdatum",
   "newExamButtonCreate": "Erstellen",
   "newExamButtonEdit": "Anpassen",
+  "newExamCardTitle": "Prüfung erstellen",
+  "editExamCardTitle": "Prüfung anpassen",
   "cancel": "Abbrechen",
   "yes": "Ja",
   "no": "Nein",
+  "invalidValue": "Ungültiger Wert",
   "correctionSelectionConfirmWithName": "Möchten sie die Korrektur von {name} öffnen?",
   "@correctionSelectionConfirmWithName": {
     "placeholders": {
@@ -57,7 +60,145 @@
   "correction": "Korrektur",
   "taskRemarkEvaluate": "Bewerten",
   "taskRemarkPoints": "Punkte",
+
+  "loadingTitle": "Lade",
   "errorTitle": "Fehler",
+  "successTitle": "Erfolg",
+
   "authenticationError": "Die Anmeldung ist fehlgeschlagen.",
-  "updateExamError": "Die Aktualisierung ist fehlgeschlagen."
+  "updateExamError": "Die Aktualisierung ist fehlgeschlagen.",
+  "offlineError": "Sie sind offline. Bitte bauen Sie eine funktionierende Internetverbindung auf.",
+
+  "loginAppError": "Während der Anmeldung ist es zu einem internen Fehler gekommen.",
+  "loginInternalError": "Während der Anmeldung ist es zu einem internen Fehler gekommen. Bitte versuchen Sie die Anmeldung später erneut.",
+  "loginBadRequestError": "Sie haben einen ungültigen Benutzernamen oder ein ungültiges Passwort eingegeben.",
+
+  "remarksGradingSuccess": "Der Notenschlüssel wurde erfolgreich aktualisiert.",
+  "remarksGradingLoading": "Warte auf die Aktualisierung des Notenschlüssels.",
+  "remarksGradingAppError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen.",
+  "remarksGradingInternalError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen. Bitte versuchen Sie es später erneut.",
+  "remarksGradingBadRequestError": "Der von Ihnen spezifizierte Notenschlüssel ist ungültig.",
+
+  "remarksRemarkAppError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt.",
+  "@remarksRemarkAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+  "remarksRemarkInternalError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt. Bitte versuchen Sie es später erneut.",
+  "@remarksRemarkInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+  "remarksRemarkBadRequestError": "Die Aktualisierung von {name} auf {points} Punkte ist ungültig.",
+  "@remarksRemarkBadRequestError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
+
+
+  "examDetailsCreationLoading": "Warte auf die Erstellung der Klausur {name}.",
+  "@examDetailsCreationLoading": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+
+  "examDetailsCreationSuccess": "{name} wurde erfolgreich erstellt.",
+  "@examDetailsCreationSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsCreationAppError": "Während der Erstellung von {name} ist es zu einem internen Fehler gekommen.",
+  "@examDetailsCreationAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsCreationInternalError": "Während der Erstellung von {name} ist es zu einem internen Fehler gekommen. Bitte versuchen Sie die Anpassung später erneut.",
+  "@examDetailsCreationInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsCreationBadRequestError": "Die von Ihnen eingegebenen Daten sind ungültig. Bitte überprüfen Sie die Daten und starten die App gegebenenfalls neu.",
+
+  "examDetailsUpdateLoading": "Warte auf die Aktualisierung von {name}.",
+  "@examDetailsUpdateLoading": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsUpdateSuccess": "{name} wurde erfolgreich aktualisiert.",
+  "@examDetailsUpdateSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsUpdateAppError": "Während der Anpassung von {name} ist es zu einem internen Fehler gekommen.",
+  "@examDetailsUpdateAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsUpdateInternalError": "Während der Anpassung von {name} ist es zu einem internen Fehler gekommen. Bitte versuchen Sie die Anpassung später erneut.",
+  "@examDetailsUpdateInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politik 1"
+      }
+    }
+  },
+  "examDetailsUpdateBadRequestError": "Die von Ihnen eingegebenen Daten sind ungültig. Bitte überprüfen Sie die Daten und starten die App gegebenenfalls neu."
 }

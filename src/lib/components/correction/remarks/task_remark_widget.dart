@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:popover/popover.dart';
 import 'package:schoolexam/schoolexam.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
+import 'package:schoolexam_correction_ui/components/correction/remarks/task_remark_dialog.dart';
 
 class AnswerRemarkWidget extends StatelessWidget {
   final Correction initial;
@@ -19,8 +21,13 @@ class AnswerRemarkWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) =>
-            BlocBuilder<RemarkCubit, RemarkState>(
+            BlocBuilder<RemarksCubit, RemarksState>(
           builder: (context, state) {
+            if (state is! RemarksCorrectionInProgress) {
+              // No content - In general an exception
+              return Container();
+            }
+
             final correction = state.getCurrent(initial);
             final answer = correction.submission.answers.firstWhere(
                 (element) => element.task.id == task.id,
@@ -52,18 +59,11 @@ class AnswerRemarkWidget extends StatelessWidget {
                     Text(AppLocalizations.of(context)!.taskRemarkPoints),
                     ElevatedButton(
                       onPressed: () {
-                        showCupertinoModalBottomSheet(
+                        showPopover(
                             context: context,
-                            builder: (context) => Material(
-                                child: SizedBox(
-                                    height: 1000,
-                                    child: Center(
-                                        child: Padding(
-                                            padding: const EdgeInsets.all(30),
-                                            child: _TaskRemarkSelectionWidget(
-                                              answer: answer,
-                                              submission: correction.submission,
-                                            ))))));
+                            bodyBuilder: (_) => TaskRemarkDialog(
+                                submission: correction.submission,
+                                answer: answer));
                       },
                       child: Text(
                           AppLocalizations.of(context)!.taskRemarkEvaluate),
@@ -75,57 +75,6 @@ class AnswerRemarkWidget extends StatelessWidget {
           },
         ),
       );
-}
-
-class _TaskRemarkSelectionWidget extends StatefulWidget {
-  final Submission submission;
-  final Answer answer;
-
-  const _TaskRemarkSelectionWidget(
-      {Key? key, required this.submission, required this.answer})
-      : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _TaskRemarkSelectionWidgetState();
-}
-
-class _TaskRemarkSelectionWidgetState
-    extends State<_TaskRemarkSelectionWidget> {
-  TextEditingController? controller;
-
-  @override
-  void initState() {
-    controller =
-        TextEditingController(text: widget.answer.achievedPoints.toString());
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) => TextField(
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-        ],
-        controller: controller,
-        style: const TextStyle(
-          fontSize: 36,
-        ),
-        decoration: InputDecoration(
-          labelText: AppLocalizations.of(context)!.taskRemarkPoints,
-        ),
-        onSubmitted: (text) => BlocProvider.of<RemarkCubit>(context).mark(
-            submission: widget.submission,
-            task: widget.answer.task,
-            achievedPoints: double.parse(text)),
-      );
-
-  @override
-  void dispose() {
-    super.dispose();
-    if (controller != null) {
-      controller!.dispose();
-    }
-  }
 }
 
 class _TaskRemarkIconWidget extends StatelessWidget {
@@ -149,15 +98,9 @@ class _TaskRemarkIconWidget extends StatelessWidget {
           size: size,
         );
       case CorrectableStatus.corrected:
-      case CorrectableStatus.published:
+      case CorrectableStatus.inProgress:
         return Icon(
           Icons.check_circle_outline,
-          color: Colors.green,
-          size: size,
-        );
-      case CorrectableStatus.archived:
-        return Icon(
-          Icons.check_circle,
           color: Colors.green,
           size: size,
         );

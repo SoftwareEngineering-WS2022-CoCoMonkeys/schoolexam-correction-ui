@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/correction.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
 
 /// Renders the submission PDF included within [correction].
@@ -50,10 +50,14 @@ class SubmissionViewState extends State<SubmissionView> {
       builder: (context, state) {
         final document = state.getCurrent(widget.initial);
 
-        return BlocBuilder<RemarkCubit, RemarkState>(
+        return BlocBuilder<RemarksCubit, RemarksState>(
             // We never need to rebuild
             buildWhen: (old, current) => false,
             builder: (context, state) {
+              if (state is! RemarksCorrectionInProgress) {
+                return Container();
+              }
+
               return SizedBox(
                 width: widget.size.width,
                 height: widget.size.height,

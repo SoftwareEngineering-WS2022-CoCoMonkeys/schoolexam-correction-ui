@@ -3,22 +3,15 @@ import 'dart:async';
 import 'package:path/path.dart' as p;
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam/exams/models/grading_table.dart';
-import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
-import 'package:schoolexam/exams/persistence/answer_segment_data.dart';
-import 'package:schoolexam/exams/persistence/correctable_data.dart';
-import 'package:schoolexam/exams/persistence/exam_data.dart';
-import 'package:schoolexam/exams/persistence/grading_table_lower_bound_data.dart';
-import 'package:schoolexam/exams/persistence/participant_data.dart';
-import 'package:schoolexam/exams/persistence/task_data.dart';
 import 'package:schoolexam/schoolexam.dart';
+import 'package:schoolexam_correction_ui/repositories/exams/persistence/persistence.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LocalExamsRepository extends ExamsRepository {
   Database? database;
 
   Future<void> init() async {
-    final path = p.join(await getDatabasesPath(), 'exams_repository7.db');
+    final path = p.join(await getDatabasesPath(), 'exams_repository100.db');
 
     database = await openDatabase(path, onCreate: (db, version) {
       /// PARTICIPANT

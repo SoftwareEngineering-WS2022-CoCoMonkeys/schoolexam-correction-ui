@@ -33,7 +33,7 @@ class LoadingExamsState extends ExamsState {
 
 /// An erroneous state.
 /// Could be the result of an API error.
-class LoadingExamsErrorState extends ExamsState implements BlocException {
+class LoadingExamsErrorState extends ExamsState implements BlocFailure {
   @override
   final Exception exception;
 
@@ -44,6 +44,10 @@ class LoadingExamsErrorState extends ExamsState implements BlocException {
             filtered: old.filtered,
             search: old.search,
             states: old.states);
+
+  @override
+  // TODO: implement description
+  String get description => "";
 }
 
 class LoadedExamsState extends ExamsState {

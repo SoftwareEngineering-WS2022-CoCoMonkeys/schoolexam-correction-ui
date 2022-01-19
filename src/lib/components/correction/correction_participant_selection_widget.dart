@@ -2,16 +2,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:schoolexam_correction_ui/blocs/remark/remark.dart';
+import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
+import 'package:schoolexam_correction_ui/extensions/correctable_extensions.dart';
 
 class CorrectionParticipantSelectionWidget extends StatelessWidget {
   const CorrectionParticipantSelectionWidget({Key? key}) : super(key: key);
 
-  bool _isSelected(RemarkState state, int index) => state.corrections
-      .any((element) => element.submission.id == state.submissions[index].id);
+  bool _isSelected(RemarksState state, int index) {
+    if (state is RemarksCorrectionInProgress) {
+      return state.corrections.any(
+          (element) => element.submission.id == state.submissions[index].id);
+    } else {
+      return false;
+    }
+  }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<RemarkCubit, RemarkState>(
+  Widget build(BuildContext context) => BlocBuilder<RemarksCubit, RemarksState>(
       builder: (context, state) => ListView.separated(
             padding: const EdgeInsets.all(8),
             itemCount: state.submissions.length,
@@ -20,8 +27,8 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
 
               return ListTile(
                 title: Text(state.submissions[index].student.displayName),
-                // TODO : Localization
-                subtitle: Text(state.submissions[index].status.name),
+                subtitle: Text(state.submissions[index].status
+                    .getDescription(context: context)),
                 leading: (isSelected) ? const Icon(Icons.check) : null,
                 onTap: (isSelected)
                     ? null
@@ -46,7 +53,7 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
                                 child: Text(AppLocalizations.of(context)!.yes),
                                 isDefaultAction: true,
                                 onPressed: () {
-                                  BlocProvider.of<RemarkCubit>(context)
+                                  BlocProvider.of<RemarksCubit>(context)
                                       .open(state.submissions[index]);
                                   Navigator.pop(context);
                                 },

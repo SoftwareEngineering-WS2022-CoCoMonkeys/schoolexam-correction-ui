@@ -11,64 +11,42 @@ class LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      listener: (context, state) {
-        if (state.status.isSubmissionFailure) {
-          showCupertinoDialog<void>(
-            context: context,
-            builder: (BuildContext context) => CupertinoAlertDialog(
-              title: Text(AppLocalizations.of(context)!.errorTitle),
-              content: Text(AppLocalizations.of(context)!.authenticationError),
-              actions: <CupertinoDialogAction>[
-                CupertinoDialogAction(
-                  child: Text("Ok"),
-                  isDefaultAction: true,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            ),
-          );
-        }
-      },
-      child: Align(
-        alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.appTitle,
+    return Align(
+      alignment: const Alignment(0, -1 / 3),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.appTitle,
+            textScaleFactor: 2,
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              AppLocalizations.of(context)!.welcomeText,
               textScaleFactor: 2,
-              style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold),
             ),
-            const SizedBox(
-              height: 50,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                AppLocalizations.of(context)!.welcomeText,
-                textScaleFactor: 2,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(AppLocalizations.of(context)!.pleaseLogin,
-                  style: const TextStyle(fontStyle: FontStyle.italic)),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            _UsernameInput(),
-            const Padding(padding: EdgeInsets.all(12)),
-            _PasswordInput(),
-            const Padding(padding: EdgeInsets.all(12)),
-            _LoginButton(),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(AppLocalizations.of(context)!.pleaseLogin,
+                style: const TextStyle(fontStyle: FontStyle.italic)),
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          _UsernameInput(),
+          const Padding(padding: EdgeInsets.all(12)),
+          _PasswordInput(),
+          const Padding(padding: EdgeInsets.all(12)),
+          _LoginButton(),
+        ],
       ),
     );
   }
