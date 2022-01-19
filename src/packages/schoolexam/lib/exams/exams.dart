@@ -1,0 +1,12 @@
+export 'exams_repository.dart';
+export 'models/answer.dart';
+export 'models/correctable.dart';
+export 'models/course.dart';
+export 'models/exam.dart';
+export 'models/grading_table.dart';
+export 'models/grading_table_lower_bound.dart';
+export 'models/participant.dart';
+export 'models/remark.dart';
+export 'models/student.dart';
+export 'models/submission.dart';
+export 'models/task.dart';

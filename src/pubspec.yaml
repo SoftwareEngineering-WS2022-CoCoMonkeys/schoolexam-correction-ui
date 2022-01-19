@@ -1,0 +1,129 @@
+name: schoolexam_correction_ui
+description: Portable UI for the correction of digitalized exams using the schoolexam backend.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.15.0 <3.0.0"
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # needed for localization
+  flutter_localizations:
+    sdk: flutter
+
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.2
+
+  equatable: ^2.0.3
+
+  # Backend
+  schoolexam:
+    path: packages/schoolexam
+
+  # Business Logic
+  flutter_bloc: ^8.0.0
+
+  # Validation of forms input
+  formz: ^0.4.1
+
+  # Freehand input
+  perfect_freehand: ^1.0.4
+
+  # Undo and redo for input
+  undo: ^1.4.0
+  intl: ^0.17.0
+
+  # PDF edit
+  # This library allows for layer support
+  syncfusion_flutter_pdf: 19.4.41-beta
+
+  # Provides information about application and cache directories
+  path_provider: ^2.0.8
+
+  # PDF viewer
+  native_pdf_view: ^5.0.0
+  flutter_pdfview: ^1.2.1
+
+  # Useful for returning multiple value types within internal functions
+  tuple: ^2.0.0
+
+  # Used for identifying page instances within overlay
+  uuid: ^3.0.5
+
+  # Used for persisting data
+  sqflite: ^2.0.1
+
+  # Used for dotted borders within new exam card
+  dotted_border: ^2.0.0
+
+  # Used for modal bottom sheets during exam creation
+  modal_bottom_sheet: ^2.0.0
+
+  # Required for edit widgets
+  popover: ^0.2.6+3
+
+  # Smart refresh using bloc states to notify controller
+  pull_to_refresh: ^2.0.0
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+  bloc_test: ^9.0.2
+
+  mocktail: ^0.2.0
+  mockito: ^5.0.17
+  build_runner: ^2.1.7
+
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^1.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+     - assets/fonts/
+     - assets/cfg/
+     -
+  fonts:
+    - family: SchoolExam
+      fonts:
+        - asset: assets/fonts/CustomIcons.ttf
+
