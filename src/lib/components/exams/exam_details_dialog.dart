@@ -25,11 +25,10 @@ class ExamDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
       navigationBar: CupertinoNavigationBar(
         leading: TextButton(
-          child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(AppLocalizations.of(context)!.cancel)),
+          child: Text(AppLocalizations.of(context)!.cancel),
           onPressed: () => Navigator.pop(context),
         ),
         trailing: BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
@@ -110,11 +109,11 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
   Widget build(BuildContext context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CupertinoFormSection(
+          CupertinoFormSection.insetGrouped(
               backgroundColor: Colors.transparent,
               key: formKey,
               children: const [_ExamTitleWidget(), _ExamTopicWidget()]),
-          CupertinoFormSection(children: [
+          CupertinoFormSection.insetGrouped(children: [
             /// === COURSE ===
 
             BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
@@ -281,17 +280,18 @@ class _ExamTitleWidget extends StatelessWidget {
           buildWhen: (old,
                   current) =>
               old.examTitle.status != current.examTitle.status,
-          builder: (context, state) => CupertinoTextFormFieldRow(
+          builder: (context, state) => CupertinoFormRow(
               prefix: Text(AppLocalizations.of(context)!.newExamTitle),
-              initialValue: state.examTitle.value,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) => (state.examTitle.invalid)
-                  ? AppLocalizations.of(context)!.invalidValue
-                  : null,
-              onChanged: (examTitle) =>
-                  BlocProvider.of<ExamDetailsCubit>(context)
-                      .changeExamTitle(title: examTitle),
-              placeholder: AppLocalizations.of(context)!.newExamTitle));
+              child: CupertinoTextFormFieldRow(
+                  initialValue: state.examTitle.value,
+                  autovalidateMode: AutovalidateMode.always,
+                  validator: (String? value) => (state.examTitle.invalid)
+                      ? AppLocalizations.of(context)!.invalidValue
+                      : null,
+                  onChanged: (examTitle) =>
+                      BlocProvider.of<ExamDetailsCubit>(context)
+                          .changeExamTitle(title: examTitle),
+                  placeholder: AppLocalizations.of(context)!.newExamTitle)));
 }
 
 class _ExamTopicWidget extends StatelessWidget {
@@ -304,15 +304,16 @@ class _ExamTopicWidget extends StatelessWidget {
           buildWhen: (old,
                   current) =>
               old.examTopic.status != current.examTopic.status,
-          builder: (context, state) => CupertinoTextFormFieldRow(
+          builder: (context, state) => CupertinoFormRow(
               prefix: Text(AppLocalizations.of(context)!.newExamTopic),
-              initialValue: state.examTopic.value,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) => (state.examTopic.invalid)
-                  ? AppLocalizations.of(context)!.invalidValue
-                  : null,
-              onChanged: (examTopic) =>
-                  BlocProvider.of<ExamDetailsCubit>(context)
-                      .changeExamTopic(topic: examTopic),
-              placeholder: AppLocalizations.of(context)!.newExamTopic));
+              child: CupertinoTextFormFieldRow(
+                  initialValue: state.examTopic.value,
+                  autovalidateMode: AutovalidateMode.always,
+                  validator: (String? value) => (state.examTopic.invalid)
+                      ? AppLocalizations.of(context)!.invalidValue
+                      : null,
+                  onChanged: (examTopic) =>
+                      BlocProvider.of<ExamDetailsCubit>(context)
+                          .changeExamTopic(topic: examTopic),
+                  placeholder: AppLocalizations.of(context)!.newExamTopic)));
 }

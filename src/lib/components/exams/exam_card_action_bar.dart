@@ -25,6 +25,7 @@ class ExamCardActionsBar extends StatelessWidget {
             BlocProvider.of<ExamDetailsCubit>(context)
                 .adjustExamOpened(exam: exam);
             showPopover(
+                direction: PopoverDirection.top,
                 context: context,
                 bodyBuilder: (_) => const ExamDetailsDialog());
           },
