@@ -181,8 +181,8 @@ class ExamDetailsCubit extends Cubit<ExamDetailsState> {
 
   @override
   Future<void> close() async {
-    await super.close();
     await _authenticationSubscription.cancel();
+    await super.close();
   }
 
   @override

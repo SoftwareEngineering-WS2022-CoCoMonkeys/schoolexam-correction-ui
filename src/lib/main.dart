@@ -21,99 +21,122 @@ import 'blocs/remarks/remarks.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => AuthenticationRepository()),
-        RepositoryProvider<ExamsRepository>(
-            create: (context) => HybridExamsRepository(
-                repository:
-                    RepositoryProvider.of<AuthenticationRepository>(context))),
-        RepositoryProvider<CorrectionOverlayRepository>(
-            create: (context) => DatabaseCorrectionOverlayRepository())
-      ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => LanguageCubit(),
-          ),
-          BlocProvider(
-              create: (context) => AuthenticationBloc(
-                  authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(
-                          context))),
-          BlocProvider(
-              create: (context) => LoginBloc(
-                  authenticationRepository:
-                      RepositoryProvider.of<AuthenticationRepository>(context),
-                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
-          BlocProvider(
-              create: (context) => NavigationCubit(
-                  authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => ExamDetailsCubit(
-                  examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context),
-                  authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context),
-                  languageCubit: BlocProvider.of<LanguageCubit>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => ExamsCubit(
-                  examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context),
-                  authenticationBloc:
-                      BlocProvider.of<AuthenticationBloc>(context),
-                  examsDetailBloc: BlocProvider.of<ExamDetailsCubit>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => RemarksCubit(
-                  navigationCubit: BlocProvider.of<NavigationCubit>(context),
-                  languageCubit: BlocProvider.of<LanguageCubit>(context),
-                  examsRepository:
-                      RepositoryProvider.of<ExamsRepository>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => CorrectionOverlayCubit(
-                  correctionOverlayRepository:
-                      RepositoryProvider.of<CorrectionOverlayRepository>(
-                          context),
-                  remarkCubit: BlocProvider.of<RemarksCubit>(context))),
-          BlocProvider(
-              lazy: false,
-              create: (context) => SynchronizationCubit(
-                    examsRepository:
-                        RepositoryProvider.of<ExamsRepository>(context),
-                    correctionOverlayRepository:
-                        RepositoryProvider.of<CorrectionOverlayRepository>(
-                            context),
-                    correctionOverlayCubit:
-                        BlocProvider.of<CorrectionOverlayCubit>(context),
-                    remarkCubit: BlocProvider.of<RemarksCubit>(context),
-                  ))
-        ],
-        child: const SchoolExamCorrectionUI(),
-      )));
+  runApp(const SchoolExamCorrectionUI());
 }
 
 class SchoolExamCorrectionUI extends StatelessWidget {
-  const SchoolExamCorrectionUI({Key? key}) : super(key: key);
+  final List<NavigatorObserver>? observers;
+  final AuthenticationBloc? authenticationBloc;
+  final ExamDetailsCubit? examDetailsCubit;
+  final ExamsCubit? examsCubit;
+
+  const SchoolExamCorrectionUI(
+      {Key? key,
+      this.authenticationBloc,
+      this.examsCubit,
+      this.examDetailsCubit,
+      this.observers})
+      : super(key: key);
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return CupertinoApp.router(
-        title: "SchoolExam",
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('de'),
-        theme: const CupertinoThemeData(
-            brightness: Brightness.light, primaryColor: Colors.blue),
-        routeInformationParser: SchoolExamRouteInformationParser(
-            navigationCubit: context.read<NavigationCubit>()),
-        routerDelegate: SchoolExamRouterDelegate(
-            navigationCubit: context.read<NavigationCubit>()));
-  }
+  Widget build(BuildContext context) => MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider(create: (context) => AuthenticationRepository()),
+            RepositoryProvider<ExamsRepository>(
+                create: (context) => HybridExamsRepository(
+                    repository: RepositoryProvider.of<AuthenticationRepository>(
+                        context))),
+            RepositoryProvider<CorrectionOverlayRepository>(
+                create: (context) => DatabaseCorrectionOverlayRepository())
+          ],
+          child: MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => LanguageCubit(),
+                ),
+                BlocProvider(
+                    create: (context) =>
+                        authenticationBloc ??
+                        AuthenticationBloc(
+                            authenticationRepository:
+                                RepositoryProvider.of<AuthenticationRepository>(
+                                    context))),
+                BlocProvider(
+                    create: (context) => LoginBloc(
+                        authenticationRepository:
+                            RepositoryProvider.of<AuthenticationRepository>(
+                                context),
+                        languageCubit:
+                            BlocProvider.of<LanguageCubit>(context))),
+                BlocProvider(
+                    create: (context) => NavigationCubit(
+                        authenticationBloc:
+                            BlocProvider.of<AuthenticationBloc>(context))),
+                BlocProvider(
+                    lazy: false,
+                    create: (context) =>
+                        examDetailsCubit ??
+                        ExamDetailsCubit(
+                            examsRepository:
+                                RepositoryProvider.of<ExamsRepository>(context),
+                            authenticationBloc:
+                                BlocProvider.of<AuthenticationBloc>(context),
+                            languageCubit:
+                                BlocProvider.of<LanguageCubit>(context))),
+                BlocProvider(
+                    lazy: false,
+                    create: (context) =>
+                        examsCubit ??
+                        ExamsCubit(
+                            examsRepository:
+                                RepositoryProvider.of<ExamsRepository>(context),
+                            authenticationBloc:
+                                BlocProvider.of<AuthenticationBloc>(context),
+                            examsDetailBloc:
+                                BlocProvider.of<ExamDetailsCubit>(context))),
+                BlocProvider(
+                    lazy: false,
+                    create: (context) => RemarksCubit(
+                        navigationCubit:
+                            BlocProvider.of<NavigationCubit>(context),
+                        languageCubit: BlocProvider.of<LanguageCubit>(context),
+                        examsRepository:
+                            RepositoryProvider.of<ExamsRepository>(context))),
+                BlocProvider(
+                    lazy: false,
+                    create: (context) => CorrectionOverlayCubit(
+                        correctionOverlayRepository:
+                            RepositoryProvider.of<CorrectionOverlayRepository>(
+                                context),
+                        remarkCubit: BlocProvider.of<RemarksCubit>(context))),
+                BlocProvider(
+                    lazy: false,
+                    create: (context) => SynchronizationCubit(
+                          examsRepository:
+                              RepositoryProvider.of<ExamsRepository>(context),
+                          correctionOverlayRepository: RepositoryProvider.of<
+                              CorrectionOverlayRepository>(context),
+                          correctionOverlayCubit:
+                              BlocProvider.of<CorrectionOverlayCubit>(context),
+                          remarkCubit: BlocProvider.of<RemarksCubit>(context),
+                        ))
+              ],
+              child: Builder(
+                builder: (BuildContext context) => CupertinoApp.router(
+                    title: "SchoolExam",
+                    debugShowCheckedModeBanner: false,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    locale: const Locale('de'),
+                    theme: const CupertinoThemeData(
+                        brightness: Brightness.light,
+                        primaryColor: Colors.blue),
+                    routeInformationParser: SchoolExamRouteInformationParser(
+                        navigationCubit: context.read<NavigationCubit>()),
+                    routerDelegate: SchoolExamRouterDelegate(
+                        observers: observers,
+                        navigationCubit: context.read<NavigationCubit>())),
+              )));
 }

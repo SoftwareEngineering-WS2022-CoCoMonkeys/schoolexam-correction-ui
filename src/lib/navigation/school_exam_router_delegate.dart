@@ -17,13 +17,15 @@ import 'package:schoolexam_correction_ui/pages/login_page.dart';
 
 class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
+  final List<NavigatorObserver>? observers;
   final NavigationCubit _navigationCubit;
   late final StreamSubscription _navigationSubscription;
 
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  SchoolExamRouterDelegate({required NavigationCubit navigationCubit})
+  SchoolExamRouterDelegate(
+      {required NavigationCubit navigationCubit, this.observers})
       : _navigationCubit = navigationCubit,
         navigatorKey = GlobalKey<NavigatorState>() {
     _navigationSubscription =
@@ -43,6 +45,7 @@ class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
         BlocProvider.of<LanguageCubit>(context).loadContext(context: context);
 
         return Navigator(
+          observers: (observers != null) ? observers! : [],
           key: navigatorKey,
           pages: [
             if (state.requiresAuthentication)
