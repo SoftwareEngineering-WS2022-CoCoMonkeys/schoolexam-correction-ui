@@ -93,4 +93,75 @@ void main() {
       expect(() async => await examsRepository.getExams(), throwsException);
     });
   });
+
+  group('getExam', () {
+    final authRepository = MockAuthenticationRepository();
+    when(authRepository.getKey()).thenAnswer((_) async => "kek:kek:kek");
+
+    test('getExam for valid response', () async {
+      final client = MockClient();
+      final provider = ApiProvider(client: client);
+
+      final examsRepository = OnlineExamsRepository(
+          authenticationRepository: authRepository, provider: provider);
+
+      /// https://github.com/SoftwareEngineering-WS2022-CoCoMonkeys/schoolexam/blob/main/src/SchoolExam.Web/Models/Exam/ExamReadModelTeacher.cs
+      final data = json.encode([
+        {
+          "id": "e001",
+          "status": "planned",
+          "title": "Mock Exam 1",
+          "date": DateTime.now().toUtc().toIso8601String(),
+          "dueDate": DateTime.now().toUtc().toIso8601String(),
+          "topic": "Politik",
+          "quota": 0.469,
+          "gradingTable": {},
+          "participants": [
+            {"type": "course", "id": "c001", "displayName": "Mathe 1"}
+          ],
+          "tasks": [
+            {"id": "t001", "displayName": "Aufgabe 1", "maxPoints": 0.5},
+            {"id": "t002", "displayName": "Aufgabe 2", "maxPoints": 1.5}
+          ]
+        }
+      ]);
+
+      final base = await getBase();
+      final path = Uri.https(base, '/exam/byteacher');
+
+      when(client.get(path, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(data, 200));
+
+      final res = await examsRepository.getExam("e001");
+
+      /// Ensure key retrieval from auth repository
+      verify(authRepository.getKey()).called(1);
+
+      /// Verify minimal calls
+      verify(client.get(any, headers: anyNamed('headers'))).called(1);
+
+      /// validate result
+      expect(ExamDTO.fromModel(model: res),
+          ExamDTO.fromJson(json.decode(data)[0]));
+    });
+
+    test('getExam for invalid valid response', () async {
+      final client = MockClient();
+      final provider = ApiProvider(client: client);
+
+      final examsRepository = OnlineExamsRepository(
+          authenticationRepository: authRepository, provider: provider);
+
+      const data = '';
+
+      final base = await getBase();
+      final path = Uri.https(base, '/exam/byteacher');
+
+      when(client.get(path, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(data, 500));
+
+      expect(
+          () async => await examsRepository.getExam("e001"), throwsException);
+    });
+  });
 }
