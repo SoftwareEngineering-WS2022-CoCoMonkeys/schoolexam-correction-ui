@@ -43,9 +43,12 @@ class ExamCardActionsBar extends StatelessWidget {
         return ElevatedButton.icon(
           icon: const Icon(Icons.cloud_upload),
           onPressed: () {
-            showDialog(
+            showPopover(
+                direction: PopoverDirection.top,
                 context: context,
-                builder: (_) => PublishExamDialog(exam: exam));
+                bodyBuilder: (_) => PublishExamDialog(
+                      exam: exam,
+                    ));
           },
           label: Text(AppLocalizations.of(context)!.examPublish),
         );

@@ -27,7 +27,6 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
 
               return ListTile(
                 title: Text(state.submissions[index].student.displayName),
-                // TODO : Localization
                 subtitle: Text(state.submissions[index].status
                     .getDescription(context: context)),
                 leading: (isSelected) ? const Icon(Icons.check) : null,

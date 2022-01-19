@@ -11,14 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
+import 'package:schoolexam_correction_ui/components/constants.dart';
 import 'package:schoolexam_correction_ui/components/was_animated_scope.dart';
-
-const double _kPickerHeight = 250;
-const int _kDurationMs = 500;
-const TextStyle _kPlaceHolderStyle = TextStyle(
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.placeholderText,
-);
 
 class ExamDetailsDialog extends StatelessWidget {
   const ExamDetailsDialog({Key? key}) : super(key: key);
@@ -142,7 +136,7 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                       child: state.examCourse.value.displayName.isEmpty
                           ? Text(
                               AppLocalizations.of(context)!.examCardCourse,
-                              style: _kPlaceHolderStyle,
+                              style: kPlaceHolderStyle,
                             )
                           : Text(state.examCourse.value.displayName,
                               style: CupertinoTheme.of(context)
@@ -154,7 +148,7 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
 
             /// We are fully animated and desired to be shown.
             if (wasCourseSelectionActive && isCourseSelectionActive) ...[
-              SizedBox(height: _kPickerHeight, child: _ExamCoursePicker()),
+              SizedBox(height: kPickerHeight, child: _ExamCoursePicker()),
             ]
 
             /// We await our animation to complete.
@@ -172,9 +166,9 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                   },
                   fromOpacity: isCourseSelectionActive ? 0.0 : 1.0,
                   toOpacity: isCourseSelectionActive ? 1.0 : 0.0,
-                  fromHeight: isCourseSelectionActive ? 0 : _kPickerHeight,
-                  toHeight: isCourseSelectionActive ? _kPickerHeight : 0,
-                  duration: const Duration(milliseconds: _kDurationMs),
+                  fromHeight: isCourseSelectionActive ? 0 : kPickerHeight,
+                  toHeight: isCourseSelectionActive ? kPickerHeight : 0,
+                  duration: const Duration(milliseconds: kDurationMs),
                   builder: (BuildContext context) => _ExamCoursePicker())
             ],
 
@@ -201,16 +195,15 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                            widget.formatter
-                                .format(state.examDate.value.toLocal()),
-                            style:
-                                CupertinoTheme.of(context).textTheme.textStyle),
+                          widget.formatter
+                              .format(state.examDate.value.toLocal()),
+                        ),
                       )));
             }),
 
             /// We are fully animated and desired to be shown.
             if (wasDateSelectionActive && isDateSelectionActive) ...[
-              SizedBox(height: _kPickerHeight, child: _ExamDatePicker()),
+              SizedBox(height: kPickerHeight, child: _ExamDatePicker()),
             ]
 
             /// We await our animation to complete.
@@ -228,9 +221,9 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                   },
                   fromOpacity: isDateSelectionActive ? 0.0 : 1.0,
                   toOpacity: isDateSelectionActive ? 1.0 : 0.0,
-                  fromHeight: isDateSelectionActive ? 0 : _kPickerHeight,
-                  toHeight: isDateSelectionActive ? _kPickerHeight : 0,
-                  duration: const Duration(milliseconds: _kDurationMs),
+                  fromHeight: isDateSelectionActive ? 0 : kPickerHeight,
+                  toHeight: isDateSelectionActive ? kPickerHeight : 0,
+                  duration: const Duration(milliseconds: kDurationMs),
                   builder: (BuildContext context) => _ExamDatePicker())
             ]
           ])
