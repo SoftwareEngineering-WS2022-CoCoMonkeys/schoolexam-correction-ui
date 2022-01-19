@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.src">
+    package="de.rootitup.schoolexam">
    <application
         android:label="src"
         android:name="${applicationName}"
