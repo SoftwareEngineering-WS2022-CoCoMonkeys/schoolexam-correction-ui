@@ -6,22 +6,53 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
-import 'package:schoolexam_correction_ui/components/exams/exam_details_bar.dart';
 import 'package:schoolexam_correction_ui/components/was_animated_scope.dart';
 
-const double _kPickerHeight = 300;
+const double _kPickerHeight = 250;
 const int _kDurationMs = 500;
+const TextStyle _kPlaceHolderStyle = TextStyle(
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.placeholderText,
+);
 
 class ExamDetailsDialog extends StatelessWidget {
   const ExamDetailsDialog({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
-      navigationBar: getBar(context),
+      navigationBar: CupertinoNavigationBar(
+        leading: TextButton(
+          child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(AppLocalizations.of(context)!.cancel)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        trailing: BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
+            buildWhen: (old, current) => old.status != current.status,
+            builder: (context, state) => TextButton(
+                onPressed: () => state.status.isValid
+                    ? BlocProvider.of<ExamDetailsCubit>(context).submitExam()
+                    : null,
+                child: Text(
+                  (state is ExamDetailsCreationState)
+                      ? AppLocalizations.of(context)!.newExamButtonCreate
+                      : AppLocalizations.of(context)!.newExamButtonEdit,
+                ))),
+        middle: BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
+            buildWhen: (old, current) => false,
+            builder: (context, state) => (state is ExamDetailsCreationState)
+                ? Text(
+                    AppLocalizations.of(context)!.newExamCardTitle,
+                  )
+                : Text(
+                    AppLocalizations.of(context)!.editExamCardTitle,
+                  )),
+      ),
       child: Material(
           child: SafeArea(
         child: _ExamDetailsDialogForm(),
@@ -89,7 +120,9 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
             BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
                 builder: (context, state) {
               return CupertinoFormRow(
-                  prefix: Text(AppLocalizations.of(context)!.newExamCourse),
+                  prefix: Text(
+                    AppLocalizations.of(context)!.newExamCourse,
+                  ),
                   child: InkWell(
                     onTap: (!allowExpansion)
                         ? null
@@ -107,7 +140,15 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                           },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(state.examCourse.value.displayName),
+                      child: state.examCourse.value.displayName.isEmpty
+                          ? Text(
+                              AppLocalizations.of(context)!.examCardCourse,
+                              style: _kPlaceHolderStyle,
+                            )
+                          : Text(state.examCourse.value.displayName,
+                              style: CupertinoTheme.of(context)
+                                  .textTheme
+                                  .textStyle),
                     ),
                   ));
             }),
@@ -161,9 +202,10 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          widget.formatter
-                              .format(state.examDate.value.toLocal()),
-                        ),
+                            widget.formatter
+                                .format(state.examDate.value.toLocal()),
+                            style:
+                                CupertinoTheme.of(context).textTheme.textStyle),
                       )));
             }),
 

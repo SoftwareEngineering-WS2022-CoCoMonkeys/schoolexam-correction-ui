@@ -87,6 +87,9 @@ dependencies:
   # Required for edit widgets
   popover: ^0.2.6+3
 
+  # Smart refresh using bloc states to notify controller
+  pull_to_refresh: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

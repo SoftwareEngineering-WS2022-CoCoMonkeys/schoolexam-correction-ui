@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/authentication/authentication.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -16,85 +17,71 @@ class ExamsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-          middle: Text(
-            AppLocalizations.of(context)!.examPageName,
-            style: const TextStyle(color: Colors.black),
-          ),
-          backgroundColor: Colors.white,
-          leading: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-              builder: (context, state) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.person,
-                  color: Colors.black,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    state.person.firstName,
+    return AppBlocListener(
+        builder: (context) => CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                  middle: Text(
+                    AppLocalizations.of(context)!.examPageName,
                     style: const TextStyle(color: Colors.black),
                   ),
-                )
-              ],
-            );
-          })),
-      child: AppBlocListener(builder: (context) {
-        return Material(
-          child: BlocBuilder<ExamsCubit, ExamsState>(
-            builder: (context, state) {
-              if (state is LoadingExamsState) {
-                return const LoadingWidget();
-              }
-
-              if (state is LoadingExamsErrorState) {
-                return const ErrorStateWidget();
-              }
-
-              return Container(
-                alignment: Alignment.topCenter,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      child: Card(
-                        child: TextField(
-                          onChanged: (search) => context
-                              .read<ExamsCubit>()
-                              .onSearchChanged(search.toLowerCase()),
-                          onSubmitted: (search) => context
-                              .read<ExamsCubit>()
-                              .onSearchChanged(search.toLowerCase()),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.search_outlined,
-                              size: 40,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            labelText: AppLocalizations.of(context)!.exam,
-                          ),
+                  backgroundColor: Colors.white,
+                  leading: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                      builder: (context, state) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.person,
+                          color: Colors.black,
                         ),
-                      ),
-                    ),
-                    const StateSelectorChips(),
-                    Expanded(flex: 1, child: ExamScreenBody(state.filtered))
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      }),
-    );
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            state.person.firstName,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        )
+                      ],
+                    );
+                  })),
+              child: BlocBuilder<ExamsCubit, ExamsState>(
+                  builder: (context, state) => Container(
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: Card(
+                              child: TextField(
+                                onChanged: (search) => context
+                                    .read<ExamsCubit>()
+                                    .onSearchChanged(search.toLowerCase()),
+                                onSubmitted: (search) => context
+                                    .read<ExamsCubit>()
+                                    .onSearchChanged(search.toLowerCase()),
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.search_outlined,
+                                    size: 40,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  labelText: AppLocalizations.of(context)!.exam,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const StateSelectorChips(),
+                          Expanded(
+                              flex: 1, child: ExamScreenBody(state.filtered))
+                        ],
+                      ))),
+            ));
   }
 }
 
@@ -120,23 +107,25 @@ class _StateSelectorChipsState extends State<StateSelectorChips> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ExamsCubit, ExamsState>(
-        builder: (context, state) => Wrap(
-              children: List.generate(
-                  selectable.length,
-                  (index) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ChoiceChip(
-                          label: Text(ExamHelper.toValue(selectable[index],
-                              context: context)),
-                          selected: state.states.any((element) =>
-                              element.name == selectable[index].name),
-                          onSelected: (bool choice) => setState(() {
-                            BlocProvider.of<ExamsCubit>(context)
-                                .onStatusChanged(
-                                    status: selectable[index], added: choice);
-                          }),
-                        ),
-                      )),
+        builder: (context, state) => Material(
+              child: Wrap(
+                children: List.generate(
+                    selectable.length,
+                    (index) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ChoiceChip(
+                            label: Text(ExamHelper.toValue(selectable[index],
+                                context: context)),
+                            selected: state.states.any((element) =>
+                                element.name == selectable[index].name),
+                            onSelected: (bool choice) => setState(() {
+                              BlocProvider.of<ExamsCubit>(context)
+                                  .onStatusChanged(
+                                      status: selectable[index], added: choice);
+                            }),
+                          ),
+                        )),
+              ),
             ));
   }
 }

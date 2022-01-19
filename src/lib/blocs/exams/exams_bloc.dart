@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
@@ -28,12 +29,9 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   void _onExamDetailsStateChanged(ExamDetailsState state) async {
-    switch (state.status) {
-      case FormzStatus.submissionSuccess:
-        await loadExams();
-        break;
-      default:
-        return;
+    if (state is ExamDetailsCreationSuccess ||
+        state is ExamDetailsUpdateSuccess) {
+      await loadExams();
     }
   }
 
@@ -91,7 +89,10 @@ class ExamsCubit extends Cubit<ExamsState> {
   }
 
   /// The user requested a reload of the exams using the current search parameters.
-  Future<void> loadExams() async => _searchExams(refresh: true);
+  Future<void> loadExams() async {
+    log("Requested refresh of exams.");
+    await _searchExams(refresh: true);
+  }
 
   @override
   Future<void> close() async {

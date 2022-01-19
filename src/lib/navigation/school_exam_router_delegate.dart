@@ -36,40 +36,42 @@ class SchoolExamRouterDelegate extends RouterDelegate<RoutePath>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final state = _navigationCubit.state;
+  Widget build(BuildContext context) =>
+      BlocBuilder<NavigationCubit, AppNavigationState>(
+          builder: (context, state) {
+        // Register current language within the cubit
+        BlocProvider.of<LanguageCubit>(context).loadContext(context: context);
 
-    // Register current language within the cubit
-    BlocProvider.of<LanguageCubit>(context).loadContext(context: context);
-
-    return Navigator(
-      key: navigatorKey,
-      pages: [
-        if (state.requiresAuthentication)
-          const CupertinoPage(key: ValueKey("LoginPage"), child: LoginPage())
-        else ...[
-          if (state.context == AppNavigationContext.exams) ...[
-            const CupertinoPage(key: ValueKey("ExamsPage"), child: ExamsPage()),
-            if (state.examId.isNotEmpty)
+        return Navigator(
+          key: navigatorKey,
+          pages: [
+            if (state.requiresAuthentication)
               const CupertinoPage(
-                  key: ValueKey("CorrectionPage"), child: CorrectionPage())
-          ] else
-            ...[]
-        ]
-      ],
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) {
-          return false;
-        }
+                  key: ValueKey("LoginPage"), child: LoginPage())
+            else ...[
+              if (state.context == AppNavigationContext.exams) ...[
+                const CupertinoPage(
+                    key: ValueKey("ExamsPage"), child: ExamsPage()),
+                if (state.examId.isNotEmpty)
+                  const CupertinoPage(
+                      key: ValueKey("CorrectionPage"), child: CorrectionPage())
+              ] else
+                ...[]
+            ]
+          ],
+          onPopPage: (route, result) {
+            if (!route.didPop(result)) {
+              return false;
+            }
 
-        if (_navigationCubit.state.examId.isNotEmpty) {
-          _navigationCubit.back();
-        }
+            if (_navigationCubit.state.examId.isNotEmpty) {
+              _navigationCubit.back();
+            }
 
-        return true;
-      },
-    );
-  }
+            return true;
+          },
+        );
+      });
 
   @override
   RoutePath get currentConfiguration {

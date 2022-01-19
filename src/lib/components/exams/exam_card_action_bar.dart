@@ -16,12 +16,10 @@ class ExamCardActionsBar extends StatelessWidget {
 
   const ExamCardActionsBar(this.exam, {Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    late final Widget child;
+  Widget _getChild({required BuildContext context}) {
     switch (exam.status) {
       case ExamStatus.planned:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.edit),
           onPressed: () {
             BlocProvider.of<ExamDetailsCubit>(context)
@@ -32,18 +30,16 @@ class ExamCardActionsBar extends StatelessWidget {
           },
           label: Text(AppLocalizations.of(context)!.examCardButtonEdit),
         );
-        break;
       case ExamStatus.inCorrection:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.fact_check_outlined),
           onPressed: () {
             BlocProvider.of<NavigationCubit>(context).toCorrection(exam.id);
           },
           label: Text(AppLocalizations.of(context)!.examCardButtonCorrect),
         );
-        break;
       case ExamStatus.corrected:
-        child = ElevatedButton.icon(
+        return ElevatedButton.icon(
           icon: const Icon(Icons.cloud_upload),
           onPressed: () {
             showDialog(
@@ -52,16 +48,17 @@ class ExamCardActionsBar extends StatelessWidget {
           },
           label: Text(AppLocalizations.of(context)!.examPublish),
         );
-        break;
       default:
-        child = Container();
-        break;
+        return Container();
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
         width: constraints.maxWidth * 0.5,
-        child: child,
+        child: _getChild(context: context),
       );
     });
   }

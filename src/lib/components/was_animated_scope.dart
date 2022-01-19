@@ -47,8 +47,7 @@ class WasAnimatedScope extends StatefulWidget {
   State<StatefulWidget> createState() => _WasAnimatedScopeState();
 }
 
-class _WasAnimatedScopeState extends State<WasAnimatedScope>
-    with TickerProviderStateMixin {
+class _WasAnimatedScopeState extends State<WasAnimatedScope> {
   Widget _animationBuilder() {
     final double? dWidth;
     final double? dHeight;
@@ -78,7 +77,7 @@ class _WasAnimatedScopeState extends State<WasAnimatedScope>
       onEnd: () => widget.onEnd(),
       builder: (BuildContext context, double value, Widget? child) {
         /// Possibly Opacity
-        late final Widget oChild;
+        final Widget oChild;
         if (dOpacity != null) {
           oChild = Opacity(
             /// Animate either by adding to fromOpacity or by subtracting from fromOpacity.
@@ -89,7 +88,7 @@ class _WasAnimatedScopeState extends State<WasAnimatedScope>
           oChild = child!;
         }
 
-        late final Widget wChild;
+        final Widget wChild;
         if (dWidth != null) {
           wChild = SizedBox(
             /// Animate either by adding to fromWidth or by subtracting from fromWidth etc..
@@ -100,7 +99,7 @@ class _WasAnimatedScopeState extends State<WasAnimatedScope>
           wChild = oChild;
         }
 
-        late final Widget hChild;
+        final Widget hChild;
         if (dHeight != null) {
           hChild = SizedBox(
             /// Animate either by adding to fromHeight or by subtracting from fromHeight etc..

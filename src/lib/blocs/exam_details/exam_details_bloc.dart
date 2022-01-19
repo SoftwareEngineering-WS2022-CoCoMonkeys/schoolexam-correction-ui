@@ -112,6 +112,8 @@ class ExamDetailsCubit extends Cubit<ExamDetailsState> {
 
   /// Trigger the submission of the current exam form.
   Future<void> submitExam() async {
+    log("Requested to submit exam.");
+
     if (!state.status.isValidated) {
       log("Error during exam creation/adjustment, the form was not validated.");
       return;
