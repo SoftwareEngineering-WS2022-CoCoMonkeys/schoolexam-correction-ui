@@ -60,6 +60,11 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
       return;
     }
 
+    // This should in theory never trigger.
+    if (line == null) {
+      return;
+    }
+
     final offset = details.localPosition;
     final point = Point(offset.dx, offset.dy, details.pressure);
     final points = [...line!.points, point];
@@ -73,6 +78,11 @@ class _DrawingInputOverlayState extends State<DrawingInputOverlay> {
       CorrectionOverlayDocument document) {
     if (details.kind != PointerDeviceKind.stylus &&
         details.kind != PointerDeviceKind.mouse) {
+      return;
+    }
+
+    // This should in theory never trigger.
+    if (line == null) {
       return;
     }
 
