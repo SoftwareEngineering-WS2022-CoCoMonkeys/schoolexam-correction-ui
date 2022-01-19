@@ -31,8 +31,11 @@ class _PublishExamDialogState extends State<PublishExamDialog> {
 
   @override
   void initState() {
-    minimumDate = DateTime.now().add(const Duration(minutes: 14));
-    publishDate = minimumDate!.add(const Duration(minutes: 1));
+    final utcDate = DateTime.now();
+
+    minimumDate = DateTime(
+        utcDate.year, utcDate.month, utcDate.day, utcDate.hour, utcDate.minute);
+    publishDate = minimumDate;
     super.initState();
   }
 
