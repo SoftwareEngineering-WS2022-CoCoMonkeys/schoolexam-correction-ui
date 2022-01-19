@@ -79,7 +79,7 @@
   "remarksGradingInternalError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen. Bitte versuchen Sie es später erneut.",
   "remarksGradingBadRequestError": "Der von Ihnen spezifizierte Notenschlüssel ist ungültig.",
 
-  "remarksRemarkAppError": "Die Aktualisierung von {name} auf {points} ist durch einen internen Fehler nicht erfolgt.",
+  "remarksRemarkAppError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt.",
   "@remarksRemarkAppError": {
     "placeholders": {
       "name": {
@@ -94,7 +94,7 @@
     }
   },
 
-  "remarksRemarkInternalError": "Die Aktualisierung von {name} auf {points} ist durch einen internen Fehler nicht erfolgt. Bitte versuchen Sie es später erneut.",
+  "remarksRemarkInternalError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt. Bitte versuchen Sie es später erneut.",
   "@remarksRemarkInternalError": {
     "placeholders": {
       "name": {
@@ -109,7 +109,7 @@
     }
   },
 
-  "remarksRemarkBadRequestError": "Die Aktualisierung von {name} auf {points} ist ungültig.",
+  "remarksRemarkBadRequestError": "Die Aktualisierung von {name} auf {points} Punkte ist ungültig.",
   "@remarksRemarkBadRequestError": {
     "placeholders": {
       "name": {

@@ -79,7 +79,7 @@
   "remarksGradingInternalError": "An internal error occurred while updating the grade table. Please try again later.",
   "remarksGradingBadRequestError": "The grading table you specified is invalid.",
 
-   "remarksRemarkAppError": "The update of {name} to {points} was not possible, due to an internal error.",
+   "remarksRemarkAppError": "The update of {name} to {points} points was not possible, due to an internal error.",
     "@remarksRemarkAppError": {
       "placeholders": {
         "name": {
@@ -94,7 +94,7 @@
       }
     },
 
-    "remarksRemarkInternalError": "The update of {name} to {points} was not possible, due to an internal error. Please retry to a later time.",
+    "remarksRemarkInternalError": "The update of {name} to {points} points was not possible, due to an internal error. Please retry to a later time.",
     "@remarksRemarkInternalError": {
       "placeholders": {
         "name": {
@@ -109,7 +109,7 @@
       }
     },
 
-    "remarksRemarkBadRequestError": "The update of {name} to {points} is invalid.",
+    "remarksRemarkBadRequestError": "The update of {name} to {points} points is invalid.",
     "@remarksRemarkBadRequestError": {
       "placeholders": {
         "name": {

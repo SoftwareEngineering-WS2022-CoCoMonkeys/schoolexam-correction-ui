@@ -30,21 +30,14 @@ typedef ChildWidgetBuilder = Widget Function(
     BuildContext context, Widget child);
 
 class _AppBlocListenerState extends State<AppBlocListener> {
-  /// A currently displayed dialog, that locks the user.
-  /// In our case, this is only possible with a loading dialog.
-  RouteSettings? settings;
-
   /// A pseudo-safe popping mechanism.
-  void _popInternalDialog(BuildContext context) {
-    // Start by removing currently visible dialog
-    if (settings != null && mounted) {
-      Navigator.popUntil(context, (route) {
-        route.settings.name == null;
-        return route.settings.name == null ||
-            (route.settings.name != settings!.name);
-      });
-      settings = null;
-    }
+  void _popInternalDialog(BuildContext context, {String? path}) {
+    Navigator.popUntil(context, (route) {
+      return route.settings.name == null ||
+          (path == null
+              ? !route.settings.name!.startsWith(dialogPath)
+              : route.settings.name != path);
+    });
   }
 
   void _showLoadingDialog(
@@ -56,10 +49,9 @@ class _AppBlocListenerState extends State<AppBlocListener> {
     }
 
     _popInternalDialog(context);
-    settings = const RouteSettings(name: loadingDialogPath);
 
     showCupertinoDialog<void>(
-        routeSettings: settings,
+        routeSettings: const RouteSettings(name: loadingDialogPath),
         context: context,
         builder: (BuildContext context) => _LoadingDialog(
             builder: (BuildContext context) =>
@@ -73,6 +65,7 @@ class _AppBlocListenerState extends State<AppBlocListener> {
     }
 
     _popInternalDialog(context);
+
     showCupertinoDialog<void>(
         routeSettings: const RouteSettings(name: successDialogPath),
         context: context,
@@ -97,58 +90,68 @@ class _AppBlocListenerState extends State<AppBlocListener> {
   }
 
   @override
-  Widget build(BuildContext context) => MultiBlocListener(listeners: [
-        BlocListener<RemarksCubit, RemarksState>(listener: (context, state) {
-          if (state is BlocFailure) {
-            _showErrorDialog(context: context, failure: state as BlocFailure);
-          } else if (state is BlocSuccess) {
-            _showSuccessDialog(context: context, success: state as BlocSuccess);
-          } else if (state is BlocLoading) {
-            _showLoadingDialog(
-                context: context,
-                loading: state as BlocLoading,
-                builder: (BuildContext context, Widget child) =>
-                    BlocListener<RemarksCubit, RemarksState>(
-                      listener: (context, state) {
-                        if (state is! BlocLoading) {
-                          // If this was not already popped, pop it now.
-                          _popInternalDialog(context);
-                        }
-                      },
-                      child: child,
-                    ));
-          }
-        }),
-        BlocListener<LoginBloc, LoginState>(listener: (context, state) {
-          if (state is BlocFailure) {
-            _showErrorDialog(context: context, failure: state as BlocFailure);
-          } else if (state is BlocSuccess) {
-            _showSuccessDialog(context: context, success: state as BlocSuccess);
-          }
-        }),
-        BlocListener<ExamDetailsCubit, ExamDetailsState>(
-            listener: (context, state) {
-          if (state is BlocFailure) {
-            _showErrorDialog(context: context, failure: state as BlocFailure);
-          } else if (state is BlocSuccess) {
-            _showSuccessDialog(context: context, success: state as BlocSuccess);
-          } else if (state is BlocLoading) {
-            _showLoadingDialog(
-                context: context,
-                loading: state as BlocLoading,
-                builder: (BuildContext context, Widget child) =>
-                    BlocListener<ExamDetailsCubit, ExamDetailsState>(
-                      listener: (context, state) {
-                        if (state is! BlocLoading) {
-                          // If this was not already popped, pop it now.
-                          _popInternalDialog(context);
-                        }
-                      },
-                      child: child,
-                    ));
-          }
-        }),
-      ], child: widget.builder(context));
+
+  /// Prevent redundant operations through redundant listeners.
+  Widget build(BuildContext context) => (!ModalRoute.of(context)!.isCurrent)
+      ? widget.builder(context)
+      : MultiBlocListener(listeners: [
+          BlocListener<RemarksCubit, RemarksState>(listener: (context, state) {
+            if (state is BlocFailure) {
+              _showErrorDialog(context: context, failure: state as BlocFailure);
+            } else if (state is BlocSuccess) {
+              _showSuccessDialog(
+                  context: context, success: state as BlocSuccess);
+            } else if (state is BlocLoading) {
+              _showLoadingDialog(
+                  context: context,
+                  loading: state as BlocLoading,
+                  builder: (BuildContext context, Widget child) =>
+                      BlocListener<RemarksCubit, RemarksState>(
+                        listener: (context, state) {
+                          if (state is! BlocLoading) {
+                            // If this was not already popped, pop it now.
+                            _popInternalDialog(context,
+                                path: loadingDialogPath);
+                          }
+                        },
+                        child: child,
+                      ));
+            }
+          }),
+          BlocListener<LoginBloc, LoginState>(listener: (context, state) {
+            if (state is BlocFailure) {
+              _showErrorDialog(context: context, failure: state as BlocFailure);
+            } else if (state is BlocSuccess) {
+              _showSuccessDialog(
+                  context: context, success: state as BlocSuccess);
+            }
+          }),
+          BlocListener<ExamDetailsCubit, ExamDetailsState>(
+              listener: (context, state) {
+            if (state is BlocFailure) {
+              _showErrorDialog(context: context, failure: state as BlocFailure);
+            } else if (state is BlocSuccess) {
+              _showSuccessDialog(
+                  context: context, success: state as BlocSuccess);
+            } else if (state is BlocLoading) {
+              _showLoadingDialog(
+                  context: context,
+                  loading: state as BlocLoading,
+                  builder: (BuildContext context, Widget child) =>
+                      BlocListener<ExamDetailsCubit, ExamDetailsState>(
+                        listener: (context, state) {
+                          if (state is! BlocLoading) {
+                            // If this was not already popped, pop it now.
+
+                            _popInternalDialog(context,
+                                path: loadingDialogPath);
+                          }
+                        },
+                        child: child,
+                      ));
+            }
+          }),
+        ], child: widget.builder(context));
 }
 
 class _LoadingDialog extends StatelessWidget {

@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam/exams/models/exam.dart';
 
-abstract class ExamHelper {
-  static String toValue(
-    ExamStatus exam, {
+extension ExamStatusExtensions on ExamStatus {
+  String getDescription({
     required BuildContext context,
   }) {
-    switch (exam) {
+    switch (this) {
       case ExamStatus.planned:
         return AppLocalizations.of(context)!.statePlanned;
       case ExamStatus.unknown:

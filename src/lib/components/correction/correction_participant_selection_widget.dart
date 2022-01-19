@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
+import 'package:schoolexam_correction_ui/extensions/correctable_extensions.dart';
 
 class CorrectionParticipantSelectionWidget extends StatelessWidget {
   const CorrectionParticipantSelectionWidget({Key? key}) : super(key: key);
@@ -27,7 +28,8 @@ class CorrectionParticipantSelectionWidget extends StatelessWidget {
               return ListTile(
                 title: Text(state.submissions[index].student.displayName),
                 // TODO : Localization
-                subtitle: Text(state.submissions[index].status.name),
+                subtitle: Text(state.submissions[index].status
+                    .getDescription(context: context)),
                 leading: (isSelected) ? const Icon(Icons.check) : null,
                 onTap: (isSelected)
                     ? null

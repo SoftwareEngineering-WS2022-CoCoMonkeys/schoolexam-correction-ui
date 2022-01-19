@@ -10,7 +10,7 @@ import 'package:schoolexam_correction_ui/components/app_bloc_listener.dart';
 import 'package:schoolexam_correction_ui/components/error_widget.dart';
 import 'package:schoolexam_correction_ui/components/exams/exam_screen_body.dart';
 import 'package:schoolexam_correction_ui/components/loading_widget.dart';
-import 'package:schoolexam_correction_ui/extensions/exam_status_helper.dart';
+import 'package:schoolexam_correction_ui/extensions/exam_extensions.dart';
 
 class ExamsPage extends StatelessWidget {
   const ExamsPage({Key? key}) : super(key: key);
@@ -114,8 +114,8 @@ class _StateSelectorChipsState extends State<StateSelectorChips> {
                     (index) => Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ChoiceChip(
-                            label: Text(ExamHelper.toValue(selectable[index],
-                                context: context)),
+                            label: Text(selectable[index]
+                                .getDescription(context: context)),
                             selected: state.states.any((element) =>
                                 element.name == selectable[index].name),
                             onSelected: (bool choice) => setState(() {
