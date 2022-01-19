@@ -84,7 +84,8 @@ class RemarksCubit extends Cubit<RemarksState> {
         examId: exam.id, submissionIds: general.map((e) => e.id).toList());
 
     final matched = details
-        .where((element) => element.isMatchedToStudent) //&& element.isCompleted)
+        .where(
+            (element) => element.isMatchedToStudent) //&& element.isCompleted)
         .toList();
 
     log("Determined matched submissions : $matched");
