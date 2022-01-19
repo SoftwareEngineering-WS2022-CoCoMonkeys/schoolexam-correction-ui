@@ -102,15 +102,15 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
 
   @override
   Widget build(BuildContext context) => Column(
+        key: formKey,
         mainAxisSize: MainAxisSize.min,
         children: [
           CupertinoFormSection.insetGrouped(
               backgroundColor: Colors.transparent,
-              key: formKey,
               children: const [_ExamTitleWidget(), _ExamTopicWidget()]),
-          CupertinoFormSection.insetGrouped(children: [
+          CupertinoFormSection
+              .insetGrouped(backgroundColor: Colors.transparent, children: [
             /// === COURSE ===
-
             BlocBuilder<ExamDetailsCubit, ExamDetailsState>(
                 builder: (context, state) {
               return CupertinoFormRow(
