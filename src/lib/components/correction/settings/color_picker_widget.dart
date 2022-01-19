@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 typedef ColorWidgetBuilder = Widget Function(
     BuildContext context, Color color, bool selected);

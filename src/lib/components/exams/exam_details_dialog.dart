@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 
@@ -9,8 +8,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details.dart';
-import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/exam_details/exam_details_state.dart';
 import 'package:schoolexam_correction_ui/components/constants.dart';
 import 'package:schoolexam_correction_ui/components/was_animated_scope.dart';
 
@@ -77,7 +74,9 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
   /// Only go into the animation widget, if difference occurs.
   bool isCourseSelectionActive = false;
   bool wasCourseSelectionActive = false;
+
   bool get canShowCourse => !isDateSelectionActive && !wasDateSelectionActive;
+
   bool get isCourseAnimating =>
       isCourseSelectionActive != wasCourseSelectionActive;
 
@@ -90,7 +89,9 @@ class _ExamDetailsDialogFormState extends State<_ExamDetailsDialogForm> {
   /// Only go into the animation widget, if difference occurs.
   bool isDateSelectionActive = false;
   bool wasDateSelectionActive = false;
+
   bool get canShowDate => !isCourseSelectionActive && !wasCourseSelectionActive;
+
   bool get isDateAnimating => isDateSelectionActive != wasDateSelectionActive;
 
   void _triggerDate() {

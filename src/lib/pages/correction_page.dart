@@ -42,6 +42,7 @@ class CorrectionPage extends StatelessWidget {
             else if (state is RemarksCorrectionInProgress) {
               return Material(
                 child: CupertinoPageScaffold(
+                    backgroundColor: Colors.grey.withOpacity(0.01),
                     resizeToAvoidBottomInset: false,
                     navigationBar: CupertinoNavigationBar(
                       trailing: IconButton(

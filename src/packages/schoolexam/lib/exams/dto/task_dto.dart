@@ -9,11 +9,20 @@ class TaskDTO extends Equatable {
   final String title;
   final double maxPoints;
 
-  TaskDTO.fromJson(Map<String, dynamic> json)
-      : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
-        title = ApiHelper.getValue(map: json, keys: ["title"], value: ""),
-        maxPoints =
-            ApiHelper.getValue(map: json, keys: ["maxPoints"], value: 0.0);
+  const TaskDTO({
+    required this.id,
+    required this.title,
+    required this.maxPoints,
+  });
+
+  factory TaskDTO.fromJson(Map<String, dynamic> json) => TaskDTO(
+      id: ApiHelper.getValue(map: json, keys: ["id"], value: ""),
+      title: ApiHelper.getValue(map: json, keys: ["title"], value: ""),
+      maxPoints:
+          ApiHelper.getValue(map: json, keys: ["maxPoints"], value: 0.0));
+
+  factory TaskDTO.fromModel({required Task task}) =>
+      TaskDTO(id: task.id, title: task.title, maxPoints: task.maxPoints);
 
   Map<String, dynamic> toJson() =>
       {"id": id, "title": title, "maxPoints": maxPoints};

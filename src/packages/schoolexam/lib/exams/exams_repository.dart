@@ -1,8 +1,6 @@
 import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 
-import 'models/exam.dart';
-
 abstract class ExamsRepository {
   const ExamsRepository();
 

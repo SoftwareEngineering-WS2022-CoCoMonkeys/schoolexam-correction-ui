@@ -13,7 +13,7 @@ class SubmissionDetailsDTO extends Equatable {
 
   final String id;
   final ParticipantDTO student;
-  final bool isCompleted;
+  final bool isComplete;
   final bool isMatchedToStudent;
 
   // details
@@ -26,7 +26,7 @@ class SubmissionDetailsDTO extends Equatable {
       required this.status,
       required this.achievedPoints,
       required this.updatedAt,
-      required this.isCompleted,
+      required this.isComplete,
       required this.isMatchedToStudent,
       required this.data,
       required this.answers});
@@ -38,7 +38,7 @@ class SubmissionDetailsDTO extends Equatable {
       'status': this.status,
       'achievedPoints': this.achievedPoints,
       'updatedAt': this.updatedAt,
-      'isCompleted': this.isCompleted,
+      'isComplete': this.isComplete,
       'isMatchedToStudent': this.isMatchedToStudent,
       'data': this.data,
       'answers': this.answers.map((e) => e.toJson()).toList()
@@ -59,8 +59,8 @@ class SubmissionDetailsDTO extends Equatable {
       achievedPoints:
           ApiHelper.getValue(map: map, keys: ["achievedPoints"], value: 0.0),
       updatedAt: ApiHelper.getValue(map: map, keys: ["updatedAt"], value: ""),
-      isCompleted:
-          ApiHelper.getValue(map: map, keys: ["isCompleted"], value: false),
+      isComplete:
+          ApiHelper.getValue(map: map, keys: ["isComplete"], value: false),
       isMatchedToStudent: ApiHelper.getValue(
           map: map, keys: ["isMatchedToStudent"], value: false),
     );
@@ -74,7 +74,7 @@ class SubmissionDetailsDTO extends Equatable {
           : Student.empty,
       data: data,
       answers: answers.map((e) => e.toModel()).toList(),
-      isCompleted: isCompleted,
+      isComplete: isComplete,
       isMatchedToStudent: isMatchedToStudent,
       updatedAt: DateTime.parse(updatedAt).toUtc(),
       achievedPoints: achievedPoints,
@@ -89,7 +89,7 @@ class SubmissionDetailsDTO extends Equatable {
         status,
         achievedPoints,
         updatedAt,
-        isCompleted,
+        isComplete,
         isMatchedToStudent,
         data,
         answers

@@ -1,6 +1,6 @@
 {
-    "name": "src",
-    "short_name": "src",
+    "name": "schoolexam",
+    "short_name": "schoolexam",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

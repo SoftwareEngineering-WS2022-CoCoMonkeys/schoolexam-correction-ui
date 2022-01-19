@@ -83,8 +83,14 @@ class RemarksCubit extends Cubit<RemarksState> {
     final details = await _examsRepository.getSubmissionDetails(
         examId: exam.id, submissionIds: general.map((e) => e.id).toList());
 
-    log("Determined submissions : $details");
-    emit(RemarksLoadSuccess(exam: exam, submissions: details));
+    final matched = details
+        .where(
+            (element) => element.isMatchedToStudent && element.isComplete)
+        .toList();
+
+    log("Determined matched submissions : $matched");
+
+    emit(RemarksLoadSuccess(exam: exam, submissions: matched));
   }
 
   /// Opens the [submission] for correction
@@ -278,15 +284,6 @@ class RemarksCubit extends Cubit<RemarksState> {
   Future<Uint8List> merge(
           {required CorrectionOverlayDocument document}) async =>
       await _helper.merge(document: document);
-
-  /// Using publish the user finalizes the correction of the [exam].
-  /// When no [publishDate] is supplied, the publishing is instantaneously.
-  Future<void> publish({required Exam exam, DateTime? publishDate}) async {
-    // TODO :Start by synchronizing the local submissions with the server
-    await _examsRepository.publishExam(
-        examId: exam.id, publishDate: publishDate);
-    log("Publishing was successful for ${exam.title}");
-  }
 
   /// Add a new lower bound to the existing grading table
   void addGradingTableBound() {

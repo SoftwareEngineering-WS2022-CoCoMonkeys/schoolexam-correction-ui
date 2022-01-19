@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 
 import 'correction_tab_view.dart';
@@ -56,10 +53,10 @@ class _CorrectionViewTabContainerState
   Widget build(BuildContext context) => Column(
         children: [
           SizedBox(
-            height: kToolbarHeight,
             width: double.infinity,
             child: TabBar(
-                labelPadding: EdgeInsets.zero,
+                indicatorPadding: EdgeInsets.zero,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 4),
                 isScrollable: true,
                 controller: _controller!,
                 tabs: widget.corrections
@@ -99,7 +96,7 @@ class _CorrectionTab extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 36,
+            margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: const BorderRadius.only(

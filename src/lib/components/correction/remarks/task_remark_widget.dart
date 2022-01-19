@@ -1,12 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:popover/popover.dart';
 import 'package:schoolexam/schoolexam.dart';
-import 'package:schoolexam_correction_ui/blocs/remarks/correction.dart';
 import 'package:schoolexam_correction_ui/blocs/remarks/remarks.dart';
 import 'package:schoolexam_correction_ui/components/correction/remarks/task_remark_dialog.dart';
 
@@ -34,42 +30,42 @@ class AnswerRemarkWidget extends StatelessWidget {
                 orElse: () => Answer.empty);
 
             return Container(
+              margin: const EdgeInsets.only(right: 8.0),
               width: double.infinity,
               constraints:
                   BoxConstraints(maxHeight: constraints.maxHeight * 0.3),
               decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8))),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text(
+                  borderRadius: const BorderRadius.all(Radius.circular(8))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
                       task.title,
                       style: Theme.of(context).textTheme.button,
                     ),
-                    _TaskRemarkIconWidget(
-                      answer: answer,
-                    ),
-                    Text("${answer.achievedPoints} / ${task.maxPoints}"),
-                    Text(AppLocalizations.of(context)!.taskRemarkPoints),
-                    ElevatedButton(
-                      onPressed: () {
-                        showPopover(
-                            context: context,
-                            bodyBuilder: (_) => TaskRemarkDialog(
-                                submission: correction.submission,
-                                answer: answer));
-                      },
-                      child: Text(
-                          AppLocalizations.of(context)!.taskRemarkEvaluate),
-                    )
-                  ],
-                ),
+                  ),
+                  _TaskRemarkIconWidget(
+                    answer: answer,
+                  ),
+                  Text("${answer.achievedPoints} / ${task.maxPoints}"),
+                  Text(AppLocalizations.of(context)!.taskRemarkPoints),
+                  ElevatedButton(
+                    onPressed: () {
+                      showPopover(
+                          context: context,
+                          bodyBuilder: (_) => TaskRemarkDialog(
+                              submission: correction.submission,
+                              answer: answer));
+                    },
+                    child:
+                        Text(AppLocalizations.of(context)!.taskRemarkEvaluate),
+                  )
+                ],
               ),
             );
           },

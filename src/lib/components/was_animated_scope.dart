@@ -1,7 +1,5 @@
-import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:tuple/tuple.dart';
 
 class WasAnimatedScope extends StatefulWidget {
   final WidgetBuilder builder;

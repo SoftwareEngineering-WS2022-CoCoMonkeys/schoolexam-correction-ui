@@ -30,7 +30,7 @@ class SubmissionData extends Correctable {
   final String studentId;
 
   final int isMatchedToStudent;
-  final int isCompleted;
+  final int isComplete;
 
   const SubmissionData({
     required this.id,
@@ -38,7 +38,7 @@ class SubmissionData extends Correctable {
     required this.studentId,
     required this.data,
     required this.isMatchedToStudent,
-    required this.isCompleted,
+    required this.isComplete,
     required int updatedAt,
     required double achievedPoints,
     required String status,
@@ -47,14 +47,15 @@ class SubmissionData extends Correctable {
             status: status,
             updatedAt: updatedAt);
 
+  @override
   Map<String, dynamic> toMap() => super.toMap()
     ..addAll({
-      'id': this.id,
-      'examId': this.examId,
-      'data': this.data,
-      'studentId': this.studentId,
-      'isMatchedToStudent': this.isMatchedToStudent,
-      'isCompleted': this.isCompleted
+      'id': id,
+      'examId': examId,
+      'data': data,
+      'studentId': studentId,
+      'isMatchedToStudent': isMatchedToStudent,
+      'isComplete': isComplete
     });
 
   factory SubmissionData.fromMap(Map<String, dynamic> map) {
@@ -64,7 +65,7 @@ class SubmissionData extends Correctable {
         data: map['data'] as String,
         studentId: map['studentId'] as String,
         isMatchedToStudent: map['isMatchedToStudent'] as int,
-        isCompleted: map['isCompleted'] as int,
+        isComplete: map['isComplete'] as int,
         updatedAt: map['updatedAt'] as int,
         achievedPoints: map['achievedPoints'] as double,
         status: map['status'] as String);
@@ -77,7 +78,7 @@ class SubmissionData extends Correctable {
           studentId: model.student.id,
           data: model.data,
           isMatchedToStudent: model.isMatchedToStudent ? 1 : 0,
-          isCompleted: model.isCompleted ? 1 : 0,
+          isComplete: model.isComplete ? 1 : 0,
           updatedAt: model.updatedAt.toUtc().millisecondsSinceEpoch,
           achievedPoints: model.achievedPoints,
           status: model.status.name);
@@ -92,7 +93,7 @@ class SubmissionData extends Correctable {
         student: student,
         data: data,
         answers: answers,
-        isCompleted: isCompleted == 1 ? true : false,
+        isComplete: isComplete == 1 ? true : false,
         isMatchedToStudent: isMatchedToStudent == 1 ? true : false,
         updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAt).toUtc(),
         achievedPoints: achievedPoints,
@@ -118,6 +119,7 @@ class AnswerData extends Correctable {
             updatedAt: updatedAt);
 
   /// Used by SQFlite to automatically generate insert, update... queries.
+  @override
   Map<String, dynamic> toMap() {
     return super.toMap()
       ..addAll({'submissionId': submissionId, 'taskId': taskId});

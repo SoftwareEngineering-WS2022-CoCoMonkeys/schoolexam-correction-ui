@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/src/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam_correction_ui/blocs/exams/exams.dart';
@@ -23,7 +22,7 @@ class _ExamScreenBodyState extends State<ExamScreenBody> {
   @override
   Widget build(BuildContext context) => BlocConsumer<ExamsCubit, ExamsState>(
         listener: (context, state) {
-          if (state is LoadedExamsState) {
+          if (state is ExamsLoadSuccess) {
             _controller.refreshCompleted();
           }
         },
@@ -32,7 +31,7 @@ class _ExamScreenBodyState extends State<ExamScreenBody> {
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: SmartRefresher(
               onRefresh: () {
-                if (state is! LoadingExamsState) {
+                if (state is! ExamsLoadInProgress) {
                   context.read<ExamsCubit>().loadExams();
                 }
               },

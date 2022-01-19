@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';

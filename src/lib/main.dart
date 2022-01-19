@@ -94,7 +94,9 @@ class SchoolExamCorrectionUI extends StatelessWidget {
                             authenticationBloc:
                                 BlocProvider.of<AuthenticationBloc>(context),
                             examsDetailBloc:
-                                BlocProvider.of<ExamDetailsCubit>(context))),
+                                BlocProvider.of<ExamDetailsCubit>(context),
+                            languageCubit:
+                                BlocProvider.of<LanguageCubit>(context))),
                 BlocProvider(
                     lazy: false,
                     create: (context) => RemarksCubit(

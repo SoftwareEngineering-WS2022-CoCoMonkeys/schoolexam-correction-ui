@@ -10,12 +10,13 @@ class GradingTableDTO extends Equatable {
 
   const GradingTableDTO({required this.lowerBounds});
 
-  GradingTableDTO.fromJson(Map<String, dynamic> json)
-      : lowerBounds = List<Map<String, dynamic>>.from(
-                ApiHelper.getValue(map: json, keys: ["lowerBounds"], value: []))
-            .map((e) => GradingTableLowerBoundDTO.fromJson(e))
-            .toList()
-          ..sort((a, b) => b.points.compareTo(a.points));
+  factory GradingTableDTO.fromJson(Map<String, dynamic> json) =>
+      GradingTableDTO(
+          lowerBounds: List<Map<String, dynamic>>.from(ApiHelper.getValue(
+                  map: json, keys: ["lowerBounds"], value: []))
+              .map((e) => GradingTableLowerBoundDTO.fromJson(e))
+              .toList()
+            ..sort((a, b) => b.points.compareTo(a.points)));
 
   Map<String, dynamic> toJson() => {"lowerBounds": lowerBounds};
 
@@ -23,9 +24,6 @@ class GradingTableDTO extends Equatable {
   String toString() {
     return jsonEncode(this);
   }
-
-  @override
-  List<Object?> get props => [lowerBounds];
 
   GradingTable toModel() {
     return GradingTable(
@@ -36,4 +34,7 @@ class GradingTableDTO extends Equatable {
       : lowerBounds = model.lowerBounds
             .map((lb) => GradingTableLowerBoundDTO.fromModel(lb))
             .toList();
+
+  @override
+  List<Object?> get props => [lowerBounds];
 }

@@ -18,7 +18,6 @@ class GradingTableLowerBoundDTO extends Equatable {
         points = ApiHelper.getValue(map: json, keys: ['points'], value: 0.0);
 
   Map<String, dynamic> toJson() =>
-      // TODO consider percentages, too
       {"grade": grade, "points": points, "type": "Points"};
 
   @override

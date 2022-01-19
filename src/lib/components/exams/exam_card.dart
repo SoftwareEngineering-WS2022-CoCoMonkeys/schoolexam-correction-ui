@@ -109,7 +109,7 @@ class ExamCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     flex: 4,
-                    child: Text(exam.participants.length.toString()),
+                    child: Text(exam.getParticipants().length.toString()),
                   )
                 ],
               ),
@@ -130,7 +130,7 @@ class ExamCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       flex: 4,
-                      child: Text(exam.quota.toStringAsFixed(3) + " %"),
+                      child: Text(exam.quota.toStringAsFixed(2) + " %"),
                     )
                   ],
                 ),

@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:schoolexam/exams/models/course.dart';
-import 'package:schoolexam/exams/models/participant.dart';
-import 'package:schoolexam/exams/models/student.dart';
+import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
 class CourseDTO extends Equatable {
@@ -38,11 +36,10 @@ class StudentDTO extends Equatable {
   final String id;
   final String displayName;
 
-  StudentDTO.fromJson(Map<String, dynamic> json)
-      : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
-        displayName = "${ApiHelper.getValue(map: json, keys: [
-              "lastName"
-            ], value: "")}, ${ApiHelper.getValue(map: json, keys: ["firstName"], value: "")}";
+  const StudentDTO({
+    required this.id,
+    required this.displayName,
+  });
 
   @override
   String toString() {
@@ -51,6 +48,15 @@ class StudentDTO extends Equatable {
 
   @override
   List<Object?> get props => [id, displayName];
+
+  factory StudentDTO.fromJson(Map<String, dynamic> json) => StudentDTO(
+      id: ApiHelper.getValue(map: json, keys: ["id"], value: ""),
+      displayName: "${ApiHelper.getValue(map: json, keys: [
+            "lastName"
+          ], value: "")}, ${ApiHelper.getValue(map: json, keys: ["firstName"], value: "")}");
+
+  factory StudentDTO.fromModel({required Student model}) =>
+      StudentDTO(id: model.id, displayName: model.displayName);
 
   Student toModel() => Student(id: id, displayName: displayName);
 }
@@ -61,6 +67,13 @@ class ParticipantDTO extends Equatable {
   final String displayName;
 
   final List<ParticipantDTO> children;
+
+  const ParticipantDTO({
+    required this.id,
+    required this.type,
+    required this.displayName,
+    required this.children,
+  });
 
   ParticipantDTO.fromJson(Map<String, dynamic> json)
       : id = ApiHelper.getValue(map: json, keys: ["id"], value: ""),
@@ -92,6 +105,17 @@ class ParticipantDTO extends Equatable {
 
   @override
   List<Object?> get props => [id, type, displayName, children];
+
+  factory ParticipantDTO.fromModel({required Participant model}) =>
+      ParticipantDTO(
+          displayName: model.displayName,
+          id: model.id,
+          children: (model is Course)
+              ? model.children
+                  .map((e) => ParticipantDTO.fromModel(model: e))
+                  .toList()
+              : <ParticipantDTO>[],
+          type: model.runtimeType.toString().toLowerCase());
 
   Participant toModel() {
     if (type.toLowerCase() == "course") {

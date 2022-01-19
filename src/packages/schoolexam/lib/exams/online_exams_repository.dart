@@ -12,13 +12,15 @@ class OnlineExamsRepository extends ExamsRepository {
   final AuthenticationRepository authenticationRepository;
   final ApiProvider provider;
 
-  OnlineExamsRepository({required this.authenticationRepository})
-      : provider = ApiProvider();
+  OnlineExamsRepository(
+      {required this.authenticationRepository, ApiProvider? provider})
+      : provider = provider ?? ApiProvider();
 
   @override
   Future<Exam> getExam(String examId) async {
     // TODO : ID based request
-    return (await getExams()).firstWhere((element) => element.id == examId,
+    final exams = await getExams();
+    return exams.firstWhere((element) => element.id == examId,
         orElse: () => Exam.empty);
   }
 
