@@ -1,12 +1,42 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:popover/popover.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/input_options.dart';
 import 'package:schoolexam_correction_ui/components/correction/settings/tool_settings_widget.dart';
 import 'package:schoolexam_correction_ui/presentation/custom_icons.dart';
 
 import 'colored_input_options.dart';
+
+void _showInputDialog(BuildContext context, CorrectionInputTool tool) async {
+  switch (tool) {
+    case CorrectionInputTool.text:
+      await showPopover(
+          context: context,
+          bodyBuilder: (context) => const TextSettingsDialog(),
+          direction: PopoverDirection.bottom);
+      break;
+    case CorrectionInputTool.pencil:
+      await showPopover(
+          context: context,
+          bodyBuilder: (context) => const PencilSettingsDialog(),
+          direction: PopoverDirection.bottom);
+      break;
+    case CorrectionInputTool.marker:
+      await showPopover(
+          context: context,
+          bodyBuilder: (context) => const MarkerSettingsDialog(),
+          direction: PopoverDirection.bottom);
+      break;
+    case CorrectionInputTool.eraser:
+      await showPopover(
+          context: context,
+          bodyBuilder: (context) => const EraserSettingsDialog(),
+          direction: PopoverDirection.bottom);
+      break;
+  }
+}
 
 class InputHeader extends StatelessWidget {
   const InputHeader({Key? key}) : super(key: key);
@@ -51,6 +81,8 @@ class InputHeader extends StatelessWidget {
       );
 }
 
+///
+///
 class _InputIconButton extends StatelessWidget {
   final CorrectionInputTool tool;
   final Icon icon;
@@ -69,36 +101,7 @@ class _InputIconButton extends StatelessWidget {
               : Colors.black,
           onPressed: () async {
             if (tool == state.inputTool) {
-              switch (tool) {
-                case CorrectionInputTool.text:
-                  await showDialog(
-                      context: context,
-                      builder: (context) => const SimpleDialog(
-                            children: [TextSettingsWidget()],
-                          ));
-                  break;
-                case CorrectionInputTool.pencil:
-                  await showDialog(
-                      context: context,
-                      builder: (context) => const SimpleDialog(
-                            children: [PencilSettingsWidget()],
-                          ));
-                  break;
-                case CorrectionInputTool.marker:
-                  await showDialog(
-                      context: context,
-                      builder: (context) => const SimpleDialog(
-                            children: [MarkerSettingsWidget()],
-                          ));
-                  break;
-                case CorrectionInputTool.eraser:
-                  await showDialog(
-                      context: context,
-                      builder: (context) => const SimpleDialog(
-                            children: [EraserSettingsWidget()],
-                          ));
-                  break;
-              }
+              _showInputDialog(context, tool);
             } else {
               switch (tool) {
                 case CorrectionInputTool.text:
@@ -149,33 +152,36 @@ class _InputSettingsWidget extends StatelessWidget {
             break;
         }
 
-        return Row(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: VerticalDivider(
-                thickness: 2,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Container(
-                height: options.size * 1.0,
-                width: 24,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.black),
-              ),
-            ),
-            if (options is ColoredInputOptions)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Icon(
-                  Icons.circle,
-                  color: options.color,
+        return GestureDetector(
+          onTap: () => _showInputDialog(context, tool),
+          child: Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: VerticalDivider(
+                  thickness: 2,
                 ),
               ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  height: options.size * 1.0,
+                  width: 24,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.black),
+                ),
+              ),
+              if (options is ColoredInputOptions)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Icon(
+                    Icons.circle,
+                    color: options.color,
+                  ),
+                ),
+            ],
+          ),
         );
       });
 }
