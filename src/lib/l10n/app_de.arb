@@ -60,25 +60,20 @@
   "correction": "Korrektur",
   "taskRemarkEvaluate": "Bewerten",
   "taskRemarkPoints": "Punkte",
-
   "loadingTitle": "Lade",
   "errorTitle": "Fehler",
   "successTitle": "Erfolg",
-
   "authenticationError": "Die Anmeldung ist fehlgeschlagen.",
   "updateExamError": "Die Aktualisierung ist fehlgeschlagen.",
   "offlineError": "Sie sind offline. Bitte bauen Sie eine funktionierende Internetverbindung auf.",
-
   "loginAppError": "Während der Anmeldung ist es zu einem internen Fehler gekommen.",
   "loginInternalError": "Während der Anmeldung ist es zu einem internen Fehler gekommen. Bitte versuchen Sie die Anmeldung später erneut.",
   "loginBadRequestError": "Sie haben einen ungültigen Benutzernamen oder ein ungültiges Passwort eingegeben.",
-
   "remarksGradingSuccess": "Der Notenschlüssel wurde erfolgreich aktualisiert.",
   "remarksGradingLoading": "Warte auf die Aktualisierung des Notenschlüssels.",
   "remarksGradingAppError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen.",
   "remarksGradingInternalError": "Während der Aktualisierung des Notenschlüssels ist es zu einem internen Fehler gekommen. Bitte versuchen Sie es später erneut.",
   "remarksGradingBadRequestError": "Der von Ihnen spezifizierte Notenschlüssel ist ungültig.",
-
   "remarksRemarkAppError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt.",
   "@remarksRemarkAppError": {
     "placeholders": {
@@ -93,7 +88,6 @@
       }
     }
   },
-
   "remarksRemarkInternalError": "Die Aktualisierung von {name} auf {points} Punkte ist durch einen internen Fehler nicht erfolgt. Bitte versuchen Sie es später erneut.",
   "@remarksRemarkInternalError": {
     "placeholders": {
@@ -108,7 +102,6 @@
       }
     }
   },
-
   "remarksRemarkBadRequestError": "Die Aktualisierung von {name} auf {points} Punkte ist ungültig.",
   "@remarksRemarkBadRequestError": {
     "placeholders": {
@@ -123,7 +116,6 @@
       }
     }
   },
-
   "examPublishSuccess": "{name} wurde erfolgreich veröffentlicht.",
   "@examPublishSuccess": {
     "placeholders": {
@@ -161,8 +153,6 @@
     }
   },
   "examPublishBadRequestError": "Die von Ihnen eingegebenen Daten sind ungültig. Bitte überprüfen Sie die Daten und starten die App gegebenenfalls neu.",
-
-
   "examDetailsCreationLoading": "Warte auf die Erstellung der Klausur {name}.",
   "@examDetailsCreationLoading": {
     "placeholders": {
@@ -172,7 +162,6 @@
       }
     }
   },
-
   "examDetailsCreationSuccess": "{name} wurde erfolgreich erstellt.",
   "@examDetailsCreationSuccess": {
     "placeholders": {
@@ -201,7 +190,6 @@
     }
   },
   "examDetailsCreationBadRequestError": "Die von Ihnen eingegebenen Daten sind ungültig. Bitte überprüfen Sie die Daten und starten die App gegebenenfalls neu.",
-
   "examDetailsUpdateLoading": "Warte auf die Aktualisierung von {name}.",
   "@examDetailsUpdateLoading": {
     "placeholders": {

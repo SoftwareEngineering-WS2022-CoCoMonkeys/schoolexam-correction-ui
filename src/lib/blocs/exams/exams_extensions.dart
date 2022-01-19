@@ -1,4 +1,3 @@
-import 'package:schoolexam/exams/dto/new_exam_dto.dart';
 import 'package:schoolexam/exams/exams.dart';
 import 'package:schoolexam/utils/network_exceptions.dart';
 import 'package:schoolexam_correction_ui/blocs/language/language.dart';

@@ -60,7 +60,7 @@ class LocalExamsRepository extends ExamsRepository {
         '	LEFT OUTER JOIN courses AS c'
         '	ON'
         '		c.id = p.id'
-        '	WHERE cc.courseId IN (${courses.map((e) => "\'$e\'").join(",")})'
+        '	WHERE cc.courseId IN (${courses.map((e) => "'$e'").join(",")})'
         '	UNION ALL'
         '	SELECT m.id, p.id, p.displayName, (CASE WHEN NOT (c.id IS NULL) THEN 1 ELSE 0 END) AS isCourse'
         ' FROM courses_children AS cc'
@@ -130,7 +130,7 @@ class LocalExamsRepository extends ExamsRepository {
     final mTasks = List<Map<String, dynamic>>.from(await database!.query(
             'tasks',
             where:
-                'id IN (${answers.map((e) => "\'${e.taskId}\'").join(",")})'))
+                'id IN (${answers.map((e) => "'${e.taskId}'").join(",")})'))
         .map((e) => TaskData.fromMap(e).toModel())
         .toList();
 
@@ -359,7 +359,7 @@ class LocalExamsRepository extends ExamsRepository {
     // Scenario : Teacher creates an exam. After some initial work on the exam, it is decided to remove a task from the exam.
     batch.delete('tasks',
         where:
-            'examId = ? AND NOT id IN (${exam.tasks.map((e) => "\'${e.id}\'").join(",")})');
+            'examId = ? AND NOT id IN (${exam.tasks.map((e) => "'${e.id}'").join(",")})');
 
     // 3. Insert participants
     // "Dangling" participants are not a problem here. It is just required, that we know of linked participants.

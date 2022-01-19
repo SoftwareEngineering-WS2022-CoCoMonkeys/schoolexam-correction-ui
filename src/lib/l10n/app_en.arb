@@ -60,108 +60,99 @@
   "correction": "correction",
   "taskRemarkEvaluate": "evaluate",
   "taskRemarkPoints": "points",
-
   "loadingTitle": "Loading",
   "errorTitle": "Error",
   "successTitle": "Success",
-
   "authenticationError": "The authentication failed.",
   "updateExamError": "The update failed.",
   "offlineError": "You are offline. Please establish a working internet connection.",
-
   "loginAppError": "An internal error occurred during the registration process.",
   "loginInternalError": "An internal error occurred during the registration process. Please try the login again later.",
   "loginBadRequestError": "You have entered an invalid user name or password.",
-
   "remarksGradingSuccess": "The grading table was successfully updated.",
   "remarksGradingLoading": "Waiting for the update of the grading table.",
   "remarksGradingAppError": "An internal error occurred while updating the grading table.",
   "remarksGradingInternalError": "An internal error occurred while updating the grade table. Please try again later.",
   "remarksGradingBadRequestError": "The grading table you specified is invalid.",
-
-   "remarksRemarkAppError": "The update of {name} to {points} points was not possible, due to an internal error.",
-    "@remarksRemarkAppError": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Aufgabe 2"
-        },
-      "points": {
-            "type": "double",
-            "format": "decimalPattern",
-            "example": "0.5"
-        }
-      }
-    },
-
-    "remarksRemarkInternalError": "The update of {name} to {points} points was not possible, due to an internal error. Please retry to a later time.",
-    "@remarksRemarkInternalError": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Aufgabe 2"
-        },
-        "points": {
-            "type": "double",
-            "format": "decimalPattern",
-            "example": "0.5"
-        }
-      }
-    },
-
-    "remarksRemarkBadRequestError": "The update of {name} to {points} points is invalid.",
-    "@remarksRemarkBadRequestError": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Aufgabe 2"
-        },
+  "remarksRemarkAppError": "The update of {name} to {points} points was not possible, due to an internal error.",
+  "@remarksRemarkAppError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
       "points": {
         "type": "double",
         "format": "decimalPattern",
         "example": "0.5"
       }
+    }
+  },
+  "remarksRemarkInternalError": "The update of {name} to {points} points was not possible, due to an internal error. Please retry to a later time.",
+  "@remarksRemarkInternalError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
       }
-    },
-
+    }
+  },
+  "remarksRemarkBadRequestError": "The update of {name} to {points} points is invalid.",
+  "@remarksRemarkBadRequestError": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Aufgabe 2"
+      },
+      "points": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.5"
+      }
+    }
+  },
   "examDetailsCreationLoading": "Waiting for the creation of the exam {name}.",
   "@examDetailsCreationLoading": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Politics 1"
-        }
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
       }
+    }
   },
   "examDetailsCreationSuccess": "{name} was successfully created.",
   "@examDetailsCreationSuccess": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Politics 1"
-        }
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
       }
+    }
   },
   "examDetailsCreationAppError": "During the creation of {name}, an internal error occurred.",
   "@examDetailsCreationAppError": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Politics 1"
-        }
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
       }
+    }
   },
   "examDetailsCreationInternalError": "During the creation of {name}, an internal error occurred. Please try the adjustment again later.",
   "@examDetailsCreationInternalError": {
-      "placeholders": {
-        "name": {
-          "type": "String",
-          "example": "Politics 1"
-        }
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Politics 1"
       }
+    }
   },
   "examDetailsCreationBadRequestError": "The data you entered is invalid. Please check the data and restart the app if necessary.",
-
   "examPublishSuccess": "{name} was successfully published.",
   "@examPublishSuccess": {
     "placeholders": {
@@ -199,7 +190,6 @@
     }
   },
   "examPublishBadRequestError": "The data you entered is invalid. Please check the data and restart the app if necessary.",
-
   "examDetailsUpdateLoading": "Waiting for the update of {name}.",
   "@examDetailsUpdateLoading": {
     "placeholders": {

@@ -1,5 +1,4 @@
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam/exams/models/grading_table.dart';
 
 class ExamData {
   final String id;

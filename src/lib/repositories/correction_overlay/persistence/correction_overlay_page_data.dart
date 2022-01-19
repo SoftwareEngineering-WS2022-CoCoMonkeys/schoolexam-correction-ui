@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:schoolexam_correction_ui/repositories/correction_overlay/correction_overlay.dart';
-import 'package:schoolexam_correction_ui/repositories/correction_overlay/models/correction_overlay_document.dart';
 
 class CorrectionOverlayPageData {
   /// We introduce a separate primary key to avoid constructing a composite one including a TEXT attribute (submissionId).

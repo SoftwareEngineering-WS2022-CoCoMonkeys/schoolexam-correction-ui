@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:schoolexam_correction_ui/blocs/overlay/correction_overlay.dart';
 import 'package:schoolexam_correction_ui/components/correction/input/colored_input_options.dart';
@@ -19,8 +18,9 @@ class _BaseSettingsDialog extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, children: [builder(context)])));
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [builder(context)])));
 }
 
 class PencilSettingsDialog extends StatelessWidget {

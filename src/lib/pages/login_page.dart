@@ -9,8 +9,9 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        resizeToAvoidBottomInset: false, child: AppBlocListener(builder: (context) {
-      return const Material(child: LoginForm());
-    }));
+        resizeToAvoidBottomInset: false,
+        child: AppBlocListener(builder: (context) {
+          return const Material(child: LoginForm());
+        }));
   }
 }

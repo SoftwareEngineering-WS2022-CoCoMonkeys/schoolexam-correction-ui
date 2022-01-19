@@ -4,6 +4,7 @@ class ExamCardBase extends StatelessWidget {
   final WidgetBuilder builder;
 
   const ExamCardBase({Key? key, required this.builder}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => SizedBox(
       height: 280,

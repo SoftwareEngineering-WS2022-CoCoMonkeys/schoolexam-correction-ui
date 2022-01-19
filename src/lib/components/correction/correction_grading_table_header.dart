@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GradingTableHeader extends TableRow {
-  static final headerTextStyle = TextStyle(fontWeight: FontWeight.bold);
+  static const headerTextStyle = TextStyle(fontWeight: FontWeight.bold);
 
   GradingTableHeader({required BuildContext context})
       : super(children: [
@@ -11,13 +10,13 @@ class GradingTableHeader extends TableRow {
           const Text(""),
           Center(
               child: Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
                 Text(AppLocalizations.of(context)!.gradingIntervalStart,
                     style: headerTextStyle),
                 Text("% | ${AppLocalizations.of(context)!.points}",
-                    style: TextStyle(color: Colors.grey))
+                    style: const TextStyle(color: Colors.grey))
               ],
             ),
           )),
@@ -31,7 +30,7 @@ class GradingTableHeader extends TableRow {
                   Text(AppLocalizations.of(context)!.gradingIntervalEnd,
                       style: headerTextStyle),
                   Text("% | ${AppLocalizations.of(context)!.points}",
-                      style: TextStyle(color: Colors.grey))
+                      style: const TextStyle(color: Colors.grey))
                 ]),
                 const Icon(Icons.edit_outlined)
               ],

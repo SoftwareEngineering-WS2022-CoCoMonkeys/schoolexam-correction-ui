@@ -8,7 +8,7 @@ class CustomIcons {
       IconData(0xf031, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData eraser =
       IconData(0xf12d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData pencil_alt =
+  static const IconData pencilAlt =
       IconData(0xf303, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData marker =
       IconData(0xf5a1, fontFamily: _kFontFam, fontPackage: _kFontPkg);

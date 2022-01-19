@@ -1,5 +1,4 @@
-import 'package:collection/src/iterable_extensions.dart';
-import 'package:schoolexam/exams/models/exam.dart';
+import 'package:collection/src/iterable_extensions.dart';import 'package:schoolexam/exams/models/exam.dart';
 import 'package:schoolexam/exams/models/grading_table.dart';
 import 'package:schoolexam/exams/models/grading_table_lower_bound.dart';
 

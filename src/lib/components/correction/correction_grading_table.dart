@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +22,7 @@ class CorrectionGradingTable extends StatelessWidget {
 
       final greyPlaceHolderText = Text(
         AppLocalizations.of(context)!.empty,
-        style: TextStyle(color: Colors.grey),
+        style: const TextStyle(color: Colors.grey),
       );
       final table = Table(
           border: const TableBorder(
@@ -128,10 +127,11 @@ class CorrectionGradingTable extends StatelessWidget {
             height: 500,
             child: Column(children: [
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
                   AppLocalizations.of(context)!.gradingTable,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 25),
                 ),
               ),
               // make grading table scrollable

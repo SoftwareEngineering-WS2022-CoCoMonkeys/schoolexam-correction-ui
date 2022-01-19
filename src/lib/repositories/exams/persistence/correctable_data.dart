@@ -47,14 +47,15 @@ class SubmissionData extends Correctable {
             status: status,
             updatedAt: updatedAt);
 
+  @override
   Map<String, dynamic> toMap() => super.toMap()
     ..addAll({
-      'id': this.id,
-      'examId': this.examId,
-      'data': this.data,
-      'studentId': this.studentId,
-      'isMatchedToStudent': this.isMatchedToStudent,
-      'isCompleted': this.isCompleted
+      'id': id,
+      'examId': examId,
+      'data': data,
+      'studentId': studentId,
+      'isMatchedToStudent': isMatchedToStudent,
+      'isCompleted': isCompleted
     });
 
   factory SubmissionData.fromMap(Map<String, dynamic> map) {
@@ -118,6 +119,7 @@ class AnswerData extends Correctable {
             updatedAt: updatedAt);
 
   /// Used by SQFlite to automatically generate insert, update... queries.
+  @override
   Map<String, dynamic> toMap() {
     return super.toMap()
       ..addAll({'submissionId': submissionId, 'taskId': taskId});

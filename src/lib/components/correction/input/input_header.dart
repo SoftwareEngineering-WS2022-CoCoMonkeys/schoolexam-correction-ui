@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popover/popover.dart';
@@ -65,7 +64,7 @@ class InputHeader extends StatelessWidget {
                     color: Colors.black,
                     icon: const Icon(Icons.redo)),
                 const _InputIconButton(
-                    icon: Icon(CustomIcons.pencil_alt),
+                    icon: Icon(CustomIcons.pencilAlt),
                     tool: CorrectionInputTool.pencil),
                 const _InputIconButton(
                     icon: Icon(CustomIcons.marker),

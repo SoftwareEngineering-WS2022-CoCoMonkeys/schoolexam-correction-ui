@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:formz/formz.dart';
@@ -59,7 +57,7 @@ class _UsernameInput extends StatelessWidget {
       buildWhen: (previous, current) => previous.username != current.username,
       builder: (context, state) {
         return Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           width: MediaQuery.of(context).size.width * 0.8,
           child: TextField(
             key: const Key('loginForm_usernameInput_textField'),
@@ -71,8 +69,8 @@ class _UsernameInput extends StatelessWidget {
                 size: 40,
                 color: Theme.of(context).primaryColor,
               ),
-              border:
-                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red)),
               isDense: true,
               labelText: AppLocalizations.of(context)!.userName,
               errorText: state.username.invalid ? 'invalid username' : null,
@@ -91,7 +89,7 @@ class _PasswordInput extends StatelessWidget {
       buildWhen: (previous, current) => previous.password != current.password,
       builder: (context, state) {
         return Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           width: MediaQuery.of(context).size.width * 0.8,
           child: TextField(
             key: const Key('loginForm_passwordInput_textField'),
@@ -104,8 +102,8 @@ class _PasswordInput extends StatelessWidget {
                 size: 40,
                 color: Theme.of(context).primaryColor,
               ),
-              border:
-                  OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red)),
               isDense: true,
               labelText: AppLocalizations.of(context)!.password,
               errorText: state.password.invalid ? 'invalid password' : null,
@@ -126,10 +124,11 @@ class _LoginButton extends StatelessWidget {
         return state.status.isSubmissionInProgress
             ? const CircularProgressIndicator()
             : Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: Size(400, 50)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(400, 50)),
                   key: const Key('loginForm_continue_raisedButton'),
                   child: Text(
                     AppLocalizations.of(context)!.login,

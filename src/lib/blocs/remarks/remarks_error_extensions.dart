@@ -37,18 +37,21 @@ extension RemarksRemarkErrorExtensions on NetworkException {
     /// Invalid credentials
     if (this is BadRequestException || this is ForbiddenException) {
       return language.translate(
-          callback: (dictionary) => dictionary.remarksRemarkBadRequestError(basis.task.title, basis.achievedPoints));
+          callback: (dictionary) => dictionary.remarksRemarkBadRequestError(
+              basis.task.title, basis.achievedPoints));
     }
 
     /// Temporary server error
     if (this is ServerException) {
       return language.translate(
-          callback: (dictionary) => dictionary.remarksRemarkInternalError(basis.task.title, basis.achievedPoints));
+          callback: (dictionary) => dictionary.remarksRemarkInternalError(
+              basis.task.title, basis.achievedPoints));
     }
 
     /// Default to app error
     return language.translate(
-        callback: (dictionary) => dictionary.remarksRemarkAppError(basis.task.title, basis.achievedPoints));
+        callback: (dictionary) => dictionary.remarksRemarkAppError(
+            basis.task.title, basis.achievedPoints));
   }
 }
 

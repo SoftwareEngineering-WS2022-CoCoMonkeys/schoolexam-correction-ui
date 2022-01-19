@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,7 +26,6 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
   //
 
   final CorrectionOverlayRepository _correctionOverlayRepository;
-  final RemarksCubit _remarkCubit;
   late final StreamSubscription _remarkSubscription;
   late final StreamSubscription _correctionSubscription;
 
@@ -35,7 +33,6 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
       {required CorrectionOverlayRepository correctionOverlayRepository,
       required RemarksCubit remarkCubit})
       : _correctionOverlayRepository = correctionOverlayRepository,
-        _remarkCubit = remarkCubit,
         _pageHistory = <String, Queue<CorrectionOverlayPage>>{},
         super(InitialOverlayState()) {
     _remarkSubscription = remarkCubit.stream.listen(_onRemarkStateChanged);

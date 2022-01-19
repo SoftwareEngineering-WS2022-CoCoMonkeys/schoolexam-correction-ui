@@ -2,9 +2,6 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:schoolexam/exams/exams.dart';
-import 'package:schoolexam/exams/models/course.dart';
-import 'package:schoolexam/exams/models/participant.dart';
-import 'package:schoolexam/exams/models/student.dart';
 import 'package:schoolexam/utils/api_helper.dart';
 
 class CourseDTO extends Equatable {
