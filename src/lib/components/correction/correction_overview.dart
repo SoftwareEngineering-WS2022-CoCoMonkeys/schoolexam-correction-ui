@@ -15,6 +15,7 @@ class CorrectionOverview extends StatelessWidget {
       builder: (context, state) => Column(
             children: [
               const CorrectionGradingTable(),
+              const Divider(thickness: 3,),
               Expanded(
                 child: Container(
                     constraints: BoxConstraints(

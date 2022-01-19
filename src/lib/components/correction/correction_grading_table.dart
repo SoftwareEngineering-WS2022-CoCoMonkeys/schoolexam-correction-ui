@@ -55,11 +55,6 @@ class CorrectionGradingTable extends StatelessWidget {
                         icon: const Icon(Icons.delete, size: 25),
                         onPressed: () => BlocProvider.of<RemarksCubit>(context)
                             .deleteGradingTableBound(index))),
-                Center(
-                    child: prevPoints.isNaN
-                        ? greyPlaceHolderText
-                        : Text(
-                            "${prevPercentage.toStringAsFixed(1)}% (${prevPoints.toStringAsFixed(1)})")),
                 InkWell(
                     onTap: _showSingleWidgetBottomSheet(
                       context: context,
@@ -70,15 +65,15 @@ class CorrectionGradingTable extends StatelessWidget {
                         onSubmitted: (pointsInput) {
                           BlocProvider.of<RemarksCubit>(context)
                               .changeGradingTableBoundPoints(
-                                  index: index,
-                                  points: double.parse(pointsInput) /
-                                      100 *
-                                      maxPoints);
+                              index: index,
+                              points: double.parse(pointsInput) /
+                                  100 *
+                                  maxPoints);
                         },
                         style: const TextStyle(fontSize: 36),
                         decoration: InputDecoration(
                             labelText:
-                                "${AppLocalizations.of(context)!.points} (%)"),
+                            "${AppLocalizations.of(context)!.points} (%)"),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
@@ -93,8 +88,15 @@ class CorrectionGradingTable extends StatelessWidget {
                           child: lb.points.isNaN
                               ? greyPlaceHolderText
                               : Text(
-                                  "${currPercentage.toStringAsFixed(1)}% (${lb.points.toStringAsFixed(1)})")),
+                              "${currPercentage.toStringAsFixed(1)}% (${lb.points.toStringAsFixed(1)})")),
                     )),
+                Center(
+                    child: prevPoints.isNaN
+                        ? greyPlaceHolderText
+                        : Text(
+                            "${prevPercentage.toStringAsFixed(1)}% (${prevPoints.toStringAsFixed(1)})",
+                            style: const TextStyle(color: Colors.grey),
+                          )),
                 InkWell(
                     onTap: _showSingleWidgetBottomSheet(
                       context: context,
@@ -123,21 +125,18 @@ class CorrectionGradingTable extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.all(30.0),
         child: SizedBox(
-            width: 600,
-            height: 500,
-            child: Column(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  AppLocalizations.of(context)!.gradingTable,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 25),
-                ),
-              ),
-              // make grading table scrollable
-              Flexible(child: SingleChildScrollView(child: table)),
-              const GradingTableActionBar()
-            ])),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              AppLocalizations.of(context)!.gradingTable,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+            ),
+          ),
+          // make grading table scrollable
+          Flexible(child: SingleChildScrollView(child: table)),
+          const GradingTableActionBar()
+        ])),
       );
     });
   }

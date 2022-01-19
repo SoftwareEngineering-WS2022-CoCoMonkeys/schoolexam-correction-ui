@@ -11,12 +11,18 @@ class GradingTableHeader extends TableRow {
           Center(
               child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text(AppLocalizations.of(context)!.gradingIntervalStart,
-                    style: headerTextStyle),
-                Text("% | ${AppLocalizations.of(context)!.points}",
-                    style: const TextStyle(color: Colors.grey))
+                Column(
+                  children: [
+                    Text(AppLocalizations.of(context)!.gradingIntervalStart,
+                        style: headerTextStyle),
+                    Text("% | ${AppLocalizations.of(context)!.points}",
+                        style: const TextStyle(color: Colors.grey))
+                  ],
+                ),
+                const Icon(Icons.edit_outlined)
               ],
             ),
           )),
@@ -32,7 +38,6 @@ class GradingTableHeader extends TableRow {
                   Text("% | ${AppLocalizations.of(context)!.points}",
                       style: const TextStyle(color: Colors.grey))
                 ]),
-                const Icon(Icons.edit_outlined)
               ],
             ),
           )),
