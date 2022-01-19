@@ -30,7 +30,7 @@ class SubmissionData extends Correctable {
   final String studentId;
 
   final int isMatchedToStudent;
-  final int isCompleted;
+  final int isComplete;
 
   const SubmissionData({
     required this.id,
@@ -38,7 +38,7 @@ class SubmissionData extends Correctable {
     required this.studentId,
     required this.data,
     required this.isMatchedToStudent,
-    required this.isCompleted,
+    required this.isComplete,
     required int updatedAt,
     required double achievedPoints,
     required String status,
@@ -55,7 +55,7 @@ class SubmissionData extends Correctable {
       'data': data,
       'studentId': studentId,
       'isMatchedToStudent': isMatchedToStudent,
-      'isCompleted': isCompleted
+      'isComplete': isComplete
     });
 
   factory SubmissionData.fromMap(Map<String, dynamic> map) {
@@ -65,7 +65,7 @@ class SubmissionData extends Correctable {
         data: map['data'] as String,
         studentId: map['studentId'] as String,
         isMatchedToStudent: map['isMatchedToStudent'] as int,
-        isCompleted: map['isCompleted'] as int,
+        isComplete: map['isComplete'] as int,
         updatedAt: map['updatedAt'] as int,
         achievedPoints: map['achievedPoints'] as double,
         status: map['status'] as String);
@@ -78,7 +78,7 @@ class SubmissionData extends Correctable {
           studentId: model.student.id,
           data: model.data,
           isMatchedToStudent: model.isMatchedToStudent ? 1 : 0,
-          isCompleted: model.isCompleted ? 1 : 0,
+          isComplete: model.isComplete ? 1 : 0,
           updatedAt: model.updatedAt.toUtc().millisecondsSinceEpoch,
           achievedPoints: model.achievedPoints,
           status: model.status.name);
@@ -93,7 +93,7 @@ class SubmissionData extends Correctable {
         student: student,
         data: data,
         answers: answers,
-        isCompleted: isCompleted == 1 ? true : false,
+        isComplete: isComplete == 1 ? true : false,
         isMatchedToStudent: isMatchedToStudent == 1 ? true : false,
         updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAt).toUtc(),
         achievedPoints: achievedPoints,

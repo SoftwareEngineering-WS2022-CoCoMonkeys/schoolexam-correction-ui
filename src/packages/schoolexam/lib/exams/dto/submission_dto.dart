@@ -10,7 +10,7 @@ class SubmissionDTO extends Equatable {
 
   final String id;
   final ParticipantDTO student;
-  final bool isCompleted;
+  final bool isComplete;
   final bool isMatchedToStudent;
 
   const SubmissionDTO(
@@ -19,7 +19,7 @@ class SubmissionDTO extends Equatable {
       required this.status,
       required this.achievedPoints,
       required this.updatedAt,
-      required this.isCompleted,
+      required this.isComplete,
       required this.isMatchedToStudent});
 
   Map<String, dynamic> toJson() {
@@ -29,7 +29,7 @@ class SubmissionDTO extends Equatable {
       'status': this.status,
       'achievedPoints': this.achievedPoints,
       'updatedAt': this.updatedAt,
-      'isCompleted': this.isCompleted,
+      'isComplete': this.isComplete,
       'isMatchedToStudent': this.isMatchedToStudent,
     };
   }
@@ -43,8 +43,8 @@ class SubmissionDTO extends Equatable {
       achievedPoints:
           ApiHelper.getValue(map: map, keys: ["achievedPoints"], value: 0.0),
       updatedAt: ApiHelper.getValue(map: map, keys: ["updatedAt"], value: ""),
-      isCompleted:
-          ApiHelper.getValue(map: map, keys: ["isCompleted"], value: false),
+      isComplete:
+          ApiHelper.getValue(map: map, keys: ["isComplete"], value: false),
       isMatchedToStudent: ApiHelper.getValue(
           map: map, keys: ["isMatchedToStudent"], value: false),
     );
@@ -57,7 +57,7 @@ class SubmissionDTO extends Equatable {
           status: model.status.name,
           achievedPoints: model.achievedPoints,
           updatedAt: model.updatedAt.toUtc().toIso8601String(),
-          isCompleted: model.isCompleted,
+          isComplete: model.isComplete,
           isMatchedToStudent: model.isMatchedToStudent);
 
   SubmissionOverview toModel({required Exam exam}) => SubmissionOverview(
@@ -66,7 +66,7 @@ class SubmissionDTO extends Equatable {
       student: (student.toModel() is Student)
           ? student.toModel() as Student
           : Student.empty,
-      isCompleted: isCompleted,
+      isComplete: isComplete,
       isMatchedToStudent: isMatchedToStudent,
       updatedAt: DateTime.parse(updatedAt).toUtc(),
       achievedPoints: achievedPoints,
@@ -81,7 +81,7 @@ class SubmissionDTO extends Equatable {
         status,
         achievedPoints,
         updatedAt,
-        isCompleted,
+        isComplete,
         isMatchedToStudent
       ];
 }

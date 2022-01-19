@@ -40,7 +40,7 @@ class LocalExamsRepository extends ExamsRepository {
 
       /// CORRECTABLE
       db.execute(
-          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, isMatchedToStudent INTEGER NOT NULL, isCompleted INTEGER NOT NULL, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, updatedAt INT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
+          'CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY, isMatchedToStudent INTEGER NOT NULL, isComplete INTEGER NOT NULL, examId TEXT NOT NULL, data TEXT NOT NULL, studentId TEXT NOT NULL, achievedPoints REAL DEFAULT 0 NOT NULL, status TEXT NOT NULL, updatedAt INT NOT NULL, FOREIGN KEY(examId) REFERENCES exams(id) ON DELETE CASCADE, FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE)');
       db.execute(
           'CREATE TABLE IF NOT EXISTS answer_segments(segmentId INTEGER PRIMARY KEY NOT NULL, submissionId TEXT NOT NULL, taskId TEXT NOT NULL, startPage INT NOT NULL, endPage INT NOT NULL, startY DOUBLE NOT NULL, endY DOUBLE NOT NULL, UNIQUE(segmentId, submissionId, taskId), FOREIGN KEY(submissionId) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE)');
       db.execute(
