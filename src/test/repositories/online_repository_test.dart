@@ -74,5 +74,23 @@ void main() {
               .map((e) => ExamDTO.fromJson(e))
               .toList());
     });
+
+    test('getExams for invalid valid response', () async {
+      final client = MockClient();
+      final provider = ApiProvider(client: client);
+
+      final examsRepository = OnlineExamsRepository(
+          authenticationRepository: authRepository, provider: provider);
+
+      const data = '';
+
+      final base = await getBase();
+      final path = Uri.https(base, '/exam/byteacher');
+
+      when(client.get(path, headers: captureAnyNamed('headers')))
+          .thenAnswer((_) async => http.Response(data, 500));
+
+      expect(() async => await examsRepository.getExams(), throwsException);
+    });
   });
 }
