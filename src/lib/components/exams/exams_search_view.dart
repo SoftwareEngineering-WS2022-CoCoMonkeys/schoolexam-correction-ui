@@ -73,6 +73,7 @@ class _StateSelectorChipsState extends State<StateSelectorChips> {
   Widget build(BuildContext context) {
     return BlocBuilder<ExamsCubit, ExamsState>(
         builder: (context, state) => Material(
+              color: CupertinoTheme.of(context).scaffoldBackgroundColor,
               child: Wrap(
                 children: List.generate(
                     selectable.length,
