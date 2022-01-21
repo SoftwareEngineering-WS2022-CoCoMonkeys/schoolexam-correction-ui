@@ -122,9 +122,11 @@ class CorrectionGradingTable extends StatelessWidget {
               ]);
             })
           ]);
+
       return Padding(
         padding: const EdgeInsets.all(30.0),
-        child: SizedBox(
+        child: LimitedBox(
+          maxHeight: MediaQuery.of(context).size.height * 0.3,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
