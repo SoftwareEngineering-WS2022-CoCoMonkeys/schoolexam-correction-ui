@@ -20,7 +20,7 @@ class Answer extends Correctable {
 
   static final empty = Answer(
       task: Task.empty,
-      segments: [],
+      segments: const [],
       achievedPoints: 0.0,
       updatedAt: DateTime(0),
       status: CorrectableStatus.unknown);
@@ -52,7 +52,7 @@ class AnswerSegment extends Equatable {
   final SegmentPosition start;
   final SegmentPosition end;
 
-  AnswerSegment({required this.start, required this.end});
+  const AnswerSegment({required this.start, required this.end});
 
   int compareTo(AnswerSegment other) {
     int c1 = start.compareTo(other.start);

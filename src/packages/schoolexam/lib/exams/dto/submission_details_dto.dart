@@ -20,7 +20,7 @@ class SubmissionDetailsDTO extends Equatable {
   final String data;
   final List<AnswerDTO> answers;
 
-  SubmissionDetailsDTO(
+  const SubmissionDetailsDTO(
       {required this.id,
       required this.student,
       required this.status,
@@ -33,15 +33,15 @@ class SubmissionDetailsDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': this.id,
-      'student': this.student,
-      'status': this.status,
-      'achievedPoints': this.achievedPoints,
-      'updatedAt': this.updatedAt,
-      'isComplete': this.isComplete,
-      'isMatchedToStudent': this.isMatchedToStudent,
-      'data': this.data,
-      'answers': this.answers.map((e) => e.toJson()).toList()
+      'id': id,
+      'student': student,
+      'status': status,
+      'achievedPoints': achievedPoints,
+      'updatedAt': updatedAt,
+      'isComplete': isComplete,
+      'isMatchedToStudent': isMatchedToStudent,
+      'data': data,
+      'answers': answers.map((e) => e.toJson()).toList()
     };
   }
 

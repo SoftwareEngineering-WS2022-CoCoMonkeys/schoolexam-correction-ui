@@ -7,15 +7,15 @@ class AuthenticationDTO extends Equatable {
   final String token;
   final UserDTO user;
 
-  AuthenticationDTO({required this.token, required this.user});
+  const AuthenticationDTO({required this.token, required this.user});
 
   Authentication toModel() =>
       Authentication(token: token, user: user.toModel());
 
   Map<String, dynamic> toJson() {
     return {
-      'token': this.token,
-      'user': this.user.toJson(),
+      'token': token,
+      'user': user.toJson(),
     };
   }
 

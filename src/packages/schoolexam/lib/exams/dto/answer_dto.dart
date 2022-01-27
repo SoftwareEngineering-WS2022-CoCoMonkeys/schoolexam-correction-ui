@@ -20,11 +20,11 @@ class AnswerDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'updatedAt': this.updatedAt,
-      'status': this.status,
-      'achievedPoints': this.achievedPoints,
-      'task': this.task.toJson(),
-      'segments': this.segments.map((e) => e.toJson()).toList(),
+      'updatedAt': updatedAt,
+      'status': status,
+      'achievedPoints': achievedPoints,
+      'task': task.toJson(),
+      'segments': segments.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -64,8 +64,8 @@ class AnswerSegmentDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'start': this.start.toJson(),
-      'end': this.end.toJson(),
+      'start': start.toJson(),
+      'end': end.toJson(),
     };
   }
 
@@ -93,8 +93,8 @@ class SegmentPositionDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'page': this.page,
-      'y': this.y,
+      'page': page,
+      'y': y,
     };
   }
 

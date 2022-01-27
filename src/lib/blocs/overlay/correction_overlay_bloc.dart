@@ -145,7 +145,7 @@ class CorrectionOverlayCubit extends Cubit<CorrectionOverlayState> {
           pages: List.generate(sDocument.pages.count, (index) {
             final size = sDocument.pages[index].size;
             // DO NOT MAKE const, as no changes are otherwise possible
-            return CorrectionOverlayPage(pageSize: size, inputs: []);
+            return CorrectionOverlayPage(pageSize: size, inputs: const []);
           }));
 
       await _correctionOverlayRepository.saveDocument(document: res);

@@ -5,7 +5,7 @@ import 'grading_table_lower_bound.dart';
 class GradingTable extends Equatable {
   final List<GradingTableLowerBound> lowerBounds;
 
-  const GradingTable({required List<GradingTableLowerBound> this.lowerBounds});
+  const GradingTable({required this.lowerBounds});
 
   @override
   List<Object?> get props => [lowerBounds];

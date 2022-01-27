@@ -7,7 +7,7 @@ class NewExamDTO extends Equatable {
   final Course course;
   final DateTime dateOfExam;
 
-  NewExamDTO(
+  const NewExamDTO(
       {required this.title,
       required this.topic,
       required this.course,

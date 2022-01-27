@@ -73,8 +73,8 @@ class Exam extends Equatable {
       topic: "",
       quota: 0,
       dateOfExam: DateTime.now(),
-      participants: [],
-      tasks: [],
+      participants: const [],
+      tasks: const [],
       gradingTable: GradingTable.empty);
 
   bool get isEmpty => this == Exam.empty;

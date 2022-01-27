@@ -81,28 +81,19 @@ class SubmissionOverview extends Correctable {
 }
 
 class Submission extends SubmissionOverview {
-  final String id;
-
-  final Exam exam;
-
   /// Base64 encoded PDF file
   final String data;
 
-  final Student student;
   final List<Answer> answers;
 
-  /// Meta information about the status
-  final bool isComplete;
-  final bool isMatchedToStudent;
-
   const Submission({
-    required this.id,
-    required this.exam,
-    required this.student,
+    required String id,
+    required Exam exam,
+    required Student student,
     required this.data,
     required this.answers,
-    required this.isComplete,
-    required this.isMatchedToStudent,
+    required bool isComplete,
+    required bool isMatchedToStudent,
     required DateTime updatedAt,
     required double achievedPoints,
     required CorrectableStatus status,
@@ -126,19 +117,22 @@ class Submission extends SubmissionOverview {
       exam: Exam.empty,
       data: "",
       student: Student.empty,
-      answers: [],
+      answers: const [],
       updatedAt: DateTime.utc(0),
       isMatchedToStudent: false,
       isComplete: false,
       achievedPoints: 0,
       status: CorrectableStatus.unknown);
 
+  @override
   bool get isEmpty => this == Submission.empty;
+  @override
   bool get isNotEmpty => this != Submission.empty;
 
   @override
   List<Object?> get props => super.props..addAll([data, answers]);
 
+  @override
   Submission copyWith({
     String? id,
     Exam? exam,

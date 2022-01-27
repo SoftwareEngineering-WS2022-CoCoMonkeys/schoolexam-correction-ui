@@ -17,9 +17,9 @@ class PersonDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'firstName': this.firstName,
-      'lastName': this.lastName,
-      'emailAddress': this.emailAddress,
+      'firstName': firstName,
+      'lastName': lastName,
+      'emailAddress': emailAddress,
     };
   }
 
