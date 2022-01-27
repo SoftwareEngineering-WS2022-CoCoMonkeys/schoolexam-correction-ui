@@ -28,7 +28,7 @@ class OnlineExamsRepository extends ExamsRepository {
   Future<List<Exam>> getExams() async {
     var res = await provider.query(
         path: "/exam/byteacher",
-        method: HTTPMethod.GET,
+        method: HTTPMethod.get,
         key: await authenticationRepository.getKey());
     var exams = List<Map<String, dynamic>>.from(res);
     return exams.map((e) => ExamDTO.fromJson(e).toModel()).toList();
@@ -38,7 +38,7 @@ class OnlineExamsRepository extends ExamsRepository {
       {required String examId, required List<String> courseIds}) async {
     await provider.query(
         path: "/exam/$examId/setparticipants",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: {
           "participants":
               courseIds.map((e) => {"id": e, "type": "Course"}).toList()
@@ -50,7 +50,7 @@ class OnlineExamsRepository extends ExamsRepository {
   Future<void> uploadExam({required NewExamDTO exam}) async {
     final res = await provider.query(
         path: "/exam/create",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
 
@@ -63,7 +63,7 @@ class OnlineExamsRepository extends ExamsRepository {
       {required NewExamDTO exam, required String examId}) async {
     await provider.query(
         path: "/exam/$examId/update",
-        method: HTTPMethod.PUT,
+        method: HTTPMethod.put,
         body: exam.toJson(),
         key: await authenticationRepository.getKey());
     await setCourses(examId: examId, courseIds: [exam.course.id]);
@@ -76,7 +76,7 @@ class OnlineExamsRepository extends ExamsRepository {
       required double achievedPoints}) async {
     await provider.query(
         path: "/submission/$submissionId/setpoints",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: {"taskId": taskId, "achievedPoints": achievedPoints},
         key: await authenticationRepository.getKey());
   }
@@ -85,7 +85,7 @@ class OnlineExamsRepository extends ExamsRepository {
   Future<void> setGradingTable({required Exam exam}) async {
     await provider.query(
         path: "/Exam/${exam.id}/SetGradingTable",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: GradingTableDTO.fromModel(exam.gradingTable),
         key: await authenticationRepository.getKey());
   }
@@ -97,7 +97,7 @@ class OnlineExamsRepository extends ExamsRepository {
 
     var res = await provider.query(
         path: "/submission/byexam/$examId",
-        method: HTTPMethod.GET,
+        method: HTTPMethod.get,
         key: await authenticationRepository.getKey());
 
     var submissions = List<Map<String, dynamic>>.from(res);
@@ -113,7 +113,7 @@ class OnlineExamsRepository extends ExamsRepository {
 
     var res = await provider.query(
         path: "/submission/byidswithdetails",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: {"ids": submissionIds},
         key: await authenticationRepository.getKey());
 
@@ -129,7 +129,7 @@ class OnlineExamsRepository extends ExamsRepository {
       {required String submissionId, required String data}) async {
     await provider.query(
         path: "/submission/$submissionId/uploadremark",
-        method: HTTPMethod.POST,
+        method: HTTPMethod.post,
         body: {"remarkPdf": data},
         key: await authenticationRepository.getKey());
   }
@@ -139,11 +139,8 @@ class OnlineExamsRepository extends ExamsRepository {
       {required String examId, DateTime? publishDate}) async {
     await provider.query(
         path: "/exam/$examId/publish",
-        method: HTTPMethod.POST,
-        body: {
-          "publishingDateTime":
-              publishDate != null ? publishDate.toUtc().toIso8601String() : null
-        },
+        method: HTTPMethod.post,
+        body: {"publishingDateTime": publishDate?.toUtc().toIso8601String()},
         key: await authenticationRepository.getKey());
   }
 

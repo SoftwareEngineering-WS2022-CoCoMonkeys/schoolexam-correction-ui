@@ -17,13 +17,13 @@ class AuthenticationRepository {
   final FlutterSecureStorage _storage;
   Authentication _authentication;
 
-  static const _storage_user_key = "authentication_repository:user:key";
-  static const _storage_password_key = "authentication_repository:password:key";
+  static const _storageUserKey = "authentication_repository:user:key";
+  static const _storagePasswordKey = "authentication_repository:password:key";
 
   AuthenticationRepository()
       : _controller = StreamController<AuthenticationStatus>(),
         _provider = ApiProvider(),
-        _storage = FlutterSecureStorage(),
+        _storage = const FlutterSecureStorage(),
         _authentication = Authentication.empty;
 
   // Why the initial state should never change from unauthenticated :
@@ -36,10 +36,10 @@ class AuthenticationRepository {
   }
 
   Future<String> _getTokenUsingStoredCredentials() async {
-    if (await _storage.containsKey(key: _storage_password_key)) {
+    if (await _storage.containsKey(key: _storagePasswordKey)) {
       return (await _getAuthenticationFromLogin(
-              username: (await _storage.read(key: _storage_user_key))!,
-              password: (await _storage.read(key: _storage_password_key))!))
+              username: (await _storage.read(key: _storageUserKey))!,
+              password: (await _storage.read(key: _storagePasswordKey))!))
           .token;
     } else {
       return "";
@@ -51,13 +51,13 @@ class AuthenticationRepository {
     final response = await _provider.query(
         path: "/authentication/authenticate",
         body: {"username": username, "password": password},
-        method: HTTPMethod.POST);
+        method: HTTPMethod.post);
 
     _authentication = AuthenticationDTO.fromJson(response).toModel();
 
     // Update
-    _storage.write(key: _storage_user_key, value: username);
-    _storage.write(key: _storage_password_key, value: password);
+    _storage.write(key: _storageUserKey, value: username);
+    _storage.write(key: _storagePasswordKey, value: password);
 
     return _authentication;
   }
@@ -84,8 +84,8 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     // TODO : Maybe terminate session with School Exam
-    await _storage.delete(key: _storage_user_key);
-    await _storage.delete(key: _storage_password_key);
+    await _storage.delete(key: _storageUserKey);
+    await _storage.delete(key: _storagePasswordKey);
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 

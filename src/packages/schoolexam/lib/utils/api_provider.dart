@@ -8,7 +8,7 @@ import 'package:schoolexam/configuration.dart';
 
 import 'network_exceptions.dart';
 
-enum HTTPMethod { GET, POST, PATCH, PUT, DELETE }
+enum HTTPMethod { get, post, patch, put, delete }
 
 class ApiProvider {
   final Client client;
@@ -23,16 +23,16 @@ class ApiProvider {
 
     try {
       switch (method) {
-        case HTTPMethod.DELETE:
+        case HTTPMethod.delete:
           return await client.delete(uri,
               headers: headers, body: (body != null) ? jsonEncode(body) : null);
-        case HTTPMethod.POST:
+        case HTTPMethod.post:
           return await client.post(uri,
               headers: headers, body: (body != null) ? jsonEncode(body) : null);
-        case HTTPMethod.PATCH:
+        case HTTPMethod.patch:
           return await client.patch(uri,
               headers: headers, body: (body != null) ? jsonEncode(body) : null);
-        case HTTPMethod.PUT:
+        case HTTPMethod.put:
           return await client.put(uri,
               headers: headers, body: (body != null) ? jsonEncode(body) : null);
         default:
@@ -46,11 +46,11 @@ class ApiProvider {
   Future<dynamic> query(
       {required String path,
       Map<String, String>? headers,
-      HTTPMethod method = HTTPMethod.GET,
+      HTTPMethod method = HTTPMethod.get,
       Object? body,
       String? key}) async {
     //Default headers
-    if (headers == null) headers = {};
+    headers ??= {};
     headers["Accept"] = "application/json";
 
     if (key != null) headers["Authorization"] = "Bearer $key";

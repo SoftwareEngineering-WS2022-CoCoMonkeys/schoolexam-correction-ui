@@ -8,6 +8,7 @@ class ConnectionException extends NetworkException {
   final String message;
   const ConnectionException(this.message);
 
+  @override
   String toString() => 'Fehler beim Aufbau der Verbindung : $message';
 }
 

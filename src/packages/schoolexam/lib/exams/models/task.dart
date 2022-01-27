@@ -7,7 +7,7 @@ class Task extends Equatable {
 
   const Task({required this.id, required this.title, required this.maxPoints});
 
-  static const empty = const Task(id: "", title: "", maxPoints: 0.0);
+  static const empty = Task(id: "", title: "", maxPoints: 0.0);
 
   bool get isEmpty => this == Task.empty;
 

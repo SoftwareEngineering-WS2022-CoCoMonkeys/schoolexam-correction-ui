@@ -7,7 +7,7 @@ class Student extends Participant {
   const Student({required String id, required String displayName})
       : super(id: id, displayName: displayName);
 
-  static const empty = const Student(id: "", displayName: "");
+  static const empty = Student(id: "", displayName: "");
 
   bool get isEmpty => this == Student.empty;
 

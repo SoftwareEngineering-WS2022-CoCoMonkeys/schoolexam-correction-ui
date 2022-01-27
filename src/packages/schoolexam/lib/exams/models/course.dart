@@ -16,7 +16,7 @@ class Course extends Participant {
       {required String id, required String displayName, required this.children})
       : super(id: id, displayName: displayName);
 
-  static const empty = const Course(id: "", displayName: "", children: []);
+  static const empty = Course(id: "", displayName: "", children: []);
 
   bool get isEmpty => this == Course.empty;
 

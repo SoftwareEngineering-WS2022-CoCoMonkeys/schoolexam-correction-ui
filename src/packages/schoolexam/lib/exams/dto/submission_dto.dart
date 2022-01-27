@@ -24,13 +24,13 @@ class SubmissionDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': this.id,
-      'student': this.student,
-      'status': this.status,
-      'achievedPoints': this.achievedPoints,
-      'updatedAt': this.updatedAt,
-      'isComplete': this.isComplete,
-      'isMatchedToStudent': this.isMatchedToStudent,
+      'id': id,
+      'student': student,
+      'status': status,
+      'achievedPoints': achievedPoints,
+      'updatedAt': updatedAt,
+      'isComplete': isComplete,
+      'isMatchedToStudent': isMatchedToStudent,
     };
   }
 

@@ -16,9 +16,9 @@ class UserDTO extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'username': this.username,
-      'role': this.role,
-      'person': this.person.toJson(),
+      'username': username,
+      'role': role,
+      'person': person.toJson(),
     };
   }
 
